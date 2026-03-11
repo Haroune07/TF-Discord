@@ -14,6 +14,6 @@ namespace Shared.Models
         public string PasswordHash { get; set; } = string.Empty;
         public byte[]? ProfileImageData { get; set; }
         public bool IsOnline { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow.ToLocalTime();
     }
 }
