@@ -77,14 +77,15 @@
                 <Button Content="Se Connecter"
                     BorderThickness="0"
                     Background="#FF5E8BD6" Foreground="White"
-                    />
+                    Click=""/>
             </Border>
 
             <Button Grid.Column="1" Grid.Row="12"
                 Content="Créer un compte"
                 Background="Transparent" Foreground="#FF5E8BD6"
                 FontWeight="Bold" BorderBrush="Transparent"
-                HorizontalAlignment="Center" Margin="0,0,0,6" Width="126"/>
+                HorizontalAlignment="Center" Margin="0,0,0,6" Width="126"
+                Click="BackToRegister_Click"/>
         </Grid>
     </Grid>
 </UserControl>
