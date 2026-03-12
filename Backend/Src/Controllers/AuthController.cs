@@ -9,7 +9,7 @@ namespace Backend.Src.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private UserService _userService;
+        private readonly UserService _userService;
 
         public AuthController(UserService userService)
         {
@@ -17,9 +17,19 @@ namespace Backend.Src.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterRequest req)
+        public async Task<ActionResult<AuthResponse>> Register(RegisterRequest req)
         {
-            return Ok(_userService.Register(req));
+            var result = await _userService.Register(req);
+
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpPost("login")]
+        public async Task<ActionResult<AuthResponse>> Login(LoginRequest req)
+        {
+            var result = await _userService.Login(req);
+
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
     }
