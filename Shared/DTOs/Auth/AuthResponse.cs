@@ -6,6 +6,6 @@ namespace Shared.DTOs.Auth
     {
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
-        public User? User { get; set; }
+        public UserDTO? User { get; set; }
     }
 }
