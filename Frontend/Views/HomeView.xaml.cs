@@ -18,11 +18,13 @@ namespace Frontend.Views
     /// <summary>
     /// Logique d'interaction pour Home.xaml
     /// </summary>
-    public partial class Home : Page
+    public partial class HomeView : UserControl
     {
-        public Home()
+        public HomeView()
         {
             InitializeComponent();
         }
+
+        
     }
 }
