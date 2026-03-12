@@ -18,5 +18,10 @@ namespace Backend.Src.Services
 
         }
 
+        public static bool VerifyHash(string input, string hash)
+        {
+            return hash == Hash(input);
+        }
+
     }
 }

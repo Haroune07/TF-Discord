@@ -1,4 +1,9 @@
-﻿using Frontend.ViewModels.Base;
+﻿using Frontend.Commands;
+using Frontend.Services;
+using Frontend.ViewModels.Base;
+using System.Diagnostics;
+using System.Text.Json;
+using System.Windows.Input;
 
 namespace Frontend.ViewModels
 {
@@ -6,6 +11,9 @@ namespace Frontend.ViewModels
     {
         private string _username = "";
         private string _password = "";
+        private readonly ApiService _apiService = new();
+
+        public ICommand RegisterCommand { get; }
 
         public string UserName
         {
@@ -26,5 +34,18 @@ namespace Frontend.ViewModels
                 OnPropertyChanged();
             }
         }
+
+        public RegisterViewModel()
+        {
+            RegisterCommand = new RelayCommand(Register, () => true);
+        }
+
+        public async void Register()
+        {
+            var res = await _apiService.RegisterUserAsync(new() { Password = _password, Username = _username});
+            Debug.WriteLine(JsonSerializer.Serialize(res));
+
+        }
+
     }
 }
