@@ -9,6 +9,13 @@
       Title="Home">
 
     <Grid>
-        
+        <Grid.Background>
+            <ImageBrush ImageSource="/static/images/background.avif" Stretch="UniformToFill"/>
+        </Grid.Background>
+        <Grid>
+            
+        </Grid>
+
+       
     </Grid>
 </Page>
