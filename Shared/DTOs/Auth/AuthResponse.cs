@@ -1,6 +1,4 @@
-﻿using Shared.Models;
-
-namespace Shared.DTOs.Auth
+﻿namespace Shared.DTOs.Auth
 {
     public class AuthResponse
     {
