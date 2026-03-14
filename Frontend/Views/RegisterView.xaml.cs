@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using Frontend.ViewModels;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace Frontend.Views
@@ -16,6 +17,14 @@ namespace Frontend.Views
         private void BackToLogin_Click(object sender, RoutedEventArgs e)
         {
             (MainWindow.GetWindow(this) as MainWindow)?.MainContent.Content = new LoginView();
+        }
+
+        private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if(this.DataContext is RegisterViewModel)
+            {
+                ((RegisterViewModel)DataContext).Password = ((PasswordBox)sender).Password;
+            }
         }
     }
 }
