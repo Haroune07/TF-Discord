@@ -88,20 +88,20 @@
                  Grid.Column="1" Grid.Row="8"
                  Width="308" Height="28"
                  MaxLength="50"
-                 HorizontalAlignment="Center" VerticalAlignment="Center" 
+                 HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,5,0,0" PasswordChanged="PasswordBox_PasswordChanged"
                          />
 
             <!-- Confirm password label -->
             <TextBlock Grid.Column="1" Grid.Row="10"
                Foreground="White"
-               HorizontalAlignment="Left" VerticalAlignment="Center" Height="16" Width="145"><Run Language="fr-ca" Text="Fake Password Input"/></TextBlock>
+               HorizontalAlignment="Left" VerticalAlignment="Center" Height="16" Width="145"><Run Language="fr-ca" Text="Confirm Password"/></TextBlock>
 
             <!-- Confirm password box -->
-            <TextBox x:Name="ConfirmPasswordBox"
+            <PasswordBox x:Name="ConfirmPasswordBox"
                  Grid.Column="1" Grid.Row="11"
                  Width="308" Height="28"
                  HorizontalAlignment="Center" VerticalAlignment="Center"
-                 MaxLength="50" Text="{Binding Password}"/>
+                 MaxLength="50"/>
 
             <!-- Signup button -->
             <Border Grid.Column="1" Grid.Row="13"
