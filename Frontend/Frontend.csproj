@@ -11,10 +11,12 @@
 
   <ItemGroup>
     <None Remove="Static\Images\bg_auth.jpg" />
+    <None Remove="Static\Images\home_button_image.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Static\Images\bg_auth.jpg" />
+    <Resource Include="Static\Images\home_button_image.png" />
   </ItemGroup>
 
   <ItemGroup>
