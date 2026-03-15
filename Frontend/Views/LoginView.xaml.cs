@@ -14,11 +14,6 @@ namespace Frontend.Views
             InitializeComponent();
         }
 
-        private void BackToRegister_Click(object sender, RoutedEventArgs e)
-        {
-            (MainWindow.GetWindow(this) as MainWindow)?.MainContent.Content = new RegisterView();
-        }
-
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
             if (this.DataContext is LoginViewModel)

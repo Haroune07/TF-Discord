@@ -7,10 +7,6 @@
              mc:Ignorable="d" 
              d:DesignHeight="720" d:DesignWidth="1280">
 
-    <UserControl.DataContext>
-        <ViewModels:LoginViewModel/>
-    </UserControl.DataContext>
-
     <Grid>
         <Grid.Background>
             <ImageBrush ImageSource="/static/images/bg_auth.jpg" Stretch="UniformToFill"/>
@@ -80,6 +76,7 @@
                 CornerRadius="30"
                 HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Button Content="Se Connecter"
+                    Name="LoginButton"
                     BorderThickness="0"
                     Background="#FF5E8BD6" Foreground="White"
                         Command="{Binding LoginCommand}"/>
@@ -89,8 +86,8 @@
                 Content="Créer un compte"
                 Background="Transparent" Foreground="#FF5E8BD6"
                 FontWeight="Bold" BorderBrush="Transparent"
-                HorizontalAlignment="Center" Margin="0,0,0,6" Width="126"
-                Click="BackToRegister_Click"/>
+                HorizontalAlignment="Center" Margin="0,0,0,6" Width="126" Command="{Binding GoToRegisterCommand}"
+                />
         </Grid>
     </Grid>
 </UserControl>

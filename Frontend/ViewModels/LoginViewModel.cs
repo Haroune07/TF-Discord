@@ -4,21 +4,29 @@ using Frontend.ViewModels.Base;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Windows.Input;
+using Frontend.Global;
 
 namespace Frontend.ViewModels
 {
-    internal class LoginViewModel : BaseViewModel
+    public class LoginViewModel : BaseViewModel
     {
         private string _username = "";
         private string _password = "";
         private readonly ApiService _apiService = new();
 
-        public ICommand LoginCommand { get; }
+        private MainViewModel? _main;
+        public ICommand? GoToRegisterCommand { get; }
 
-        public LoginViewModel()
+        public ICommand? LoginCommand { get; }
+
+        public LoginViewModel(MainViewModel main)
         {
+            _main = main;
             LoginCommand = new RelayCommand(Login, () => true);
+            GoToRegisterCommand = new RelayCommand(() => main.CurrentViewModel = new RegisterViewModel(_main), () => true );
         }
+
+        public LoginViewModel() { }
 
         public string UserName
         {
@@ -43,6 +51,13 @@ namespace Frontend.ViewModels
         public async void Login()
         {
             var res = await _apiService.LoginUserAsync(new() { Password = _password, Username = _username });
+
+            if (res.Success && res.User != null)
+            {
+                Session.Current.Login(res.User);
+
+                _main.CurrentViewModel = new HomeViewModel(_main);
+            }
 
             Debug.WriteLine("\n\n\n");
             Debug.WriteLine(JsonSerializer.Serialize(res));
