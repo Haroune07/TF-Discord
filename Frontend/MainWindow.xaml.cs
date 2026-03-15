@@ -1,6 +1,5 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
-using Frontend.Views;
+using Frontend.ViewModels;
 
 namespace Frontend
 {
@@ -12,12 +11,7 @@ namespace Frontend
         public MainWindow()
         {
             InitializeComponent();
-
-            MainContent.Content = new RegisterView();
-        }
-        public void NavigateTo(UserControl dest)
-        {
-            MainContent.Content = dest;
+            DataContext = new MainViewModel();
         }
     }
 }
