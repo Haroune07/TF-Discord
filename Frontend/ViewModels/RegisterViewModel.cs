@@ -53,6 +53,8 @@ namespace Frontend.ViewModels
             if (res.Success && res.User != null)
             {
                 Session.Current.Login(res.User);
+
+                _main.CurrentViewModel = new HomeViewModel(_main);
             }
 
             Debug.WriteLine(JsonSerializer.Serialize(res));
