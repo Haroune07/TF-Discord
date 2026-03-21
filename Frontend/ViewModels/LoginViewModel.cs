@@ -12,6 +12,8 @@ namespace Frontend.ViewModels
     {
         private string _username = "";
         private string _password = "";
+        private string _errormessage = "";
+
         private readonly ApiService _apiService = new();
 
         private MainViewModel? _main;
@@ -48,8 +50,20 @@ namespace Frontend.ViewModels
             }
         }
 
+        public string ErrorMessage
+        {
+            get => _errormessage;
+            set
+            {
+                _errormessage = value;
+                OnPropertyChanged();
+            }
+        }
+
         public async void Login()
         {
+            ErrorMessage = "";
+
             var res = await _apiService.LoginUserAsync(new() { Password = _password, Username = _username });
 
             if (res.Success && res.User != null)
@@ -59,8 +73,13 @@ namespace Frontend.ViewModels
                 _main.CurrentViewModel = new HomeViewModel(_main);
             }
 
+            else {
+                ErrorMessage = JsonSerializer.Serialize(res);
+            }
+
             Debug.WriteLine("\n\n\n");
             Debug.WriteLine(JsonSerializer.Serialize(res));
+
         }
     }
 }
