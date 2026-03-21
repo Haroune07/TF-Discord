@@ -4,16 +4,20 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:ViewModels="clr-namespace:Frontend.ViewModels"
+             xmlns:Converters="clr-namespace:Frontend.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="720" d:DesignWidth="1280">
 
     <Grid>
+        <Grid.Resources>
+            <Converters:StringToVisibilityConverter x:Key="StringToVisibility"/>
+        </Grid.Resources>
         <Grid.Background>
             <ImageBrush ImageSource="/static/images/bg_auth.jpg" Stretch="UniformToFill"/>
         </Grid.Background>
 
         <!-- Login Panel -->
-        <Grid Width="368" Height="331"
+        <Grid Width="368" MinHeight="331" Height="Auto"
           HorizontalAlignment="Center" VerticalAlignment="Center"
           Background="#FF2D314C">
 
@@ -81,6 +85,12 @@
                     Background="#FF5E8BD6" Foreground="White"
                         Command="{Binding LoginCommand}"/>
             </Border>
+
+            <TextBlock Grid.Column="1" Grid.Row="11"
+               Text="{Binding ErrorMessage}"
+               Foreground="#FFFF6B6B"
+               HorizontalAlignment="Center" VerticalAlignment="Center"
+               Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibility}}"/>
 
             <Button Grid.Column="1" Grid.Row="12"
                 Content="Créer un compte"
