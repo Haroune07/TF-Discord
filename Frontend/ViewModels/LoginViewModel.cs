@@ -74,7 +74,7 @@ namespace Frontend.ViewModels
             }
 
             else {
-                ErrorMessage = JsonSerializer.Serialize(res);
+                ErrorMessage = res.Message;
             }
 
             Debug.WriteLine("\n\n\n");
