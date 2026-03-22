@@ -1,14 +1,19 @@
-﻿<UserControl
+<UserControl
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Frontend.Views"
-             xmlns:ViewModels="clr-namespace:Frontend.ViewModels" x:Class="Frontend.Views.RegisterView"
+             xmlns:ViewModels="clr-namespace:Frontend.ViewModels" 
+             xmlns:Converters="clr-namespace:Frontend.Converters"
+             x:Class="Frontend.Views.RegisterView"
              mc:Ignorable="d" 
              d:DesignHeight="720" d:DesignWidth="1280">
 
     <Grid>
+        <Grid.Resources>
+            <Converters:StringToVisibilityConverter x:Key="StringToVisibility"/>
+        </Grid.Resources>
         <Grid.Background>
             <ImageBrush ImageSource="/static/images/bg_auth.jpg" Stretch="UniformToFill"/>
         </Grid.Background>
@@ -93,6 +98,12 @@
                  Width="308" Height="28"
                  HorizontalAlignment="Center" VerticalAlignment="Center"
                  MaxLength="50"/>
+
+            <TextBlock Grid.Column="1" Grid.Row="12"
+               Text="{Binding ErrorMessage}"
+               Foreground="#FFFF6B6B"
+               HorizontalAlignment="Center" VerticalAlignment="Center"
+               Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibility}}"/>
 
             <!-- Signup button -->
             <Border Grid.Column="1" Grid.Row="13"
