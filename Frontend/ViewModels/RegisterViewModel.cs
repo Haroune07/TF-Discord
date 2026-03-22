@@ -1,4 +1,4 @@
-﻿using Frontend.Commands;
+using Frontend.Commands;
 using Frontend.Global;
 using Frontend.Services;
 using Frontend.ViewModels.Base;
@@ -12,6 +12,7 @@ namespace Frontend.ViewModels
     {
         private string _username = "";
         private string _password = "";
+        private string _errormessage = "";
         private readonly ApiService _apiService = new();
 
         private MainViewModel? _main;
@@ -39,6 +40,16 @@ namespace Frontend.ViewModels
                 OnPropertyChanged();
             }
         }
+
+        public string ErrorMessage
+        {
+            get => _errormessage;
+            set
+            {
+                _errormessage = value;
+                OnPropertyChanged();
+            }
+        }
         public RegisterViewModel(MainViewModel main)
         {
             _main = main;
@@ -48,6 +59,7 @@ namespace Frontend.ViewModels
 
         public async void Register()
         {
+            ErrorMessage = "";
             var res = await _apiService.RegisterUserAsync(new() { Password = _password, Username = _username});
 
             if (res.Success && res.User != null)
@@ -56,6 +68,11 @@ namespace Frontend.ViewModels
 
                 _main.CurrentViewModel = new HomeViewModel(_main);
             }
+            // Yassine
+            else {
+                ErrorMessage = res.Message;
+            }
+            // End
 
             Debug.WriteLine(JsonSerializer.Serialize(res));
 
