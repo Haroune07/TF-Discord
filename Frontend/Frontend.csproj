@@ -15,6 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Static\Images\logoutlogo.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Static\Images\bg_auth.jpg" />
     <Resource Include="Static\Images\home_button_image.png" />
   </ItemGroup>

@@ -15,7 +15,7 @@
       mc:Ignorable="d" 
 
       d:DesignHeight="720" d:DesignWidth="1280">
-    
+
     <Grid Background="#1E1F22">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="72"/>
@@ -56,6 +56,9 @@
                             <TextBlock Text="{Binding OnlineStatus}" Foreground="#B5BAC1" FontSize="10"/>
                         </StackPanel>
                     </StackPanel>
+                    <Button Command="{Binding GoToLoginCommand}" Width="33" Margin="181,0,10,0" Background="#313338">
+                        <Image Source="/Static/Images/logoutlogo.png"  Stretch="Uniform"/>
+                    </Button>
                 </Grid>
             </Border>
         </Grid>
