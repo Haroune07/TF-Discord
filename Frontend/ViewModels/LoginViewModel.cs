@@ -1,4 +1,4 @@
-﻿using Frontend.Commands;
+using Frontend.Commands;
 using Frontend.Services;
 using Frontend.ViewModels.Base;
 using System.Diagnostics;
