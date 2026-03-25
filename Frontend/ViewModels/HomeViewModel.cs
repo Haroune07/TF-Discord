@@ -2,6 +2,7 @@
 using Frontend.Global;
 using Frontend.ViewModels.Base;
 using Shared.DTOs;
+using System;
 using System.Windows.Input;
 
 namespace Frontend.ViewModels
@@ -14,6 +15,11 @@ namespace Frontend.ViewModels
 
         public bool IsUserOnline => User?.IsOnline == true;
         public string OnlineStatus => IsUserOnline ? "Online" : "Offline";
+
+        public string MemberSince =>
+            User != null
+                ? $"Member since {User.CreatedAt:MMMM dd, yyyy}"
+                : "Member since unknown";
 
         public ICommand? GoToLoginCommand { get; }
 

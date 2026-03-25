@@ -29,12 +29,6 @@ namespace Backend.Src.Services
                 .AnyAsync();
         }
 
-        private async Task SetOnlineStatusAsync(string userId, bool isOnline)
-        {
-            var update = Builders<User>.Update.Set(u => u.IsOnline, isOnline);
-            await _users.UpdateOneAsync(u => u.Id == userId, update);
-        }
-
         public async Task<AuthResponse> Register(RegisterRequest req)
         {
             if (string.IsNullOrWhiteSpace(req.Username) || string.IsNullOrWhiteSpace(req.Password))
@@ -94,7 +88,6 @@ namespace Backend.Src.Services
             if (user != null && CryptoService.VerifyHash(req.Password, user.PasswordHash))
             {
                 user.IsOnline = true;
-                await SetOnlineStatusAsync(user.Id, true);
 
                 return new()
                 {
