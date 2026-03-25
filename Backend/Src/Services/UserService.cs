@@ -10,7 +10,6 @@ namespace Backend.Src.Services
 {
     public class UserService
     {
-
         private readonly IMongoCollection<User> _users;
 
         public UserService(IMongoClient client, IOptions<MongoDBSettings> options)
@@ -30,9 +29,14 @@ namespace Backend.Src.Services
                 .AnyAsync();
         }
 
+        private async Task SetOnlineStatusAsync(string userId, bool isOnline)
+        {
+            var update = Builders<User>.Update.Set(u => u.IsOnline, isOnline);
+            await _users.UpdateOneAsync(u => u.Id == userId, update);
+        }
+
         public async Task<AuthResponse> Register(RegisterRequest req)
         {
-
             if (string.IsNullOrWhiteSpace(req.Username) || string.IsNullOrWhiteSpace(req.Password))
             {
                 return new()
@@ -42,11 +46,20 @@ namespace Backend.Src.Services
                 };
             }
 
-            if (! await UsernameExistsAsync(req.Username))
+            if (!await UsernameExistsAsync(req.Username))
             {
                 string passwordHash = CryptoService.Hash(req.Password);
-                var user = new User() { Username = req.Username, PasswordHash = passwordHash, CreatedAt = DateTime.Now };
+
+                var user = new User()
+                {
+                    Username = req.Username,
+                    PasswordHash = passwordHash,
+                    CreatedAt = DateTime.Now,
+                    IsOnline = true
+                };
+
                 await _users.InsertOneAsync(user);
+
                 var userDTO = new UserDTO()
                 {
                     Username = user.Username,
@@ -55,39 +68,47 @@ namespace Backend.Src.Services
                     IsOnline = user.IsOnline,
                     ProfileImageUrl = user.ProfileImageUrl
                 };
-                return new() { Success = true, User = userDTO, Message = Messages.UserCreatedSuccess };
-            }
 
+                return new()
+                {
+                    Success = true,
+                    User = userDTO,
+                    Message = Messages.UserCreatedSuccess
+                };
+            }
             else
             {
-                return new () { Success = false, User = null, Message = Messages.UserNameAlreadyExists };
+                return new()
+                {
+                    Success = false,
+                    User = null,
+                    Message = Messages.UserNameAlreadyExists
+                };
             }
-
         }
 
         public async Task<AuthResponse> Login(LoginRequest req)
         {
-            if(await UsernameExistsAsync(req.Username))
-            {
-                var user = await GetByUsernameAsync(req.Username);
+            var user = await GetByUsernameAsync(req.Username);
 
-                if (CryptoService.VerifyHash(req.Password, user.PasswordHash))
+            if (user != null && CryptoService.VerifyHash(req.Password, user.PasswordHash))
+            {
+                user.IsOnline = true;
+                await SetOnlineStatusAsync(user.Id, true);
+
+                return new()
                 {
-                    user.IsOnline = true;
-                    return new()
+                    Success = true,
+                    Message = Messages.LoginSuccess,
+                    User = new()
                     {
-                        Success = true,
-                        Message = Messages.LoginSuccess,
-                        User = new()
-                        {
-                            CreatedAt = user.CreatedAt.ToLocalTime(),
-                            Id = user.Id,
-                            IsOnline = true,
-                            ProfileImageUrl = user.ProfileImageUrl,
-                            Username = user.Username
-                        }
-                    };
-                }
+                        CreatedAt = user.CreatedAt.ToLocalTime(),
+                        Id = user.Id,
+                        IsOnline = true,
+                        ProfileImageUrl = user.ProfileImageUrl,
+                        Username = user.Username
+                    }
+                };
             }
 
             return new()
