@@ -42,6 +42,25 @@ namespace Backend.Src.Services
                 };
             }
 
+            if (req.Username.Length > 20)
+            {
+                return new()
+                {
+                    Success = false,
+                    Message = Messages.InvalidUsernameLength
+
+                };
+            }
+
+            if (req.Password.Length < 6) 
+            {
+                return new()
+                {
+                    Success = false,
+                    Message = Messages.InvalidPasswordLength
+                };
+            }
+
             if (! await UsernameExistsAsync(req.Username))
             {
                 string passwordHash = CryptoService.Hash(req.Password);
