@@ -5,7 +5,6 @@ using Shared.DTOs.Auth;
 using Backend.Src.Models;
 using Shared.Constants;
 using Shared.DTOs;
-
 namespace Backend.Src.Services
 {
     public class UserService
@@ -42,7 +41,7 @@ namespace Backend.Src.Services
                 };
             }
 
-            if (req.Username.Length > 20)
+            if (req.Username.Length > Auth.MaxUsernameLength )
             {
                 return new()
                 {
@@ -52,7 +51,7 @@ namespace Backend.Src.Services
                 };
             }
 
-            if (req.Password.Length < 6) 
+            if (req.Password.Length < Auth.MinPasswordLength) 
             {
                 return new()
                 {
