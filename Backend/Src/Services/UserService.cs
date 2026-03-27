@@ -5,7 +5,6 @@ using Shared.DTOs.Auth;
 using Backend.Src.Models;
 using Shared.Constants;
 using Shared.DTOs;
-
 namespace Backend.Src.Services
 {
     public class UserService
@@ -39,6 +38,25 @@ namespace Backend.Src.Services
                 {
                     Success = false,
                     Message = Messages.InvalidUsernameOrPassowrd
+                };
+            }
+
+            if (req.Username.Length > Auth.MaxUsernameLength )
+            {
+                return new()
+                {
+                    Success = false,
+                    Message = Messages.InvalidUsernameLength
+
+                };
+            }
+
+            if (req.Password.Length < Auth.MinPasswordLength) 
+            {
+                return new()
+                {
+                    Success = false,
+                    Message = Messages.InvalidPasswordLength
                 };
             }
 
