@@ -1,4 +1,4 @@
-﻿using Backend.Settings;
+using Backend.Settings;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Shared.DTOs.Auth;
@@ -9,6 +9,7 @@ namespace Backend.Src.Services
 {
     public class UserService
     {
+
         private readonly IMongoCollection<User> _users;
 
         public UserService(IMongoClient client, IOptions<MongoDBSettings> options)
@@ -30,6 +31,7 @@ namespace Backend.Src.Services
 
         public async Task<AuthResponse> Register(RegisterRequest req)
         {
+
             if (string.IsNullOrWhiteSpace(req.Username) || string.IsNullOrWhiteSpace(req.Password))
             {
                 return new()
@@ -39,20 +41,29 @@ namespace Backend.Src.Services
                 };
             }
 
-            if (!await UsernameExistsAsync(req.Username))
+            if (req.Username.Length > Auth.MaxUsernameLength)
+            {
+                return new()
+                {
+                    Success = false,
+                    Message = Messages.InvalidUsernameLength
+                };
+            }
+
+            if (req.Password.Length < Auth.MinPasswordLength)
+            {
+                return new()
+                {
+                    Success = false,
+                    Message = Messages.InvalidPasswordLength
+                };
+            }
+
+            if (! await UsernameExistsAsync(req.Username))
             {
                 string passwordHash = CryptoService.Hash(req.Password);
-
-                var user = new User()
-                {
-                    Username = req.Username,
-                    PasswordHash = passwordHash,
-                    CreatedAt = DateTime.Now,
-                    IsOnline = true
-                };
-
+                var user = new User() { Username = req.Username, PasswordHash = passwordHash, CreatedAt = DateTime.Now, IsOnline = true };
                 await _users.InsertOneAsync(user);
-
                 var userDTO = new UserDTO()
                 {
                     Username = user.Username,
@@ -61,46 +72,39 @@ namespace Backend.Src.Services
                     IsOnline = user.IsOnline,
                     ProfileImageUrl = user.ProfileImageUrl
                 };
-
-                return new()
-                {
-                    Success = true,
-                    User = userDTO,
-                    Message = Messages.UserCreatedSuccess
-                };
+                return new() { Success = true, User = userDTO, Message = Messages.UserCreatedSuccess };
             }
+
             else
             {
-                return new()
-                {
-                    Success = false,
-                    User = null,
-                    Message = Messages.UserNameAlreadyExists
-                };
+                return new () { Success = false, User = null, Message = Messages.UserNameAlreadyExists };
             }
+
         }
 
         public async Task<AuthResponse> Login(LoginRequest req)
         {
-            var user = await GetByUsernameAsync(req.Username);
-
-            if (user != null && CryptoService.VerifyHash(req.Password, user.PasswordHash))
+            if(await UsernameExistsAsync(req.Username))
             {
-                user.IsOnline = true;
+                var user = await GetByUsernameAsync(req.Username);
 
-                return new()
+                if (CryptoService.VerifyHash(req.Password, user.PasswordHash))
                 {
-                    Success = true,
-                    Message = Messages.LoginSuccess,
-                    User = new()
+                    user.IsOnline = true;
+                    return new()
                     {
-                        CreatedAt = user.CreatedAt.ToLocalTime(),
-                        Id = user.Id,
-                        IsOnline = true,
-                        ProfileImageUrl = user.ProfileImageUrl,
-                        Username = user.Username
-                    }
-                };
+                        Success = true,
+                        Message = Messages.LoginSuccess,
+                        User = new()
+                        {
+                            CreatedAt = user.CreatedAt.ToLocalTime(),
+                            Id = user.Id,
+                            IsOnline = true,
+                            ProfileImageUrl = user.ProfileImageUrl,
+                            Username = user.Username
+                        }
+                    };
+                }
             }
 
             return new()
