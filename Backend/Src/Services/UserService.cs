@@ -1,4 +1,4 @@
-﻿using Backend.Settings;
+using Backend.Settings;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Shared.DTOs.Auth;
@@ -41,7 +41,7 @@ namespace Backend.Src.Services
                 };
             }
 
-            if (req.Username.Length > Auth.MaxUsernameLength )
+            if (req.Username.Length > Auth.MaxUsernameLength)
             {
                 return new()
                 {
@@ -50,7 +50,7 @@ namespace Backend.Src.Services
                 };
             }
 
-            if (req.Password.Length < Auth.MinPasswordLength) 
+            if (req.Password.Length < Auth.MinPasswordLength)
             {
                 return new()
                 {
@@ -62,7 +62,7 @@ namespace Backend.Src.Services
             if (! await UsernameExistsAsync(req.Username))
             {
                 string passwordHash = CryptoService.Hash(req.Password);
-                var user = new User() { Username = req.Username, PasswordHash = passwordHash, CreatedAt = DateTime.Now };
+                var user = new User() { Username = req.Username, PasswordHash = passwordHash, CreatedAt = DateTime.Now, IsOnline = true };
                 await _users.InsertOneAsync(user);
                 var userDTO = new UserDTO()
                 {
