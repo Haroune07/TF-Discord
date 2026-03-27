@@ -47,7 +47,6 @@ namespace Backend.Src.Services
                 {
                     Success = false,
                     Message = Messages.InvalidUsernameLength
-
                 };
             }
 
