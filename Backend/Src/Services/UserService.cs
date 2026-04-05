@@ -5,6 +5,7 @@ using Shared.DTOs.Auth;
 using Backend.Src.Models;
 using Shared.Constants;
 using Shared.DTOs;
+using Shared.DTOs.Requests;
 namespace Backend.Src.Services
 {
     public class UserService

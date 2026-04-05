@@ -1,4 +1,4 @@
-﻿namespace Shared.DTOs.Auth
+﻿namespace Shared.DTOs.Requests
 {
     public class RegisterRequest
     {
