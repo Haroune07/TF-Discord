@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Net.Http.Json;
 using Shared.Constants;
+using Shared.DTOs.Requests;
 
 namespace Frontend.Services
 {
