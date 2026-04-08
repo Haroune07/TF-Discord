@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Backend.Src.Models
 {
-    public class Message
+    public class Message : IEntity
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
