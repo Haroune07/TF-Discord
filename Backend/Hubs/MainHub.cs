@@ -1,17 +1,20 @@
-using System.Runtime.InteropServices;
+using Backend.Src.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Shared.DTOs;
+using Shared.DTOs.Auth;
+using Shared.DTOs.Requests;
 
-// In SDK-style projects such as this one, several assembly attributes that were historically
-// defined in this file are now automatically added during build and populated with
-// values defined in project properties. For details of which attributes are included
-// and how to customise this process see: https://aka.ms/assembly-info-properties
+namespace Backend.Hubs
+{
+    
+    public class MainHub : Hub
+    {
+        public async Task SendMessage(MessageDTO messageDTO) {
 
+            await Clients.All.SendAsync("SendMessage", messageDTO);
+        }
 
-// Setting ComVisible to false makes the types in this assembly not visible to COM
-// components.  If you need to access a type in this assembly from COM, set the ComVisible
-// attribute to true on that type.
-
-[assembly: ComVisible(false)]
-
-// The following GUID is for the ID of the typelib if this project is exposed to COM.
-
-[assembly: Guid("1dd0b08f-9be3-4780-a6ef-c99f2c78afa3")]
+    }
+}
