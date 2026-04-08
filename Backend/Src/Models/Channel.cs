@@ -4,7 +4,7 @@ using Shared.Enums;
 
 namespace Backend.Src.Models
 {
-    public class Channel
+    public class Channel : IEntity
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]

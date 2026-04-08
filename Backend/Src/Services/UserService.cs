@@ -1,33 +1,30 @@
-using Backend.Settings;
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Shared.DTOs.Auth;
 using Backend.Src.Models;
 using Shared.Constants;
 using Shared.DTOs;
 using Shared.DTOs.Requests;
+using Backend.Src.Repository;
 namespace Backend.Src.Services
 {
     public class UserService
     {
 
-        private readonly IMongoCollection<User> _users;
+        private readonly IRepository<User> _users;
 
-        public UserService(IMongoClient client, IOptions<MongoDBSettings> options)
+        public UserService(IRepository<User> userRepo)
         {
-            _users = client.GetDatabase(options.Value.DatabaseName).GetCollection<User>("Users");
+            _users = userRepo;
         }
 
         private async Task<User?> GetByUsernameAsync(string username)
         {
-            return await _users.Find(u => u.Username == username)
-                .FirstOrDefaultAsync();
+            return (await _users.FindAsync(u => u.Username == username)).FirstOrDefault();
         }
 
         private async Task<bool> UsernameExistsAsync(string username)
         {
-            return await _users.Find(u => u.Username == username)
-                .AnyAsync();
+            return (await _users.FindAsync(u => u.Username == username)).Any();
         }
 
         public async Task<AuthResponse> Register(RegisterRequest req)
@@ -64,7 +61,7 @@ namespace Backend.Src.Services
             {
                 string passwordHash = CryptoService.Hash(req.Password);
                 var user = new User() { Username = req.Username, PasswordHash = passwordHash, CreatedAt = DateTime.Now, IsOnline = true };
-                await _users.InsertOneAsync(user);
+                await _users.InsertAsync(user);
                 var userDTO = new UserDTO()
                 {
                     Username = user.Username,
