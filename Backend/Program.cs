@@ -1,4 +1,5 @@
 
+using Backend.Hubs;
 using Backend.Settings;
 using Backend.Src.Models;
 using Backend.Src.Repository;
@@ -36,6 +37,9 @@ namespace Backend
                 app.UseSwaggerUI();
             }
             //app.UseAuthorization();
+
+            app.MapHub<MainHub>("/mainhub");
+
             app.MapControllers();
             app.Run();
         }
