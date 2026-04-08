@@ -1,5 +1,7 @@
 
 using Backend.Settings;
+using Backend.Src.Models;
+using Backend.Src.Repository;
 using Backend.Src.Services;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -24,6 +26,7 @@ namespace Backend
                 return new MongoClient(settings.ConnectionString);
             });
             builder.Services.AddScoped<UserService>();
+            builder.Services.AddScoped<IRepository<User>, MongoRepository<User>>();
             builder.WebHost.UseUrls(Shared.Constants.Ports.SERVER_LISTEN_URL);
             var app = builder.Build();
             // Configure the HTTP request pipeline.
