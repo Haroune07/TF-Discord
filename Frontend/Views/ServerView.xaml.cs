@@ -24,5 +24,6 @@ namespace Frontend.Views
         {
             InitializeComponent();
         }
+
     }
 }
