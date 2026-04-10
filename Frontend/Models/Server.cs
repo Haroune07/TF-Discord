@@ -1,6 +1,8 @@
-﻿namespace Frontend.Models
+﻿using Frontend.ViewModels;
+
+namespace Frontend.Models
 {
-    public class Server
+    public class Server : ServerViewModel
     {
         public int Id { get; set; }
         public string Name { get; set; }
