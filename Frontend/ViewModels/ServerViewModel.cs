@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace Frontend.ViewModels
 {
-    internal class ServerViewModel
+    public class ServerViewModel
     {
+        public string Name { get; set; }
+        public ServerViewModel() 
+        {
+            Name = string.Empty;
+        }
     }
 }
