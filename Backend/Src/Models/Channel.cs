@@ -1,4 +1,4 @@
-﻿using MongoDB.Bson;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using Shared.Enums;
 
@@ -12,10 +12,8 @@ namespace Backend.Src.Models
         public string? Name { get; set; }
         public ChannelType Type { get; set; }
 
-        [BsonRepresentation(BsonType.ObjectId)]
         public string ServerId { get; set; } = string.Empty;
 
-        [BsonRepresentation(BsonType.ObjectId)]
         public DateTime CreatedAt { get; set; }
         public List<string>? Participants { get; set; }
     }
