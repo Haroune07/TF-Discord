@@ -7,13 +7,10 @@
              mc:Ignorable="d" 
              d:DesignHeight="48" d:DesignWidth="48">
     <Border CornerRadius="14" Width="48" Height="48" Background="#5865F2">
-        <StackPanel>
-            <Image Source="/Static/Images/bg_auth.jpg">
+        <Image Source="/Static/Images/bg_auth.jpg">
                 <Image.InputBindings>
-                    <MouseBinding Gesture="LeftClick" Command="{x:Null}"/>
-                </Image.InputBindings>
+                <MouseBinding Gesture="LeftClick" Command="{}"/>
+            </Image.InputBindings>
             </Image>
-            <TextBlock Text="{Binding Name}"></TextBlock>
-        </StackPanel>
     </Border>
 </UserControl>
