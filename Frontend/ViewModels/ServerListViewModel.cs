@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Frontend.Models;
+using Frontend.ViewModels.Base;
+using System.Collections.ObjectModel;
 
-namespace Frontend.ViewModels
+public class ServerListViewModel : BaseViewModel
 {
-    internal class ServerListViewModel
+    public ObservableCollection<Server> Servers { get; set; }
+
+    public ServerListViewModel()
     {
+        var fakeData = MockServerData.GetFakeServers();
+        Servers = new ObservableCollection<Server>(fakeData);
     }
 }
