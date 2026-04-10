@@ -1,8 +1,7 @@
-using Backend.Src.Models;
 using Backend.Src.Services;
 using Microsoft.AspNetCore.Mvc;
+using Shared.DTOs;
 using Shared.DTOs.Requests;
-using System.Threading.Tasks;
 
 namespace Backend.Src.Controllers
 {
@@ -18,17 +17,24 @@ namespace Backend.Src.Controllers
         }
 
         [HttpPost("server")]
-        public async Task<ActionResult<Channel>> CreateServerChannel(CreateChannelRequest req)
+        public async Task<ActionResult<ChannelDTO>> CreateServerChannel(CreateChannelRequest req)
         {
             var channel = await _channelService.CreateServerChannelAsync(req);
             return Ok(channel);
         }
 
         [HttpPost("dm")]
-        public async Task<ActionResult<Channel>> CreateDMChannel(CreateDMRequest req)
+        public async Task<ActionResult<ChannelDTO>> CreateDMChannel(CreateDMRequest req)
         {
             var channel = await _channelService.CreateDMChannelAsync(req);
             return Ok(channel);
+        }
+
+        [HttpGet("server/{serverId}")]
+        public async Task<ActionResult<List<ChannelDTO>>> GetServerChannels(string serverId)
+        {
+            var channels = await _channelService.GetServerChannelsAsync(serverId);
+            return Ok(channels);
         }
     }
 }
