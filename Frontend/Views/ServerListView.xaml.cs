@@ -23,7 +23,6 @@ namespace Frontend.Views
         public ServerListView()
         {
             InitializeComponent();
-            this.DataContext = new ServerListViewModel();
         }
     }
 }

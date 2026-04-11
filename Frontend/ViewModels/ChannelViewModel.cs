@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 public class ChannelViewModel
 {
-    public int Id { get; set; }
-    public int ServerID { get; set; }
-    public string Name { get; set; }
+    public string Id { get; set; } = string.Empty;
+    public string ServerID { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+
+    public DateTime CreatedAt { get; set; }
     
 }
