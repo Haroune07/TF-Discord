@@ -136,6 +136,14 @@
                            Foreground="#B5BAC1"
                            HorizontalAlignment="Center"
                            Margin="0,40,0,0"/>
+                <Button Content="Test Send" Command="{Binding TestSendCommand}"/>
+                <ListBox ItemsSource="{Binding Messages}" Height="100">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Content}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </StackPanel>
         </Border>
     </Grid>
