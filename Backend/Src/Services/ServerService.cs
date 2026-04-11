@@ -1,6 +1,7 @@
 ﻿using Backend.Src.Models;
 using Backend.Src.Repository;
 using Shared.DTOs;
+using Shared.DTOs.Requests;
 using Shared.Enums;
 
 namespace Backend.Src.Services
@@ -18,23 +19,24 @@ namespace Backend.Src.Services
             _members = members;
         }
 
-        // CREATE SERVER
-        public async Task<ServerDTO> CreateServer(string name, string ownerId)
+        public async Task<ServerDTO> CreateServerAsync(CreateServerRequest req)
         {
+
+            // on ne fait pas de vérification de nom car deux serveurs peuvent avoir le même nom dans l'original
             var server = new Server
             {
-                Name = name,
-                OwnerId = ownerId,
-                CreatedAt = DateTime.UtcNow // date de création automatique
+                Name = req.Name,
+                OwnerId = req.OwnerId,
+                CreatedAt = DateTime.UtcNow
             };
 
             await _servers.InsertAsync(server);
 
-            // Le créateur devient automatiquement OWNER du serveur
+            // Le créateur devient owner du serveur
             var member = new ServerMember
             {
                 ServerId = server.Id,
-                UserId = ownerId,
+                UserId = req.OwnerId,
                 Role = MemberRole.Owner,
                 JoinedAt = DateTime.UtcNow
             };
@@ -44,29 +46,30 @@ namespace Backend.Src.Services
             return MapToDTO(server);
         }
 
-        // GET ALL SERVERS
-        public async Task<List<ServerDTO>> GetServers()
+        public async Task<List<ServerDTO>> GetUserServersAsync(string userId)
         {
-            var servers = await _servers.GetAllAsync();
+            var memberships = await _members.FindAsync(m => m.UserId == userId);
+            var serverIds = memberships.Select(m => m.ServerId).ToList();
 
-            // transformation en DTO pour ne pas exposer le modèle Mongo
-            return servers.Select(MapToDTO).ToList();
+            var servers = await _servers.FindAsync(s => serverIds.Contains(s.Id));
+
+            return servers.Select(serv => MapToDTO(serv)).ToList();
         }
 
         // JOIN SERVER
-        public async Task JoinServer(string serverId, string userId)
+        public async Task JoinServerAsync(JoinOrLeaveServerRequest req)
         {
             // vérifier si l'utilisateur est déjà membre
             var existing = await _members.FindAsync(m =>
-                m.ServerId == serverId && m.UserId == userId);
+                m.ServerId == req.ServerId && m.UserId == req.UserId);
 
             if (existing.Any())
                 throw new Exception("User already in server");
 
             var member = new ServerMember
             {
-                ServerId = serverId,
-                UserId = userId,
+                ServerId = req.ServerId,
+                UserId = req.UserId,
                 Role = MemberRole.Member,
                 JoinedAt = DateTime.UtcNow
             };
@@ -74,11 +77,10 @@ namespace Backend.Src.Services
             await _members.InsertAsync(member);
         }
 
-        // LEAVE SERVER
-        public async Task LeaveServer(string serverId, string userId)
+        public async Task LeaveServer(JoinOrLeaveServerRequest req)
         {
             var members = await _members.FindAsync(m =>
-                m.ServerId == serverId && m.UserId == userId);
+                m.ServerId == req.ServerId && m.UserId == req.UserId);
 
             var member = members.FirstOrDefault();
 
@@ -88,7 +90,6 @@ namespace Backend.Src.Services
             await _members.DeleteAsync(member.Id);
         }
 
-        // MAPPING vers DTO (bonne pratique pour séparer modèle et réponse API)
         private ServerDTO MapToDTO(Server server)
         {
             return new ServerDTO
