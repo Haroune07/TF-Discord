@@ -1,10 +1,12 @@
 
+using Backend.Hubs;
 using Backend.Settings;
 using Backend.Src.Models;
 using Backend.Src.Repository;
 using Backend.Src.Services;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using Shared.Constants;
 
 namespace Backend
 {
@@ -35,6 +37,18 @@ namespace Backend
             builder.Services.AddScoped<MessageService>();
             builder.Services.AddScoped<IRepository<Message>, MongoRepository<Message>>();
             builder.WebHost.UseUrls(Shared.Constants.Ports.SERVER_LISTEN_URL);
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.WithOrigins(Ports.SERVER_LISTEN_URL)
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                });
+            });
+
             var app = builder.Build();
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -43,6 +57,11 @@ namespace Backend
                 app.UseSwaggerUI();
             }
             //app.UseAuthorization();
+
+            app.MapHub<ChatHub>("/hubs/chat");
+
+            app.UseCors();
+
             app.MapControllers();
             app.Run();
         }
