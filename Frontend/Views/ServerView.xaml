@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Frontend.Views.ServerView"
+<UserControl x:Class="Frontend.Views.ServerView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="48" d:DesignWidth="48">
     <Border CornerRadius="14" Width="48" Height="48" Background="#5865F2" ClipToBounds="True">
-        <Button Command="{Binding Test}" Background="Transparent" BorderThickness="0">
+        <Button Command="{Binding SelectCommand}" Background="Transparent" BorderThickness="0">
             <Button.Template>
                 <ControlTemplate TargetType="Button">
                     <Grid Background="Transparent">
