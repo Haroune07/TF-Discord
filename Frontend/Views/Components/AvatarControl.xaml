@@ -5,7 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              x:Name="Root"
              mc:Ignorable="d" 
-             d:DesignHeight="32" d:DesignWidth="32">
+             d:DesignHeight="32" 
+             d:DesignWidth="32">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>

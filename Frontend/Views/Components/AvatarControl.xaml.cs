@@ -1,7 +1,7 @@
-﻿using Frontend.ViewModels;
-using Shared.DTOs;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
+using Shared.DTOs;
+using Frontend.ViewModels;
 
 namespace Frontend.Views.Components
 {
@@ -20,13 +20,18 @@ namespace Frontend.Views.Components
         public AvatarControl()
         {
             InitializeComponent();
-            DataContext = new AvatarControlViewModel();
+            // Par défaut, s'initialise sur la session
+            this.DataContext = new AvatarControlViewModel();
         }
 
         private static void OnUserChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (AvatarControl)d;
-            control.DataContext = new AvatarControlViewModel(e.NewValue as UserDTO);
+            if (e.NewValue is UserDTO user)
+            {
+                // On injecte le nouvel utilisateur dans un nouveau VM
+                control.DataContext = new AvatarControlViewModel(user);
+            }
         }
     }
 }
