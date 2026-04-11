@@ -5,11 +5,11 @@ using Shared.Constants;
 using Shared.DTOs;
 using Shared.DTOs.Requests;
 using Backend.Src.Repository;
+using Backend.Src.Mappers;
 namespace Backend.Src.Services
 {
     public class UserService
     {
-
         private readonly IRepository<User> _users;
 
         public UserService(IRepository<User> userRepo)
@@ -62,14 +62,7 @@ namespace Backend.Src.Services
                 string passwordHash = CryptoService.Hash(req.Password);
                 var user = new User() { Username = req.Username, PasswordHash = passwordHash, CreatedAt = DateTime.Now, IsOnline = true };
                 await _users.InsertAsync(user);
-                var userDTO = new UserDTO()
-                {
-                    Username = user.Username,
-                    CreatedAt = user.CreatedAt,
-                    Id = user.Id,
-                    IsOnline = user.IsOnline,
-                    ProfileImageUrl = user.ProfileImageUrl
-                };
+                var userDTO = user.ToDTO();
                 return new() { Success = true, User = userDTO, Message = Messages.UserCreatedSuccess };
             }
 
@@ -89,18 +82,12 @@ namespace Backend.Src.Services
                 if (CryptoService.VerifyHash(req.Password, user.PasswordHash))
                 {
                     user.IsOnline = true;
+                    await _users.UpdateAsync(user.Id, user);
                     return new()
                     {
                         Success = true,
                         Message = Messages.LoginSuccess,
-                        User = new()
-                        {
-                            CreatedAt = user.CreatedAt.ToLocalTime(),
-                            Id = user.Id,
-                            IsOnline = true,
-                            ProfileImageUrl = user.ProfileImageUrl,
-                            Username = user.Username
-                        }
+                        User = user.ToDTO()
                     };
                 }
             }
