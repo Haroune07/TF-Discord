@@ -12,24 +12,17 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Shared.DTOs;
 
 namespace Frontend.Views.Components
 {
     /// <summary>
-    /// Logique d'interaction pour AvatarControl.xaml
+    /// Logique d'interaction pour InitialsView.xaml
     /// </summary>
-    public partial class AvatarControl : UserControl
+    public partial class InitialsView : UserControl
     {
-        
-
-        public AvatarControl()
+        public InitialsView()
         {
             InitializeComponent();
-            if (!System.ComponentModel.DesignerProperties.GetIsInDesignMode(this))
-            {
-                DataContext = new ViewModels.AvatarControlViewModel();
-            }
         }
     }
 }
