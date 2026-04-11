@@ -24,7 +24,7 @@ namespace Backend.Hubs
 
         public async Task SendMessage(MessageDTO messageDTO)
         {
-            await Clients.All.SendAsync("ReceiveMessage", messageDTO);
+            await Clients.Group(messageDTO.ChannelId).SendAsync("ReceiveMessage", messageDTO);
         }
 
     }

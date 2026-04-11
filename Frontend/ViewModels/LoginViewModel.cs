@@ -25,7 +25,7 @@ namespace Frontend.ViewModels
         {
             _main = main;
             LoginCommand = new RelayCommand(Login, () => true);
-            GoToRegisterCommand = new RelayCommand(() => main.CurrentViewModel = new RegisterViewModel(_main), () => true );
+            GoToRegisterCommand = new RelayCommand(() => main.CurrentViewModel = new RegisterViewModel(_main), () => true);
         }
 
         public LoginViewModel() { }
@@ -73,7 +73,8 @@ namespace Frontend.ViewModels
                 _main.CurrentViewModel = new HomeViewModel(_main);
             }
 
-            else {
+            else
+            {
                 ErrorMessage = res.Message;
             }
 
