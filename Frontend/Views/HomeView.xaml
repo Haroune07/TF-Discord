@@ -12,6 +12,8 @@
     
     xmlns:local="clr-namespace:Frontend.Views"
     
+    xmlns:views="clr-namespace:Frontend.Views"
+    
     xmlns:ViewModels="clr-namespace:Frontend.ViewModels"
     
     mc:Ignorable="d"

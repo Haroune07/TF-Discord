@@ -23,7 +23,6 @@ namespace Frontend.Views
         public ChannelListView()
         {
             InitializeComponent();
-            this.DataContext = new ChannelListViewModel();
         }
     }
 }

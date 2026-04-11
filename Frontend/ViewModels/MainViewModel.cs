@@ -1,24 +1,27 @@
-﻿using Frontend.ViewModels.Base;
+﻿using Frontend.ViewModels;
+using Frontend.ViewModels.Base;
 
-namespace Frontend.ViewModels
+public class MainViewModel : BaseViewModel
 {
-    public class MainViewModel : BaseViewModel
+    private BaseViewModel _currentViewModel;
+
+    public ServerListViewModel ServerList { get; }
+    public ChannelListViewModel ChannelList { get; }
+
+    public BaseViewModel CurrentViewModel
     {
-        private BaseViewModel _currentViewModel;
-
-        public BaseViewModel CurrentViewModel
+        get => _currentViewModel;
+        set
         {
-            get => _currentViewModel;
-            set
-            {
-                _currentViewModel = value;
-                OnPropertyChanged(nameof(CurrentViewModel));
-            }
+            _currentViewModel = value;
+            OnPropertyChanged(nameof(CurrentViewModel));
         }
+    }
 
-        public MainViewModel()
-        {
-            _currentViewModel = new LoginViewModel(this);
-        }
+    public MainViewModel()
+    {
+        ChannelList = new ChannelListViewModel();
+        ServerList = new ServerListViewModel(serverId => ChannelList.LoadChannels(serverId));
+        _currentViewModel = new LoginViewModel(this);
     }
 }

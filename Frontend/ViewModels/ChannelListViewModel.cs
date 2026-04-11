@@ -1,27 +1,27 @@
-﻿using Frontend.Models;
+﻿
+using Frontend.Models;
 using Frontend.ViewModels.Base;
 using System.Collections.ObjectModel;
 
-public class ChannelListViewModel : BaseViewModel
+
+namespace Frontend.ViewModels
 {
-    public ObservableCollection<ChannelViewModel> Channels { get; set; }
-
-    public ChannelListViewModel() // Constructeur sans paramètre possible ici
+    public class ChannelListViewModel : BaseViewModel
     {
-        Channels = new ObservableCollection<ChannelViewModel>();
-        ServerSelectionService.OnServerChanged += LoadChannels;
-    }
+        public ObservableCollection<ChannelViewModel> Channels { get; set; }
 
-    private void LoadChannels(int serverId)
-    {
-        Channels.Clear();
-        var data = MockServerData.GetFakeChannels();
-
-        foreach (var c in data)
+        public ChannelListViewModel()
         {
-            if (c.ServerId == serverId)
+            Channels = new ObservableCollection<ChannelViewModel>();
+        }
+
+        public void LoadChannels(string serverId)
+        {
+            Channels.Clear();
+            var data = MockServerData.GetFakeChannels();
+            foreach (var c in data.Where(c => c.ServerId == serverId))
             {
-                Channels.Add(new ChannelViewModel { Name = c.Name });
+                Channels.Add(new ChannelViewModel { Name = c.Name, Id = c.Id, ServerID = c.ServerId, CreatedAt = c.CreatedAt });
             }
         }
     }
