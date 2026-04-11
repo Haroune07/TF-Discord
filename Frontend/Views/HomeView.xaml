@@ -12,6 +12,8 @@
     
     xmlns:local="clr-namespace:Frontend.Views"
     
+    xmlns:views="clr-namespace:Frontend.Views"
+    
     xmlns:ViewModels="clr-namespace:Frontend.ViewModels"
     
     mc:Ignorable="d"
@@ -42,6 +44,9 @@
                        HorizontalAlignment="Center"/>
             </Border>
             <Separator Background="#35363C" HorizontalAlignment="Center" Width="32" Margin="0,4,0,12"/>
+
+            <!-- ServerListView en dessous du séparateur -->
+            <views:ServerListView DataContext="{Binding ServerList}"/>
         </StackPanel>
 
         <Grid Grid.Column="1" Background="#2B2D31">
@@ -58,7 +63,7 @@
                         Foreground="#949BA4"
                         BorderThickness="0"/>
             </Border>
-
+            <views:ChannelListView Grid.Row="1" DataContext="{Binding ChannelList}"/>
             <Border Grid.Row="2" Background="#232428" Padding="8,0">
                 <Grid VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
