@@ -17,6 +17,9 @@ namespace Backend
             var builder = WebApplication.CreateBuilder(args);
             // Add services to the container.
             builder.Services.AddControllers();
+            builder.Services.AddScoped<ServerService>();
+            builder.Services.AddScoped<IRepository<Server>, MongoRepository<Server>>();
+            builder.Services.AddScoped<IRepository<ServerMember>, MongoRepository<ServerMember>>();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -29,6 +32,10 @@ namespace Backend
             });
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<IRepository<User>, MongoRepository<User>>();
+            builder.Services.AddScoped<ChannelService>();
+            builder.Services.AddScoped<IRepository<Channel>, MongoRepository<Channel>>();
+            builder.Services.AddScoped<MessageService>();
+            builder.Services.AddScoped<IRepository<Message>, MongoRepository<Message>>();
             builder.WebHost.UseUrls(Shared.Constants.Ports.SERVER_LISTEN_URL);
 
             builder.Services.AddCors(options =>

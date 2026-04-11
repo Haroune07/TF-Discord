@@ -1,4 +1,4 @@
-﻿using Frontend.Commands;
+using Frontend.Commands;
 using Frontend.Global;
 using Frontend.Services;
 using Frontend.ViewModels.Base;
@@ -23,6 +23,11 @@ namespace Frontend.ViewModels
 
         public UserDTO? User { get; private set; } = Session.Current.User;
 
+        public AvatarControlViewModel CurrentUserAvatar { get; set; }
+        
+        public ServerListViewModel? ServerList => _main?.ServerList;
+        public ChannelListViewModel? ChannelList => _main?.ChannelList;
+
         public bool IsUserOnline => User?.IsOnline == true;
         public string OnlineStatus => IsUserOnline ? "Online" : "Offline";
 
@@ -41,6 +46,7 @@ namespace Frontend.ViewModels
             TestSendCommand = new RelayCommand(() => _ = TestSendAsync(), () => true);
 
             _ = InitChatAsync();
+            CurrentUserAvatar = new(User);
         }
 
         private void Logout()

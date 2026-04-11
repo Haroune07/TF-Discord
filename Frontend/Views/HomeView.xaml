@@ -12,7 +12,11 @@
     
     xmlns:local="clr-namespace:Frontend.Views"
     
+    xmlns:views="clr-namespace:Frontend.Views"
+    
     xmlns:ViewModels="clr-namespace:Frontend.ViewModels"
+    
+    xmlns:components="clr-namespace:Frontend.Views.Components"
     
     mc:Ignorable="d"
     
@@ -42,6 +46,9 @@
                        HorizontalAlignment="Center"/>
             </Border>
             <Separator Background="#35363C" HorizontalAlignment="Center" Width="32" Margin="0,4,0,12"/>
+
+            <!-- ServerListView en dessous du séparateur -->
+            <views:ServerListView DataContext="{Binding ServerList}"/>
         </StackPanel>
 
         <Grid Grid.Column="1" Background="#2B2D31">
@@ -58,21 +65,15 @@
                         Foreground="#949BA4"
                         BorderThickness="0"/>
             </Border>
-
+            <views:ChannelListView Grid.Row="1" DataContext="{Binding ChannelList}"/>
             <Border Grid.Row="2" Background="#232428" Padding="8,0">
                 <Grid VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
-                        <Grid Width="32" Height="32">
-                            <Ellipse Width="32" Height="32" Fill="#5865F2"/>
-                            <Ellipse Width="12"
-                                     Height="12"
-                                     Fill="#23A55A"
-                                     Stroke="#232428"
-                                     StrokeThickness="2"
-                                     HorizontalAlignment="Right"
-                                     VerticalAlignment="Bottom"
-                                     Visibility="{Binding IsUserOnline, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                        </Grid>
+
+                        <components:AvatarControl DataContext="{Binding CurrentUserAvatar}" 
+                                 Width="32" 
+                                 Height="32" 
+                                 Margin="0,0,8,0"/>
 
                         <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
                             <TextBlock Text="{Binding User.Username}"
