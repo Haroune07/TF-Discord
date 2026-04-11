@@ -16,6 +16,8 @@
     
     xmlns:ViewModels="clr-namespace:Frontend.ViewModels"
     
+    xmlns:components="clr-namespace:Frontend.Views.Components"
+    
     mc:Ignorable="d"
     
     d:DesignHeight="720"
@@ -67,17 +69,11 @@
             <Border Grid.Row="2" Background="#232428" Padding="8,0">
                 <Grid VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
-                        <Grid Width="32" Height="32">
-                            <Ellipse Width="32" Height="32" Fill="#5865F2"/>
-                            <Ellipse Width="12"
-                                     Height="12"
-                                     Fill="#23A55A"
-                                     Stroke="#232428"
-                                     StrokeThickness="2"
-                                     HorizontalAlignment="Right"
-                                     VerticalAlignment="Bottom"
-                                     Visibility="{Binding IsUserOnline, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                        </Grid>
+
+                        <components:AvatarControl DataContext="{Binding CurrentUserAvatar}" 
+                                 Width="32" 
+                                 Height="32" 
+                                 Margin="0,0,8,0"/>
 
                         <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
                             <TextBlock Text="{Binding User.Username}"

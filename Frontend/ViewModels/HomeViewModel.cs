@@ -12,6 +12,8 @@ namespace Frontend.ViewModels
         private MainViewModel? _main;
 
         public UserDTO? User { get; private set; } = Session.Current.User;
+
+        public AvatarControlViewModel CurrentUserAvatar { get; set; }
         
         public ServerListViewModel? ServerList => _main?.ServerList;
         public ChannelListViewModel? ChannelList => _main?.ChannelList;
@@ -30,6 +32,7 @@ namespace Frontend.ViewModels
         {
             _main = main;
             GoToLoginCommand = new RelayCommand(Logout, () => true);
+            CurrentUserAvatar = new(User);
         }
 
         private void Logout()
