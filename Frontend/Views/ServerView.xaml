@@ -6,11 +6,15 @@
              xmlns:local="clr-namespace:Frontend.Views"
              mc:Ignorable="d" 
              d:DesignHeight="48" d:DesignWidth="48">
-    <Border CornerRadius="14" Width="48" Height="48" Background="#5865F2">
-        <Image Source="/Static/Images/bg_auth.jpg">
-                <Image.InputBindings>
-                <MouseBinding Gesture="LeftClick" Command="{}"/>
-            </Image.InputBindings>
-            </Image>
+    <Border CornerRadius="14" Width="48" Height="48" Background="#5865F2" ClipToBounds="True">
+        <Button Command="{Binding Test}" Background="Transparent" BorderThickness="0">
+            <Button.Template>
+                <ControlTemplate TargetType="Button">
+                    <Grid Background="Transparent">
+                        <Image Source="/Static/Images/bg_auth.jpg" />
+                    </Grid>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
     </Border>
 </UserControl>

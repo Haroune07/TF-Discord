@@ -5,7 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Frontend.Views"
              mc:Ignorable="d" Height="30" Width="230">
-    <Grid>
-            
-    </Grid>
+    <Border CornerRadius="5" Background="#232428">
+        <Grid>
+            <TextBlock Text="{Binding Name, StringFormat='# : {0}'}" Foreground="White"></TextBlock>
+        </Grid>
+    </Border>
 </UserControl>
