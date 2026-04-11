@@ -3,25 +3,43 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:Frontend.Views.Components"
+             x:Name="Root"
              mc:Ignorable="d" 
              d:DesignHeight="32" d:DesignWidth="32">
-    <Border CornerRadius="20" Width="32" Height="32" ClipToBounds="True">
-        <Grid>
-            <!-- 1. Le fond coloré (en dessous de tout) -->
-            <Ellipse Fill="#5865F2" Width="32" Height="32"/>
-            <TextBlock Text="{Binding Initials}" 
-                   VerticalAlignment="Center" 
-                   HorizontalAlignment="Center" 
-                   Foreground="White"
-                   FontSize="12"/>
-        <Rectangle Width="32" Height="32">
-            <Rectangle.Fill>
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Border CornerRadius="20" ClipToBounds="True">
+            <Grid>
+                <Ellipse Fill="#5865F2"/>
+
+                <TextBlock Text="{Binding Initials}" 
+                           VerticalAlignment="Center" 
+                           HorizontalAlignment="Center" 
+                           Foreground="White"
+                           FontSize="12"
+                           FontWeight="Bold"/>
+
+                <Rectangle>
+                    <Rectangle.Fill>
                         <ImageBrush ImageSource="{Binding AvatarImage}" 
-                            Stretch="UniformToFill" 
-                            Opacity="{Binding AvatarOpacity}"/>
+                                    Stretch="UniformToFill" 
+                                    Opacity="{Binding AvatarOpacity}"/>
                     </Rectangle.Fill>
-        </Rectangle>
+                </Rectangle>
+            </Grid>
+        </Border>
+
+        <Ellipse Width="10" Height="10" 
+                 Fill="#23A55A" 
+                 Stroke="#232428" 
+                 StrokeThickness="2"
+                 HorizontalAlignment="Right" 
+                 VerticalAlignment="Bottom"
+                 Margin="0,0,1,1"
+                 Visibility="{Binding IsOnline, Converter={StaticResource BooleanToVisibilityConverter}}"/>
     </Grid>
-</Border>
 </UserControl>
