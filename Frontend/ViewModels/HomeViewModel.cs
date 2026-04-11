@@ -1,4 +1,4 @@
-﻿using Frontend.Commands;
+using Frontend.Commands;
 using Frontend.Global;
 using Frontend.ViewModels.Base;
 using Shared.DTOs;
@@ -12,6 +12,9 @@ namespace Frontend.ViewModels
         private MainViewModel? _main;
 
         public UserDTO? User { get; private set; } = Session.Current.User;
+        
+        public ServerListViewModel? ServerList => _main?.ServerList;
+        public ChannelListViewModel? ChannelList => _main?.ChannelList;
 
         public bool IsUserOnline => User?.IsOnline == true;
         public string OnlineStatus => IsUserOnline ? "Online" : "Offline";
