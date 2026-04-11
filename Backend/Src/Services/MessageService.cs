@@ -4,6 +4,7 @@ using Shared.DTOs.Requests;
 using Shared.DTOs;
 using System.Collections.Generic;
 using System.Linq;
+using Backend.Src.Mappers;
 using System.Threading.Tasks;
 
 namespace Backend.Src.Services
@@ -39,14 +40,7 @@ namespace Backend.Src.Services
                 Content = message.Content,
                 ChannelId = message.ChannelId,
                 SentAt = message.SentAt,
-                Sender = sender == null ? new UserDTO { Id = message.SenderId } : new UserDTO
-                {
-                    Id = sender.Id,
-                    Username = sender.Username,
-                    IsOnline = sender.IsOnline,
-                    ProfileImageUrl = sender.ProfileImageUrl,
-                    CreatedAt = sender.CreatedAt
-                }
+                Sender = sender == null ? new UserDTO { Id = message.SenderId } : sender.ToDTO()
             };
         }
 
@@ -69,14 +63,7 @@ namespace Backend.Src.Services
                         Content = m.Content,
                         ChannelId = m.ChannelId,
                         SentAt = m.SentAt,
-                        Sender = sender == null ? new UserDTO { Id = m.SenderId } : new UserDTO
-                        {
-                            Id = sender.Id,
-                            Username = sender.Username,
-                            IsOnline = sender.IsOnline,
-                            ProfileImageUrl = sender.ProfileImageUrl,
-                            CreatedAt = sender.CreatedAt
-                        }
+                        Sender = sender == null ? new UserDTO { Id = m.SenderId } : sender.ToDTO()
                     };
                 })
                 .ToList();
