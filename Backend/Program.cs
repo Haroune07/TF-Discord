@@ -27,6 +27,10 @@ namespace Backend
             });
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<IRepository<User>, MongoRepository<User>>();
+            builder.Services.AddScoped<ChannelService>();
+            builder.Services.AddScoped<IRepository<Channel>, MongoRepository<Channel>>();
+            builder.Services.AddScoped<MessageService>();
+            builder.Services.AddScoped<IRepository<Message>, MongoRepository<Message>>();
             builder.WebHost.UseUrls(Shared.Constants.Ports.SERVER_LISTEN_URL);
             var app = builder.Build();
             // Configure the HTTP request pipeline.
