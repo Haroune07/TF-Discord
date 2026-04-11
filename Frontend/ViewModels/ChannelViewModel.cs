@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Frontend.ViewModels
+public class ChannelViewModel
 {
-    internal class ChannelViewModel
-    {
-    }
+    public int Id { get; set; }
+    public int ServerID { get; set; }
+    public string Name { get; set; }
+    
 }

@@ -2,7 +2,7 @@
 
 namespace Frontend.Models
 {
-    public class Server : ServerViewModel
+    public class Server
     {
         public int Id { get; set; }
         public string Name { get; set; }

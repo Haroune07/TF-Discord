@@ -9,7 +9,12 @@ public class ServerListViewModel : BaseViewModel
 
     public ServerListViewModel()
     {
-        var fakeData = MockServerData.GetFakeServers();
-        Servers = new ObservableCollection<ServerViewModel>(fakeData);
+        Servers = new ObservableCollection<ServerViewModel>();
+        var data = MockServerData.GetFakeServers();
+        foreach (var s in data)
+        {
+            Servers.Add(new ServerViewModel { Name = s.Name, Id = s.Id });
+        }
     }
+
 }
