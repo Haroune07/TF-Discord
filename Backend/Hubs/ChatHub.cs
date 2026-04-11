@@ -27,5 +27,15 @@ namespace Backend.Hubs
             await Clients.Group(messageDTO.ChannelId).SendAsync("ReceiveMessage", messageDTO);
         }
 
+        public async Task TypingStarted(string channelId, string username)
+        {
+            await Clients.OthersInGroup(channelId).SendAsync("UserTyping", username);
+        }
+
+        public async Task TypingStopped(string channelId, string username)
+        {
+            await Clients.OthersInGroup(channelId).SendAsync("UserStoppedTyping", username);
+        }
+
     }
 }
