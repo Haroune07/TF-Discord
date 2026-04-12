@@ -21,7 +21,7 @@ public class MainViewModel : BaseViewModel
     public MainViewModel()
     {
         ChannelList = new ChannelListViewModel();
-        ServerList = new ServerListViewModel(serverId => ChannelList.LoadChannels(serverId));
+        ServerList = new ServerListViewModel(async serverId => await ChannelList.LoadChannelsAsync(serverId));
         _currentViewModel = new LoginViewModel(this);
     }
 }
