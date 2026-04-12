@@ -9,6 +9,7 @@
         public const string GetMyServersRoute = "/api/server/mine";
         public const string JoinServerRoute = "/api/server/join";
         public const string LeaveServerRoute = "/api/server/leave";
+        public const string GetAllServersRoute = "/api/server/all";
 
         public const string CreateServerChannelRoute = "/api/channel/server";
         public const string CreateDMChannelRoute = "/api/channel/dm";
