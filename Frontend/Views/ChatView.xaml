@@ -1,0 +1,90 @@
+﻿<UserControl x:Class="Frontend.Views.ChatView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:components="clr-namespace:Frontend.Views.Components"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" 
+             d:DesignWidth="800"
+             Background="#313338"> 
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <ScrollViewer x:Name="ChatScrollViewer" Grid.Row="0" Margin="0,10,0,0">
+            <ItemsControl ItemsSource="{Binding Messages}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="16,8,16,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <components:AvatarControl Grid.Column="0" 
+                                                      User="{Binding Sender}" 
+                                                      Width="40" Height="40" 
+                                                      VerticalAlignment="Top" 
+                                                      Margin="0,0,16,0"/>
+
+                            <StackPanel Grid.Column="1">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                    <TextBlock Text="{Binding Sender.Username}" 
+                                               Foreground="White" 
+                                               FontWeight="SemiBold" 
+                                               FontSize="15"/>
+                                    <TextBlock Text="{Binding SentAt}" 
+                                               Foreground="#949BA4" 
+                                               FontSize="12" 
+                                               Margin="8,2,0,0" 
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <TextBlock Text="{Binding Content}" 
+                                           Foreground="#DBDEE1" 
+                                           FontSize="15" 
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <Border Grid.Row="1" Background="#383A40" CornerRadius="8" Margin="16,0,16,24" Padding="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" 
+                         Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
+                         Background="Transparent" 
+                         Foreground="#DBDEE1" 
+                         BorderThickness="0" 
+                         FontSize="15"
+                         VerticalAlignment="Center"
+                         Margin="5,0,16,0"/>
+
+                <Button Grid.Column="1" 
+                        Command="{Binding SendMessageCommand}" 
+                        Content="Envoyer" 
+                        Background="#5865F2" 
+                        Foreground="White" 
+                        BorderThickness="0" 
+                        Padding="15,8"
+                        Cursor="Hand">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="4"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

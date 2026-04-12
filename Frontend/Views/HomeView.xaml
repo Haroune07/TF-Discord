@@ -117,9 +117,7 @@
                 </StackPanel>
             </Border>
 
-            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
-                <TextBlock Text="Wumpus is waiting for friends." Foreground="#949BA4" FontSize="16"/>
-            </StackPanel>
+            <views:ChatView Grid.Row="1" DataContext="{Binding ActiveChat}" />
         </Grid>
 
         <Border Grid.Column="3"

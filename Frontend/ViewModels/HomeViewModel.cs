@@ -5,6 +5,7 @@ using Frontend.ViewModels.Base;
 using Shared.DTOs;
 using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Frontend.ViewModels
@@ -13,28 +14,23 @@ namespace Frontend.ViewModels
     {
         private MainViewModel? _main;
 
-
-
-        private readonly ChatService _chat = new();
-        public ObservableCollection<MessageDTO> Messages { get; } = new();
-
-        public ICommand TestSendCommand { get; }
-
-
+        // Données utilisateur
         public UserDTO? User { get; private set; } = Session.Current.User;
-
         public AvatarControlViewModel CurrentUserAvatar { get; set; }
-        
+
+        // Accès aux listes de Wilson via MainViewModel
         public ServerListViewModel? ServerList => _main?.ServerList;
         public ChannelListViewModel? ChannelList => _main?.ChannelList;
 
+        // Ton Chat
+        public ChatViewModel ActiveChat { get; }
+
+        // Propriétés de statut
         public bool IsUserOnline => User?.IsOnline == true;
         public string OnlineStatus => IsUserOnline ? "Online" : "Offline";
-
-        public string MemberSince =>
-            User != null
-                ? $"Member since {User.CreatedAt:MMMM dd, yyyy}"
-                : "Member since unknown";
+        public string MemberSince => User != null
+            ? $"Member since {User.CreatedAt:MMMM dd, yyyy}"
+            : "Member since unknown";
 
         public ICommand? GoToLoginCommand { get; }
 
@@ -43,10 +39,26 @@ namespace Frontend.ViewModels
             _main = main;
             GoToLoginCommand = new RelayCommand(Logout, () => true);
 
-            TestSendCommand = new RelayCommand(() => _ = TestSendAsync(), () => true);
+            var apiService = new ApiService();
+            var chatService = new ChatService();
+            ActiveChat = new ChatViewModel(apiService, chatService);
 
-            _ = InitChatAsync();
             CurrentUserAvatar = new(User);
+
+            // demarrer la connexion SignalR en arrière-plan
+            _ = chatService.ConnectAsync();
+
+            // s'abonner au clic sur un salon
+            if (_main?.ChannelList != null)
+            {
+                _main.ChannelList.OnChannelSelected += async (id) => await SelectChannelAsync(id);
+            }
+
+            // Charger les serveurs maintenant que le login est fait
+            if (_main?.ServerList != null)
+            {
+                _ = _main.ServerList.LoadServersAsync();
+            }
         }
 
         private void Logout()
@@ -55,37 +67,9 @@ namespace Frontend.ViewModels
             _main!.CurrentViewModel = new LoginViewModel(_main);
         }
 
-
-        private async Task InitChatAsync()
+        public async Task SelectChannelAsync(string channelId)
         {
-            try
-            {
-
-                _chat.MessageReceived += msg =>
-                {
-                    Console.WriteLine($"[VM] MessageReceived event fired: {msg.Content}");
-                    App.Current.Dispatcher.Invoke(() =>
-                    {
-                        Console.WriteLine($"[VM] Adding to Messages collection");
-                        Messages.Add(msg);
-                        Console.WriteLine($"[VM] Messages count: {Messages.Count}");
-                    });
-                };
-
-                await _chat.ConnectAsync();
-                await _chat.JoinChannelAsync("test-channel");
-            }
-            catch (Exception ex)
-            {
-                // Put a breakpoint here
-                System.Diagnostics.Debug.WriteLine($"SignalR error: {ex.Message}");
-            }
+            await ActiveChat.LoadChannelAsync(channelId);
         }
-        public async Task TestSendAsync()
-        {
-            await _chat.SendMessageAsync("test-channel", "test SignalR");
-        }
-
-
     }
 }
