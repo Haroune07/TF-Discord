@@ -21,6 +21,21 @@ namespace Backend.Src.Controllers
         [HttpPost("send")]
         public async Task<ActionResult<Message>> SendMessage(CreateMessageRequest req)
         {
+            if (string.IsNullOrWhiteSpace(req.Content))
+            {
+                return BadRequest("Content is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(req.ChannelId))
+            {
+                return BadRequest("ChannelId is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(req.SenderId))
+            {
+                return BadRequest("SenderId is required.");
+            }
+
             var message = await _messageService.SendMessageAsync(req);
             return Ok(message);
         }

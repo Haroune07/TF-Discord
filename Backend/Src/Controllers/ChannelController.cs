@@ -19,6 +19,16 @@ namespace Backend.Src.Controllers
         [HttpPost("server")]
         public async Task<ActionResult<ChannelDTO>> CreateServerChannel(CreateChannelRequest req)
         {
+            if (string.IsNullOrWhiteSpace(req.Name))
+            {
+                return BadRequest("Name is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(req.ServerId))
+            {
+                return BadRequest("ServerId is required.");
+            }
+
             var channel = await _channelService.CreateServerChannelAsync(req);
             return Ok(channel);
         }
