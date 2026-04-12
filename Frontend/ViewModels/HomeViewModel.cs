@@ -3,9 +3,6 @@ using Frontend.Global;
 using Frontend.Services;
 using Frontend.ViewModels.Base;
 using Shared.DTOs;
-using System;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Frontend.ViewModels
@@ -14,18 +11,28 @@ namespace Frontend.ViewModels
     {
         private MainViewModel? _main;
 
-        // Données utilisateur
         public UserDTO? User { get; private set; } = Session.Current.User;
         public AvatarControlViewModel CurrentUserAvatar { get; set; }
 
-        // Accès aux listes de Wilson via MainViewModel
         public ServerListViewModel? ServerList => _main?.ServerList;
         public ChannelListViewModel? ChannelList => _main?.ChannelList;
+        public UserListViewModel UserList { get; }
 
-        // Ton Chat
         public ChatViewModel ActiveChat { get; }
 
-        // Propriétés de statut
+        private bool _isDMMode = false;
+        public bool IsDMMode
+        {
+            get => _isDMMode;
+            set { 
+                _isDMMode = value; 
+                OnPropertyChanged(); 
+                OnPropertyChanged(nameof(IsServerMode));
+                System.Diagnostics.Debug.WriteLine($"IsDMMode={_isDMMode}, IsServerMode={!_isDMMode}");
+            }
+        }
+        public bool IsServerMode => !IsDMMode;
+
         public bool IsUserOnline => User?.IsOnline == true;
         public string OnlineStatus => IsUserOnline ? "Online" : "Offline";
         public string MemberSince => User != null
@@ -33,11 +40,13 @@ namespace Frontend.ViewModels
             : "Member since unknown";
 
         public ICommand? GoToLoginCommand { get; }
+        public ICommand? GoToHomeCommand { get; }
 
         public HomeViewModel(MainViewModel main)
         {
             _main = main;
             GoToLoginCommand = new RelayCommand(Logout, () => true);
+            GoToHomeCommand = new RelayCommand(SwitchToDMMode, () => true);
 
             var apiService = new ApiService();
             var chatService = new ChatService();
@@ -45,20 +54,28 @@ namespace Frontend.ViewModels
 
             CurrentUserAvatar = new(User);
 
-            // demarrer la connexion SignalR en arrière-plan
+            UserList = new UserListViewModel(async (channelId) =>
+            {
+                IsDMMode = true;
+                await ActiveChat.LoadChannelAsync(channelId);
+            });
+
             _ = chatService.ConnectAsync();
 
-            // s'abonner au clic sur un salon
             if (_main?.ChannelList != null)
-            {
                 _main.ChannelList.OnChannelSelected += async (id) => await SelectChannelAsync(id);
-            }
 
-            // Charger les serveurs maintenant que le login est fait
             if (_main?.ServerList != null)
             {
+                _main.ServerList.OnServerSelected += (id) => IsDMMode = false;
                 _ = _main.ServerList.LoadServersAsync();
             }
+        }
+
+        private void SwitchToDMMode()
+        {
+            IsDMMode = true;
+            _ = UserList.LoadUsersAsync();
         }
 
         private void Logout()
@@ -69,6 +86,7 @@ namespace Frontend.ViewModels
 
         public async Task SelectChannelAsync(string channelId)
         {
+            IsDMMode = false;
             await ActiveChat.LoadChannelAsync(channelId);
         }
     }
