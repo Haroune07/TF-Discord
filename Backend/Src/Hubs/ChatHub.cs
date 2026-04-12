@@ -1,12 +1,7 @@
-using Backend.Src.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Shared.DTOs;
-using Shared.DTOs.Auth;
-using Shared.DTOs.Requests;
 
-namespace Backend.Hubs
+namespace Backend.Src.Hubs
 {
     
     public class ChatHub : Hub
