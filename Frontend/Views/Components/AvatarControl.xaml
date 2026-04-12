@@ -12,25 +12,17 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </UserControl.Resources>
 
+
     <Grid>
         <Border CornerRadius="20" ClipToBounds="True">
             <Grid>
                 <Ellipse Fill="#5865F2"/>
-
-                <TextBlock Text="{Binding Initials}" 
+                <TextBlock Text="{Binding Initials, ElementName=Root}" 
                            VerticalAlignment="Center" 
                            HorizontalAlignment="Center" 
                            Foreground="White"
                            FontSize="12"
                            FontWeight="Bold"/>
-
-                <Rectangle>
-                    <Rectangle.Fill>
-                        <ImageBrush ImageSource="{Binding AvatarImage}" 
-                                    Stretch="UniformToFill" 
-                                    Opacity="{Binding AvatarOpacity}"/>
-                    </Rectangle.Fill>
-                </Rectangle>
             </Grid>
         </Border>
 
@@ -41,6 +33,7 @@
                  HorizontalAlignment="Right" 
                  VerticalAlignment="Bottom"
                  Margin="0,0,1,1"
-                 Visibility="{Binding IsOnline, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                 Visibility="{Binding IsOnline, ElementName=Root, 
+                              Converter={StaticResource BooleanToVisibilityConverter}}"/>
     </Grid>
 </UserControl>

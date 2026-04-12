@@ -1,4 +1,4 @@
-﻿
+﻿using System;
 using System.Windows.Input;
 
 namespace Frontend.Commands
@@ -8,7 +8,11 @@ namespace Frontend.Commands
         private readonly Action _execute;
         private readonly Func<bool> _canExecute;
 
-        public event EventHandler? CanExecuteChanged;
+        public event EventHandler? CanExecuteChanged
+        {
+            add => CommandManager.RequerySuggested += value;
+            remove => CommandManager.RequerySuggested -= value;
+        }
 
         public bool CanExecute(object? parameter)
         {
