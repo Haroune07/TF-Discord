@@ -23,7 +23,10 @@ namespace Frontend.ViewModels
 
             Servers.Clear(); // On vide la liste pour éviter les doublons
 
-            var data = await _apiService.GetMyServersAsync(Session.Current.User.Id);
+            // on devrait utiliser cette méthode, mais en ce moment on teste
+            //var data = await _apiService.GetMyServersAsync(Session.Current.User.Id);
+
+            var data = await _apiService.GetAllServers();
 
             foreach (var s in data)
             {
