@@ -17,6 +17,12 @@ namespace Backend.Src.Services
             _users = userRepo;
         }
 
+        public async Task<List<UserDTO>> GetAllUsersExceptAsync(string userId)
+        {
+            var users = await _users.FindAsync(u => u.Id != userId);
+            return users.Select(u => u.ToDTO()!).ToList();
+        }
+
         private async Task<User?> GetByUsernameAsync(string username)
         {
             return (await _users.FindAsync(u => u.Username == username)).FirstOrDefault();
@@ -57,7 +63,7 @@ namespace Backend.Src.Services
                 };
             }
 
-            if (! await UsernameExistsAsync(req.Username))
+            if (!await UsernameExistsAsync(req.Username))
             {
                 string passwordHash = CryptoService.Hash(req.Password);
                 var user = new User() { Username = req.Username, PasswordHash = passwordHash, CreatedAt = DateTime.Now, IsOnline = true };
@@ -68,14 +74,14 @@ namespace Backend.Src.Services
 
             else
             {
-                return new () { Success = false, User = null, Message = Messages.UserNameAlreadyExists };
+                return new() { Success = false, User = null, Message = Messages.UserNameAlreadyExists };
             }
 
         }
 
         public async Task<AuthResponse> Login(LoginRequest req)
         {
-            if(await UsernameExistsAsync(req.Username))
+            if (await UsernameExistsAsync(req.Username))
             {
                 var user = await GetByUsernameAsync(req.Username);
 

@@ -85,6 +85,10 @@ namespace Frontend.Services
 
             return res ?? new();
         }
+        public async Task<List<UserDTO>> GetAllUsersExceptMeAsync(string userId)
+        {
+            return await _client.GetFromJsonAsync<List<UserDTO>>($"{Routes.GetAllUsersRoute}/{userId}") ?? new();
+        }
 
     }
 }
