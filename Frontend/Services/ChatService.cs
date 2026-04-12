@@ -9,8 +9,9 @@ namespace Frontend.Services
     public class ChatService
     {
 
+        public event Action<string>? UserTyping;
+        public event Action<string>? UserStoppedTyping;
         private HubConnection? _connection;
-
         public event Action<MessageDTO>? MessageReceived;
 
         public async Task ConnectAsync()
@@ -25,6 +26,9 @@ namespace Frontend.Services
                 MessageReceived?.Invoke(msg);
             });
 
+            _connection.On<string>("UserTyping", username => UserTyping?.Invoke(username));
+            _connection.On<string>("UserStoppedTyping", username => UserStoppedTyping?.Invoke(username));
+
             await _connection.StartAsync();
 
         }
@@ -37,18 +41,9 @@ namespace Frontend.Services
         public async Task LeaveChannelAsync(string channelId)
             => await _connection!.InvokeAsync("LeaveChannel", channelId);
 
-        public async Task SendMessageAsync(string channelId, string content)
+        public async Task BroadcastMessageAsync(MessageDTO messageDTO)
         {
-            var messageDTO = new MessageDTO
-            {
-                ChannelId = channelId,
-                Content = content,
-                Sender = Session.Current.User!,
-                SentAt = DateTime.UtcNow
-            };
-
             await _connection!.InvokeAsync("SendMessage", messageDTO);
-
         }
 
         public async Task DisconnectAsync()
@@ -57,5 +52,10 @@ namespace Frontend.Services
                 await _connection.StopAsync();
         }
 
+        public async Task NotifyTypingStartedAsync(string channelId, string username)
+            => await _connection!.InvokeAsync("TypingStarted", channelId, username);
+
+        public async Task NotifyTypingStoppedAsync(string channelId, string username)
+            => await _connection!.InvokeAsync("TypingStopped", channelId, username);
     }
 }

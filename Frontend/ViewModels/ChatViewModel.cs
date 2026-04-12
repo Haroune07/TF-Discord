@@ -22,8 +22,17 @@ namespace Frontend.ViewModels
         public string InputText
         {
             get => _inputText;
-            set { _inputText = value; OnPropertyChanged(); }
+            set { _inputText = value; OnPropertyChanged(); _ = HandleTypingAsync(); }
         }
+
+        private string _typingText = string.Empty;
+        public string TypingText
+        {
+            get => _typingText;
+            set { _typingText = value; OnPropertyChanged(); }
+        }
+
+        private CancellationTokenSource? _typingCTS;
 
         public ICommand SendMessageCommand { get; }
 
@@ -35,6 +44,8 @@ namespace Frontend.ViewModels
             SendMessageCommand = new RelayCommand(SendMessage, CanSendMessage);
 
             _chatService.MessageReceived += OnMessageReceived;
+            _chatService.UserTyping += OnOtherUserTyping;
+            _chatService.UserStoppedTyping += OnOtherUserStoppedTyping;
         }
 
         public async Task LoadChannelAsync(string channelId)
@@ -60,18 +71,22 @@ namespace Frontend.ViewModels
         private async void SendMessage()
         {
             string content = InputText;
-            InputText = string.Empty; // Vider l'UI instantanément
+            InputText = string.Empty;
 
             if (string.IsNullOrEmpty(_currentChannelId)) return;
 
-            // 1. Envoi via HTTP pour la base de données
-            var req = new CreateMessageRequest { ChannelId = _currentChannelId, Content = content, SenderId = Session.Current.User!.Id };
+            var req = new CreateMessageRequest
+            {
+                ChannelId = _currentChannelId,
+                Content = content,
+                SenderId = Session.Current.User!.Id
+            };
             var savedMessage = await _apiService.SendMessageAsync(req);
 
-            // 2. Si sauvegardé, on l'envoie aux autres via SignalR
             if (savedMessage != null)
             {
-                await _chatService.SendMessageAsync(_currentChannelId, content);
+                // On broadcast le message sauvegardé (avec le vrai sender du backend)
+                await _chatService.BroadcastMessageAsync(savedMessage);
             }
         }
 
@@ -86,6 +101,33 @@ namespace Frontend.ViewModels
                     Messages.Add(msg);
                 }
             });
+        }
+
+        private void OnOtherUserTyping(string username)
+        {
+            Application.Current.Dispatcher.Invoke(() => TypingText = $"{username} is typing...");
+        }
+
+        private void OnOtherUserStoppedTyping(string username)
+        {
+            Application.Current.Dispatcher.Invoke(() => TypingText = string.Empty);
+        }
+
+        private async Task HandleTypingAsync()
+        {
+            if (string.IsNullOrEmpty(_currentChannelId)) return;
+
+            _typingCTS?.Cancel();
+            _typingCTS = new CancellationTokenSource();
+
+            await _chatService.NotifyTypingStartedAsync(_currentChannelId, Session.Current.User!.Username);
+
+            try
+            {
+                await Task.Delay(2000, _typingCTS.Token);
+                await _chatService.NotifyTypingStoppedAsync(_currentChannelId, Session.Current.User!.Username);
+            }
+            catch (TaskCanceledException) { }
         }
     }
 }
