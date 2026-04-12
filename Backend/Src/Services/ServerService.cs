@@ -100,5 +100,10 @@ namespace Backend.Src.Services
                 CreatedAt = server.CreatedAt
             };
         }
+
+        public async Task<List<ServerDTO>> GetAllServersAsync()
+        {
+            return (await _servers.GetAllAsync()).Select(MapToDTO).ToList();
+        }
     }
 }

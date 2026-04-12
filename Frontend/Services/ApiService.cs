@@ -78,5 +78,13 @@ namespace Frontend.Services
             return res.IsSuccessStatusCode;
         }
 
+        //test method
+        public async Task<List<ServerDTO>> GetAllServers()
+        {
+            var res = await _client.GetFromJsonAsync<List<ServerDTO>>(Routes.GetAllServersRoute);
+
+            return res ?? new();
+        }
+
     }
 }
