@@ -3,8 +3,6 @@ using Frontend.Global;
 using Frontend.Services;
 using Frontend.ViewModels.Base;
 using Shared.DTOs;
-using System;
-using System.Collections.ObjectModel;
 using System.Windows.Input;
 
 namespace Frontend.ViewModels
@@ -13,40 +11,71 @@ namespace Frontend.ViewModels
     {
         private MainViewModel? _main;
 
-
-
-        private readonly ChatService _chat = new();
-        public ObservableCollection<MessageDTO> Messages { get; } = new();
-
-        public ICommand TestSendCommand { get; }
-
-
         public UserDTO? User { get; private set; } = Session.Current.User;
-
         public AvatarControlViewModel CurrentUserAvatar { get; set; }
-        
+
         public ServerListViewModel? ServerList => _main?.ServerList;
         public ChannelListViewModel? ChannelList => _main?.ChannelList;
+        public UserListViewModel UserList { get; }
+
+        public ChatViewModel ActiveChat { get; }
+
+        private bool _isDMMode = false;
+        public bool IsDMMode
+        {
+            get => _isDMMode;
+            set { 
+                _isDMMode = value; 
+                OnPropertyChanged(); 
+                OnPropertyChanged(nameof(IsServerMode));
+                System.Diagnostics.Debug.WriteLine($"IsDMMode={_isDMMode}, IsServerMode={!_isDMMode}");
+            }
+        }
+        public bool IsServerMode => !IsDMMode;
 
         public bool IsUserOnline => User?.IsOnline == true;
         public string OnlineStatus => IsUserOnline ? "Online" : "Offline";
-
-        public string MemberSince =>
-            User != null
-                ? $"Member since {User.CreatedAt:MMMM dd, yyyy}"
-                : "Member since unknown";
+        public string MemberSince => User != null
+            ? $"Member since {User.CreatedAt:MMMM dd, yyyy}"
+            : "Member since unknown";
 
         public ICommand? GoToLoginCommand { get; }
+        public ICommand? GoToHomeCommand { get; }
 
         public HomeViewModel(MainViewModel main)
         {
             _main = main;
             GoToLoginCommand = new RelayCommand(Logout, () => true);
+            GoToHomeCommand = new RelayCommand(SwitchToDMMode, () => true);
 
-            TestSendCommand = new RelayCommand(() => _ = TestSendAsync(), () => true);
+            var apiService = new ApiService();
+            var chatService = new ChatService();
+            ActiveChat = new ChatViewModel(apiService, chatService);
 
-            _ = InitChatAsync();
             CurrentUserAvatar = new(User);
+
+            UserList = new UserListViewModel(async (channelId) =>
+            {
+                IsDMMode = true;
+                await ActiveChat.LoadChannelAsync(channelId);
+            });
+
+            _ = chatService.ConnectAsync();
+
+            if (_main?.ChannelList != null)
+                _main.ChannelList.OnChannelSelected += async (id) => await SelectChannelAsync(id);
+
+            if (_main?.ServerList != null)
+            {
+                _main.ServerList.OnServerSelected += (id) => IsDMMode = false;
+                _ = _main.ServerList.LoadServersAsync();
+            }
+        }
+
+        private void SwitchToDMMode()
+        {
+            IsDMMode = true;
+            _ = UserList.LoadUsersAsync();
         }
 
         private void Logout()
@@ -55,37 +84,10 @@ namespace Frontend.ViewModels
             _main!.CurrentViewModel = new LoginViewModel(_main);
         }
 
-
-        private async Task InitChatAsync()
+        public async Task SelectChannelAsync(string channelId)
         {
-            try
-            {
-
-                _chat.MessageReceived += msg =>
-                {
-                    Console.WriteLine($"[VM] MessageReceived event fired: {msg.Content}");
-                    App.Current.Dispatcher.Invoke(() =>
-                    {
-                        Console.WriteLine($"[VM] Adding to Messages collection");
-                        Messages.Add(msg);
-                        Console.WriteLine($"[VM] Messages count: {Messages.Count}");
-                    });
-                };
-
-                await _chat.ConnectAsync();
-                await _chat.JoinChannelAsync("test-channel");
-            }
-            catch (Exception ex)
-            {
-                // Put a breakpoint here
-                System.Diagnostics.Debug.WriteLine($"SignalR error: {ex.Message}");
-            }
+            IsDMMode = false;
+            await ActiveChat.LoadChannelAsync(channelId);
         }
-        public async Task TestSendAsync()
-        {
-            await _chat.SendMessageAsync("test-channel", "test SignalR");
-        }
-
-
     }
 }

@@ -7,7 +7,7 @@ using System.Net.Http.Json;
 
 namespace Frontend.Services
 {
-    internal class ApiService
+    public class ApiService
     {
 
         private readonly HttpClient _client;
@@ -66,16 +66,28 @@ namespace Frontend.Services
             return res.IsSuccessStatusCode ? await res.Content.ReadFromJsonAsync<ServerDTO>() : null;
         }
 
-        public async Task<bool> JoinServerAsync(JoinServerRequest req)
+        public async Task<bool> JoinServerAsync(JoinOrLeaveServerRequest req)
         {
             var res = await _client.PostAsJsonAsync(Routes.JoinServerRoute, req);
             return res.IsSuccessStatusCode;
         }
 
-        public async Task<bool> LeaveServerAsync(JoinServerRequest req)
+        public async Task<bool> LeaveServerAsync(JoinOrLeaveServerRequest req)
         {
             var res = await _client.PostAsJsonAsync(Routes.LeaveServerRoute, req);
             return res.IsSuccessStatusCode;
+        }
+
+        //test method
+        public async Task<List<ServerDTO>> GetAllServers()
+        {
+            var res = await _client.GetFromJsonAsync<List<ServerDTO>>(Routes.GetAllServersRoute);
+
+            return res ?? new();
+        }
+        public async Task<List<UserDTO>> GetAllUsersExceptMeAsync(string userId)
+        {
+            return await _client.GetFromJsonAsync<List<UserDTO>>($"{Routes.GetAllUsersRoute}/{userId}") ?? new();
         }
 
     }

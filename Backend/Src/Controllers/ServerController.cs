@@ -58,5 +58,13 @@ namespace Backend.Src.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("all")]
+        public async Task<ActionResult<List<ServerDTO>>> GetAllServers()
+        {
+            var servers = await _serverService.GetAllServersAsync();
+
+            return Ok(servers);
+        }
     }
 }

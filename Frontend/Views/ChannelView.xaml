@@ -6,8 +6,8 @@
              xmlns:local="clr-namespace:Frontend.Views"
              mc:Ignorable="d" Height="30" Width="230">
     <Border CornerRadius="5" Background="#232428">
-        <Grid>
-            <TextBlock Text="{Binding Name, StringFormat='# : {0}'}" Foreground="White"></TextBlock>
-        </Grid>
+        <Button Command="{Binding SelectCommand}" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Left" Padding="5">
+            <TextBlock Text="{Binding Name, StringFormat='# : {0}'}" Foreground="White" />
+        </Button>
     </Border>
 </UserControl>
