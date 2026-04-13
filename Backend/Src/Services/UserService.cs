@@ -66,7 +66,7 @@ namespace Backend.Src.Services
             if (!await UsernameExistsAsync(req.Username))
             {
                 string passwordHash = CryptoService.Hash(req.Password);
-                var user = new User() { Username = req.Username, PasswordHash = passwordHash, CreatedAt = DateTime.Now, IsOnline = true };
+                var user = new User() { Username = req.Username, PasswordHash = passwordHash, CreatedAt = DateTime.UtcNow, IsOnline = true };
                 await _users.InsertAsync(user);
                 var userDTO = user.ToDTO();
                 return new() { Success = true, User = userDTO, Message = Messages.UserCreatedSuccess };

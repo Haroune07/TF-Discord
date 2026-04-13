@@ -19,6 +19,16 @@ namespace Backend.Src.Controllers
         [HttpPost("create")]
         public async Task<ActionResult<ServerDTO>> CreateServer(CreateServerRequest req)
         {
+            if (string.IsNullOrWhiteSpace(req.Name))
+            {
+                return BadRequest("Server name is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(req.OwnerId))
+            {
+                return BadRequest("OwnerId is required.");
+            }
+
             var server = await _serverService.CreateServerAsync(req);
             return Ok(server);
         }
@@ -33,6 +43,16 @@ namespace Backend.Src.Controllers
         [HttpPost("join")]
         public async Task<ActionResult> JoinServer(JoinOrLeaveServerRequest req)
         {
+            if (string.IsNullOrWhiteSpace(req.ServerId))
+            {
+                return BadRequest("ServerId is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(req.UserId))
+            {
+                return BadRequest("UserId is required.");
+            }
+
             try 
             {
                 await _serverService.JoinServerAsync(req);
@@ -48,6 +68,16 @@ namespace Backend.Src.Controllers
         public async Task<ActionResult> LeaveServer(JoinOrLeaveServerRequest req) 
         {
             // Note: On réutilise JoinServerRequest car il contient déjà ServerId et UserId
+            if (string.IsNullOrWhiteSpace(req.ServerId))
+            {
+                return BadRequest("ServerId is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(req.UserId))
+            {
+                return BadRequest("UserId is required.");
+            }
+
             try
             {
                 await _serverService.LeaveServer(req);

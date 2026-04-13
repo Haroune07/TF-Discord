@@ -12,8 +12,13 @@ namespace Backend.Src.Repository
 
         public MongoRepository(IMongoClient client, IOptions<MongoDBSettings> options)
         {
-            string collectionName = typeof(T).Name + "s";
+            string collectionName = GetCollectionName();
             collection = client.GetDatabase(options.Value.DatabaseName).GetCollection<T>(collectionName);
+        }
+
+        private static string GetCollectionName()
+        {
+            return typeof(T).Name + "s";
         }
 
         public Task DeleteAsync(string id)
