@@ -27,7 +27,7 @@ namespace Backend.Src.Services
                 Content = req.Content,
                 ChannelId = req.ChannelId,
                 SenderId = req.SenderId,
-                SentAt = DateTime.Now
+                SentAt = DateTime.UtcNow
             };
 
             await _messages.InsertAsync(message);

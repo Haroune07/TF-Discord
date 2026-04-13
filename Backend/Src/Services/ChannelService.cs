@@ -22,7 +22,7 @@ namespace Backend.Src.Services
                 Name = req.Name,
                 ServerId = req.ServerId,
                 Type = ChannelType.Server,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.UtcNow
             };
 
             await _channels.InsertAsync(channel);
@@ -58,7 +58,7 @@ namespace Backend.Src.Services
             var channel = new Channel
             {
                 Type = ChannelType.Direct,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
                 Participants = new List<string> { req.SenderId, req.TargetUserId }
             };
 
