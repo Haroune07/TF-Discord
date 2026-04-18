@@ -13,5 +13,6 @@ namespace Backend.Src.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string OwnerId { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        public string? ServerImageUrl { get; set; }
     }
 }
