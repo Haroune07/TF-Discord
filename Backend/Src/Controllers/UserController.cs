@@ -19,26 +19,4 @@ public class UserController : ControllerBase
         var users = await _userService.GetAllUsersExceptAsync(userId);
         return Ok(users);
     }
-
-    [HttpPut("{userId}/update-pfp")]
-    public async Task<IActionResult> UpdateUserProfilePicture(string userId, [FromBody] string newPfpUrl)
-    {
-        // On appelle le service pour faire le travail logique
-        var success = await _userService.UpdatePfpAsync(userId, newPfpUrl);
-
-        if (!success) return NotFound("Utilisateur non trouvé");
-
-        return NoContent();
-    }
-
-    [HttpPut("{userId}/update-status")]
-    public async Task<IActionResult> UpdateUserStatus(string userId, [FromBody] string newStatus)
-    {
-        // On appelle le service pour faire le travail logique
-        var success = await _userService.UpdateStatusAsync(userId, newStatus);
-
-        if (!success) return NotFound("Utilisateur non trouvé");
-
-        return NoContent();
-    }
 }
