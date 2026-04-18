@@ -25,23 +25,6 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
 
-        <Button 
-            Content="+"
-            Command="{Binding CreateServerCommand}"
-            Width="48" Height="48"
-            Background="#3BA55D"
-            Foreground="White"
-            FontSize="24" FontWeight="Bold"
-            BorderThickness="0"
-            Margin="0,8,0,0"
-            Cursor="Hand">
-            <Button.Resources>
-                <Style TargetType="Border">
-                    <Setter Property="CornerRadius" Value="14"/>
-                </Style>
-            </Button.Resources>
-        </Button>
-
     </StackPanel>
 
 </UserControl>

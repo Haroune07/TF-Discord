@@ -6,6 +6,5 @@
         public string Name { get; set; } = string.Empty;
         public string OwnerId { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
-        public string? ServerImageUrl { get; set; }
     }
 }

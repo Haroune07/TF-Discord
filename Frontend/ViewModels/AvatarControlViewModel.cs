@@ -9,7 +9,7 @@ namespace Frontend.ViewModels
         public string Initials { get; set; } = string.Empty;
         public string? AvatarImage { get; set; }
         public double AvatarOpacity { get; set; }
-        public string OnlineStatus { get; set; }
+        public bool IsOnline { get; set; }
 
         //le userDTO est passé en parametre ca nous permet de reutiliser aillerus (msg, dm, user status)
         public AvatarControlViewModel(UserDTO? user = null)
@@ -21,7 +21,7 @@ namespace Frontend.ViewModels
                 string name = user.Username ?? "??";
                 Initials = name.Length >= 2 ? name.Substring(0, 2).ToUpper() : name.ToUpper();
                 AvatarImage = user.ProfileImageUrl;
-                OnlineStatus = user.OnlineStatus;
+                IsOnline = user.IsOnline;
                 AvatarOpacity = string.IsNullOrEmpty(AvatarImage) ? 0 : 1;
             }
         }
