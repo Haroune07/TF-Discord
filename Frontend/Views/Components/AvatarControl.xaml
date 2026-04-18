@@ -23,17 +23,21 @@
                            Foreground="White"
                            FontSize="12"
                            FontWeight="Bold"/>
+                <Ellipse Width="32" Height="32">
+                    <Ellipse.Fill>
+                        <ImageBrush ImageSource="{Binding AvatarImage, ElementName=Root}" 
+                                    Stretch="UniformToFill" 
+                                    Opacity="{Binding AvatarOpacity, ElementName=Root}"/>
+                    </Ellipse.Fill>
+                </Ellipse>
             </Grid>
         </Border>
 
-        <Ellipse Width="10" Height="10" 
-                 Fill="#23A55A" 
-                 Stroke="#232428" 
-                 StrokeThickness="2"
+        <Image Width="10" Height="10" 
+                 Source="{Binding OnlineStatusImage, ElementName=Root}" 
                  HorizontalAlignment="Right" 
                  VerticalAlignment="Bottom"
                  Margin="0,0,1,1"
-                 Visibility="{Binding IsOnline, ElementName=Root, 
-                              Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                 />
     </Grid>
 </UserControl>

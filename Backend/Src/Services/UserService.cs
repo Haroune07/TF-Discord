@@ -1,11 +1,12 @@
-using MongoDB.Driver;
-using Shared.DTOs.Auth;
+using Backend.Src.Mappers;
 using Backend.Src.Models;
+using Backend.Src.Repository;
+using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using Shared.Constants;
 using Shared.DTOs;
+using Shared.DTOs.Auth;
 using Shared.DTOs.Requests;
-using Backend.Src.Repository;
-using Backend.Src.Mappers;
 namespace Backend.Src.Services
 {
     public class UserService
@@ -66,7 +67,7 @@ namespace Backend.Src.Services
             if (!await UsernameExistsAsync(req.Username))
             {
                 string passwordHash = CryptoService.Hash(req.Password);
-                var user = new User() { Username = req.Username, PasswordHash = passwordHash, CreatedAt = DateTime.UtcNow, IsOnline = true };
+                var user = new User() { Username = req.Username, PasswordHash = passwordHash, CreatedAt = DateTime.UtcNow };
                 await _users.InsertAsync(user);
                 var userDTO = user.ToDTO();
                 return new() { Success = true, User = userDTO, Message = Messages.UserCreatedSuccess };
@@ -87,7 +88,7 @@ namespace Backend.Src.Services
 
                 if (CryptoService.VerifyHash(req.Password, user.PasswordHash))
                 {
-                    user.IsOnline = true;
+                    
                     await _users.UpdateAsync(user.Id, user);
                     return new()
                     {
@@ -104,6 +105,32 @@ namespace Backend.Src.Services
                 Success = false,
                 User = null
             };
+        }
+
+        public async Task<bool> UpdatePfpAsync(string userId, string newPfpUrl)
+        {
+            var user = await _users.GetByIdAsync(userId);
+
+            if (user == null) return false;
+
+            user.ProfileImageUrl = newPfpUrl;
+
+            await _users.UpdateAsync(userId, user);
+
+            return true;
+        }
+
+        public async Task<bool> UpdateStatusAsync(string userId, string newStatus)
+        {
+            var user = await _users.GetByIdAsync(userId);
+
+            if (user == null) return false;
+
+            user.OnlineStatus = newStatus;
+
+            await _users.UpdateAsync(userId, user);
+
+            return true;
         }
     }
 }
