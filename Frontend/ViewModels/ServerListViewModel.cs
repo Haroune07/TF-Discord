@@ -40,7 +40,7 @@ namespace Frontend.ViewModels
                 {
                     OnServerSelected?.Invoke(id);
                     _onServerSelected(id);
-                }));
+                }, s.ServerImageUrl));
             }
         }
 
