@@ -4,6 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Backend.Src.Models
 {
+    [BsonIgnoreExtraElements]
     public class User : IEntity 
     {
         [BsonId]
@@ -12,7 +13,7 @@ namespace Backend.Src.Models
         public string Username { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
         public string? ProfileImageUrl { get; set; }
-        public bool IsOnline { get; set; }
+        public string OnlineStatus { get; set; } = "Offline";
         public DateTime CreatedAt { get; set; }
     }
 }
