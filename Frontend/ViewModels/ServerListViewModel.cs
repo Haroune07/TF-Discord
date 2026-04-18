@@ -1,7 +1,10 @@
-﻿using Frontend.Services;
+﻿using Frontend.Commands;
 using Frontend.Global;
+using Frontend.Services;
 using Frontend.ViewModels.Base;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
+using System.Windows;
 
 namespace Frontend.ViewModels
 {
@@ -11,10 +14,13 @@ namespace Frontend.ViewModels
         private readonly Action<string> _onServerSelected;
         private readonly ApiService _apiService = new();
         public event Action<string>? OnServerSelected;
+        public ICommand CreateServerCommand { get; }
+
         public ServerListViewModel(Action<string> onServerSelected)
         {
             _onServerSelected = onServerSelected;
             Servers = new ObservableCollection<ServerViewModel>();
+            CreateServerCommand = new RelayCommand(OpenCreateServerWindow, () => true);
         }
 
         public async Task LoadServersAsync()
@@ -36,6 +42,16 @@ namespace Frontend.ViewModels
                     _onServerSelected(id);
                 }));
             }
+        }
+
+        private void OpenCreateServerWindow()
+        {
+            var window = new Frontend.Views.CreateServerWindow();
+            window.Owner = Application.Current.MainWindow;
+            bool? result = window.ShowDialog();
+
+            if (result == true)
+                _ = LoadServersAsync();
         }
     }
 }
