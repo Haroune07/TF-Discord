@@ -90,17 +90,21 @@
             <Border Grid.Row="2" Background="#232428" Padding="8,0">
                 <Grid VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
-                        <components:AvatarControl User="{Binding User}" 
+                        <components:AvatarControl DataContext="{Binding CurrentUserAvatar}" Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                           Width="32" Height="32" 
                           Margin="0,0,8,0">
                             <components:AvatarControl.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="Téléverser une image de profile (url)" Command="{Binding UploadAvatarCommand}"/>
+                                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                    <MenuItem Header="Téléverser une image de profil (url)" 
+                      Command="{Binding Path=PlacementTarget.Tag.UploadAvatarCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+
                                     <MenuItem Header="Statut en ligne">
-                                        <MenuItem Header="En ligne" Command="{Binding SetOnlineStatusCommand}" CommandParameter="Online"/>
-                                        <MenuItem Header="Inactif" Command="{Binding SetOnlineStatusCommand}" CommandParameter="Inactif"/>
-                                        <MenuItem Header="Ne pas déranger" Command="{Binding SetOnlineStatusCommand}" CommandParameter="DND"/>
-                                        <MenuItem Header="Invisible" Command="{Binding SetOnlineStatusCommand}" CommandParameter="Offline"/>
+                                        <MenuItem Header="En ligne" 
+                          Command="{Binding Path=PlacementTarget.Tag.SetOnlineStatusCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
+                          CommandParameter="True"/>
+                                        <MenuItem Header="Invisible" 
+                          Command="{Binding Path=PlacementTarget.Tag.SetOnlineStatusCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
+                          CommandParameter="False"/>
                                     </MenuItem>
                                 </ContextMenu>
                             </components:AvatarControl.ContextMenu>
@@ -109,7 +113,7 @@
                         <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
                             <TextBlock Text="{Binding User.Username}" Foreground="White"
                                        FontSize="12" FontWeight="SemiBold"/>
-                            <TextBlock Text="{Binding User.OnlineStatus}" Foreground="#B5BAC1" FontSize="10"/>
+                            <TextBlock Text="{Binding CurrentUserAvatar.OnlineStatusText}" Foreground="#B5BAC1" FontSize="10"/>
                             <TextBlock Text="{Binding MemberSince}" Foreground="#B5BAC1" FontSize="10"/>
                         </StackPanel>
                     </StackPanel>

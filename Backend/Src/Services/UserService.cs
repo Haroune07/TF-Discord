@@ -123,14 +123,22 @@ namespace Backend.Src.Services
         public async Task<bool> UpdateStatusAsync(string userId, string newStatus)
         {
             var user = await _users.GetByIdAsync(userId);
-
             if (user == null) return false;
 
-            user.OnlineStatus = newStatus;
+            // Convertit "True" (envoyé par le XAML/JSON) en booléen pour le modèle User
+            if (bool.TryParse(newStatus, out bool isOnline))
+            {
+                user.IsOnline = isOnline;
+            }
+            else
+            {
+                // Optionnel : gestion si le string est "online"/"offline"
+                user.IsOnline = newStatus.Equals("online", StringComparison.OrdinalIgnoreCase);
+            }
 
             await _users.UpdateAsync(userId, user);
-
             return true;
         }
+
     }
 }
