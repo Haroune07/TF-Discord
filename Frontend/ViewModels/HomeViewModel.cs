@@ -76,40 +76,53 @@ namespace Frontend.ViewModels
                 _main.ServerList.OnServerSelected += (id) => IsDMMode = false;
                 _ = _main.ServerList.LoadServersAsync();
             }
+            CurrentUserAvatar.Refresh();
         }
 
-        private async void SetOnlineStatus(string status)
+        private async void SetOnlineStatus(string parameter)
         {
-            try
+            if (User == null) return;
+
+            await Task.Run(async () =>
             {
-                using (var client = new HttpClient())
+                try
                 {
+                    using var client = new HttpClient();
                     var apiUrl = $"http://localhost:8080/api/user/{User.Id}/update-status";
 
-                    // Cette ligne transforme Online en "Online" (avec guillemets)
-                    // C'est ce que [FromBody] string attend pour ne pas faire d'erreur 400
-                    var jsonStatus = System.Text.Json.JsonSerializer.Serialize(status);
-                    var content = new StringContent(jsonStatus, System.Text.Encoding.UTF8, "application/json");
+                    // L'API attend juste "True" ou "online" entouré de guillemets (format JSON string pur)
+                    // On sérialise juste le string, ce qui donnera "True" (avec les guillemets) dans le body
+                    var json = System.Text.Json.JsonSerializer.Serialize(parameter);
+                    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
+                    System.Diagnostics.Debug.WriteLine($"[TEST] Envoi brut : {json}");
                     var response = await client.PutAsync(apiUrl, content);
 
                     if (response.IsSuccessStatusCode)
                     {
-                        User.OnlineStatus = status;
-                        System.Diagnostics.Debug.WriteLine("[TEST] Statut mis à jour !");
+                        App.Current.Dispatcher.Invoke(() =>
+                        {
+                            User.IsOnline = (parameter == "True");
+                            CurrentUserAvatar?.Refresh();
+                            System.Diagnostics.Debug.WriteLine("[TEST] Succès !");
+                        });
                     }
                     else
                     {
                         var error = await response.Content.ReadAsStringAsync();
-                        System.Diagnostics.Debug.WriteLine($"[TEST] Erreur : {response.StatusCode} - {error}");
+                        System.Diagnostics.Debug.WriteLine($"[TEST] Échec : {response.StatusCode} - {error}");
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"[Erreur] : {ex.Message}");
-            }
+                catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[ERREUR] : {ex.Message}"); }
+            });
         }
+
+
+
+
+
+
+
 
 
 
@@ -133,6 +146,7 @@ namespace Frontend.ViewModels
 
         public async void OpenUrlInputDialog()
         {
+            System.Diagnostics.Debug.WriteLine("[TEST] Ouverture de la fenêtre de saisie d'URL pour l'avatar.");
             var dialog = new UrlInputWindowView();
             dialog.Owner = App.Current.MainWindow;
 
@@ -158,8 +172,14 @@ namespace Frontend.ViewModels
 
                             if (response.IsSuccessStatusCode)
                             {
+                                // 1. Mise à jour de la donnée brute
                                 User.ProfileImageUrl = dialog.Url;
-                                System.Diagnostics.Debug.WriteLine("[TEST] Mise à jour réussie dans l'UI !");
+
+                                // 2. Notification du ViewModel de l'avatar
+                                // C'est cette ligne qui déclenche OnPropertyChanged pour l'image
+                                CurrentUserAvatar?.Refresh();
+
+                                System.Diagnostics.Debug.WriteLine("[TEST] UI rafraîchie !");
                             }
                             else
                             {
