@@ -1,7 +1,10 @@
-﻿using Frontend.Services;
+﻿using Frontend.Commands;
 using Frontend.Global;
+using Frontend.Services;
 using Frontend.ViewModels.Base;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
+using System.Windows;
 
 namespace Frontend.ViewModels
 {
@@ -11,10 +14,13 @@ namespace Frontend.ViewModels
         private readonly Action<string> _onServerSelected;
         private readonly ApiService _apiService = new();
         public event Action<string>? OnServerSelected;
+        public ICommand CreateServerCommand { get; }
+
         public ServerListViewModel(Action<string> onServerSelected)
         {
             _onServerSelected = onServerSelected;
             Servers = new ObservableCollection<ServerViewModel>();
+            CreateServerCommand = new RelayCommand(OpenCreateServerWindow, () => true);
         }
 
         public async Task LoadServersAsync()
@@ -24,18 +30,33 @@ namespace Frontend.ViewModels
             Servers.Clear(); // On vide la liste pour éviter les doublons
 
             var data = await _apiService.GetAllServers();
-            
+
             // on devrait utiliser cette méthode, mais en ce moment on teste
             //var data = await _apiService.GetMyServersAsync(Session.Current.User.Id);
 
             foreach (var s in data)
             {
-                Servers.Add(new ServerViewModel(s.Name, s.Id, (id) =>
-                {
-                    OnServerSelected?.Invoke(id);
-                    _onServerSelected(id);
-                }));
+                Servers.Add(new ServerViewModel(
+                    s.Name, 
+                    s.Id, 
+                    (id) =>
+                    {
+                        OnServerSelected?.Invoke(id);
+                        _onServerSelected(id);
+                    },
+                    s.ServerImageUrl
+                ));
             }
+        }
+
+        private void OpenCreateServerWindow()
+        {
+            var window = new Frontend.Views.CreateServerWindow();
+            window.Owner = Application.Current.MainWindow;
+            bool? result = window.ShowDialog();
+
+            if (result == true)
+                _ = LoadServersAsync();
         }
     }
 }
