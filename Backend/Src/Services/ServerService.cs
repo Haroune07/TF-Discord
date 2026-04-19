@@ -27,7 +27,8 @@ namespace Backend.Src.Services
             {
                 Name = req.Name,
                 OwnerId = req.OwnerId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                ServerImageUrl = req.ServerImageUrl
             };
 
             await _servers.InsertAsync(server);
@@ -97,7 +98,8 @@ namespace Backend.Src.Services
                 Id = server.Id,
                 Name = server.Name,
                 OwnerId = server.OwnerId,
-                CreatedAt = server.CreatedAt
+                CreatedAt = server.CreatedAt,
+                ServerImageUrl = server.ServerImageUrl
             };
         }
 
