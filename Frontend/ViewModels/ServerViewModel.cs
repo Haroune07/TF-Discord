@@ -1,12 +1,5 @@
 ﻿using Frontend.Commands;
-using Frontend.ViewModels;
 using Frontend.ViewModels.Base;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 
 namespace Frontend.ViewModels
@@ -15,12 +8,15 @@ namespace Frontend.ViewModels
     {
         public string Name { get; set; }
         public string Id { get; set; }
+        public string? ServerImageUrl { get; set; }
+        public string Initials => Name.Length >= 2 ? Name.Substring(0, 2).ToUpper() : Name.ToUpper();
         public ICommand SelectCommand { get; }
 
-        public ServerViewModel(string name, string id, Action<string> onSelected)
+        public ServerViewModel(string name, string id, Action<string> onSelected, string? serverImageUrl = null)
         {
             Name = name;
             Id = id;
+            ServerImageUrl = serverImageUrl;
             SelectCommand = new RelayCommand(() => onSelected(Id), () => true);
         }
     }
