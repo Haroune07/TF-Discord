@@ -24,9 +24,10 @@ namespace Frontend.ViewModels
         public bool IsDMMode
         {
             get => _isDMMode;
-            set { 
-                _isDMMode = value; 
-                OnPropertyChanged(); 
+            set
+            {
+                _isDMMode = value;
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(IsServerMode));
                 System.Diagnostics.Debug.WriteLine($"IsDMMode={_isDMMode}, IsServerMode={!_isDMMode}");
             }
@@ -42,6 +43,9 @@ namespace Frontend.ViewModels
         public ICommand? GoToLoginCommand { get; }
         public ICommand? GoToHomeCommand { get; }
 
+        private readonly ChatService _chatService; // déjà présent, s'assurer qu'il est au niveau de la classe
+
+
         public HomeViewModel(MainViewModel main)
         {
             _main = main;
@@ -49,8 +53,8 @@ namespace Frontend.ViewModels
             GoToHomeCommand = new RelayCommand(SwitchToDMMode, () => true);
 
             var apiService = new ApiService();
-            var chatService = new ChatService();
-            ActiveChat = new ChatViewModel(apiService, chatService);
+            _chatService = new ChatService();
+            ActiveChat = new ChatViewModel(apiService, _chatService);
 
             CurrentUserAvatar = new(User);
 
@@ -60,7 +64,7 @@ namespace Frontend.ViewModels
                 await ActiveChat.LoadChannelAsync(channelId);
             });
 
-            _ = chatService.ConnectAsync();
+            _ = _chatService.ConnectAsync();
 
             if (_main?.ChannelList != null)
                 _main.ChannelList.OnChannelSelected += async (id) => await SelectChannelAsync(id);
@@ -78,8 +82,9 @@ namespace Frontend.ViewModels
             _ = UserList.LoadUsersAsync();
         }
 
-        private void Logout()
+        private async void Logout()
         {
+            await _chatService.DisconnectAsync();
             Session.Current.Logout();
             _main!.CurrentViewModel = new LoginViewModel(_main);
         }
