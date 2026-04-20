@@ -361,7 +361,3 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/Backend/Src/Mappers/UserMapper.cs
-/Backend/Src/Models/Server.cs
-/Backend/Src/Models/User.cs
-/Shared/DTOs/UserDTO.cs
