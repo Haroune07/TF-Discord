@@ -7,22 +7,15 @@ namespace Frontend.Views.Components
 {
     public partial class AvatarControl : UserControl
     {
-
-        public class UserDTO
-        {
-            public string Username { get; set; } = string.Empty;
-            public bool IsOnline { get; set; }
-            public string ProfileImageUrl { get; set; } = string.Empty;
-        }
         public static readonly DependencyProperty UserProperty =
-        DependencyProperty.Register(nameof(User), typeof(UserDTO), typeof(AvatarControl),
-            new PropertyMetadata(null));
+            DependencyProperty.Register("User", typeof(UserDTO), typeof(AvatarControl),
+                new PropertyMetadata(null, OnUserChanged));
 
         public static readonly DependencyProperty InitialsProperty =
             DependencyProperty.Register("Initials", typeof(string), typeof(AvatarControl), new PropertyMetadata(""));
 
         public static readonly DependencyProperty OnlineStatusProperty =
-            DependencyProperty.Register("OnlineStatus", typeof(bool), typeof(AvatarControl), new PropertyMetadata(false));
+            DependencyProperty.Register("OnlineStatus", typeof(string), typeof(AvatarControl), new PropertyMetadata("Offline"));
 
         public static readonly DependencyProperty AvatarImageProperty =
             DependencyProperty.Register("AvatarImage", typeof(Uri), typeof(AvatarControl), new PropertyMetadata(null));
@@ -46,9 +39,9 @@ namespace Frontend.Views.Components
             set => SetValue(InitialsProperty, value);
         }
 
-        public bool OnlineStatus
+        public string OnlineStatus
         {
-            get => (bool)GetValue(OnlineStatusProperty);
+            get => (string)GetValue(OnlineStatusProperty);
             set => SetValue(OnlineStatusProperty, value);
         }
 
@@ -79,10 +72,16 @@ namespace Frontend.Views.Components
         {
             if (User == null) return;
 
+            
+            string status = User.OnlineStatus?.ToLower() ?? "offline";
 
-            string status = User.IsOnline ? "/Static/Images/online.png" : "/Static/Images/invisible.png";
-
-            OnlineStatusImage = status;
+            OnlineStatusImage = status switch
+            {
+                "online" => "/Static/Images/online.png",
+                "inactif" => "/Static/Images/idle.png",
+                "dnd" => "/Static/Images/DND.png",
+                _ => string.Empty
+            };
         }
 
         private void UpdateDisplay(UserDTO user)
@@ -91,7 +90,7 @@ namespace Frontend.Views.Components
 
             string name = user.Username ?? "??";
             Initials = name.Length >= 2 ? name.Substring(0, 2).ToUpper() : name.ToUpper();
-            OnlineStatus = user.IsOnline;
+            OnlineStatus = user.OnlineStatus;
 
             if (!string.IsNullOrEmpty(user.ProfileImageUrl))
             {
@@ -108,7 +107,7 @@ namespace Frontend.Views.Components
 
         private void OnUserPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(UserDTO.IsOnline))
+            if (e.PropertyName == nameof(UserDTO.OnlineStatus))
             {
                 // On met à jour le texte ET l'image .png
                 UpdateDisplay(User);
@@ -120,8 +119,28 @@ namespace Frontend.Views.Components
             }
         }
 
+        private static void OnUserChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var control = (AvatarControl)d;
 
+           
+            if (e.OldValue is UserDTO oldUser)
+            {
+                oldUser.PropertyChanged -= control.OnUserPropertyChanged;
+            }
 
-        
+            if (e.NewValue is UserDTO newUser)
+            {
+                // S'abonner au nouvel utilisateur
+                newUser.PropertyChanged += control.OnUserPropertyChanged;
+                control.UpdateDisplay(newUser);
+                control.UpdateOnlineStatusImage();
+                
+            }
+            else
+            {
+                control.AvatarImage = null;
+            }
+        }
     }
 }
