@@ -3,8 +3,8 @@ using Frontend.Global;
 using Frontend.Services;
 using Frontend.ViewModels.Base;
 using System.Collections.ObjectModel;
-using System.Windows.Input;
 using System.Windows;
+using System.Windows.Input;
 
 namespace Frontend.ViewModels
 {
@@ -37,8 +37,8 @@ namespace Frontend.ViewModels
             foreach (var s in data)
             {
                 Servers.Add(new ServerViewModel(
-                    s.Name, 
-                    s.Id, 
+                    s.Name,
+                    s.Id,
                     (id) =>
                     {
                         OnServerSelected?.Invoke(id);

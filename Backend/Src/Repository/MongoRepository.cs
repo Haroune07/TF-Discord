@@ -23,7 +23,7 @@ namespace Backend.Src.Repository
 
         public Task DeleteAsync(string id)
         {
-             return collection.DeleteOneAsync(t => t.Id == id);
+            return collection.DeleteOneAsync(t => t.Id == id);
         }
 
         public async Task<List<T>> FindAsync(Expression<Func<T, bool>> filter)

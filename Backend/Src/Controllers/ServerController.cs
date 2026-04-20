@@ -53,7 +53,7 @@ namespace Backend.Src.Controllers
                 return BadRequest("UserId is required.");
             }
 
-            try 
+            try
             {
                 await _serverService.JoinServerAsync(req);
                 return Ok();
@@ -65,7 +65,7 @@ namespace Backend.Src.Controllers
         }
 
         [HttpPost("leave")]
-        public async Task<ActionResult> LeaveServer(JoinOrLeaveServerRequest req) 
+        public async Task<ActionResult> LeaveServer(JoinOrLeaveServerRequest req)
         {
             // Note: On réutilise JoinServerRequest car il contient déjà ServerId et UserId
             if (string.IsNullOrWhiteSpace(req.ServerId))

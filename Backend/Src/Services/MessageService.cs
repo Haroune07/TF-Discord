@@ -1,11 +1,8 @@
+using Backend.Src.Mappers;
 using Backend.Src.Models;
 using Backend.Src.Repository;
-using Shared.DTOs.Requests;
 using Shared.DTOs;
-using System.Collections.Generic;
-using System.Linq;
-using Backend.Src.Mappers;
-using System.Threading.Tasks;
+using Shared.DTOs.Requests;
 
 namespace Backend.Src.Services
 {

@@ -1,5 +1,4 @@
 ﻿using Backend.Src.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared.DTOs.Auth;
 using Shared.DTOs.Requests;

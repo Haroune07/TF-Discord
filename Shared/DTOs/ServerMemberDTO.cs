@@ -1,5 +1,4 @@
 ﻿using Shared.Enums;
-using System;
 
 namespace Shared.DTOs
 {

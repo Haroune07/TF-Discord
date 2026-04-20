@@ -16,7 +16,7 @@ namespace Frontend.Views
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            if(this.DataContext is RegisterViewModel)
+            if (this.DataContext is RegisterViewModel)
             {
                 ((RegisterViewModel)DataContext).Password = ((PasswordBox)sender).Password;
             }
