@@ -17,7 +17,7 @@
         <Border CornerRadius="20" ClipToBounds="True">
             <Grid>
                 <Ellipse Fill="#5865F2"/>
-                <TextBlock Text="{Binding Initials, TargetNullValue={x:Null}, FallbackValue={x:Null}}" 
+                <TextBlock Text="{Binding Initials, ElementName=Root}" 
                            VerticalAlignment="Center" 
                            HorizontalAlignment="Center" 
                            Foreground="White"
@@ -25,7 +25,7 @@
                            FontWeight="Bold"/>
                 <Ellipse Width="32" Height="32">
                     <Ellipse.Fill>
-                        <ImageBrush ImageSource="{Binding AvatarImage, TargetNullValue={x:Null}, FallbackValue={x:Null}}" 
+                        <ImageBrush ImageSource="{Binding AvatarImage, ElementName=Root}" 
                                     Stretch="UniformToFill" 
                                     Opacity="{Binding AvatarOpacity, ElementName=Root}"/>
                     </Ellipse.Fill>
@@ -33,21 +33,11 @@
             </Grid>
         </Border>
 
-        <Grid Width="10" Height="10" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,1,1">
-            <Image Source="/Static/Images/invisible.png" />
-            <Image Source="/Static/Images/online.png">
-                <Image.Style>
-                    <Style TargetType="Image">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                            <!-- On binde sur le booléen IsOnline du ViewModel -->
-                            <DataTrigger Binding="{Binding IsOnline, FallbackValue=False}" Value="True">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Image.Style>
-            </Image>
-        </Grid>
+        <Image Width="10" Height="10" 
+                 Source="{Binding OnlineStatusImage, ElementName=Root}" 
+                 HorizontalAlignment="Right" 
+                 VerticalAlignment="Bottom"
+                 Margin="0,0,1,1"
+                 />
     </Grid>
 </UserControl>
