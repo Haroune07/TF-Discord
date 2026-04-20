@@ -105,5 +105,35 @@ namespace Backend.Src.Services
                 User = null
             };
         }
+        // Recherche de Users (case-insensitive)
+        public async Task<List<UserDTO>> SearchUsersAsync(string username)
+        {
+            var users = await _users.FindAsync(u => u.Username.ToLower().Contains(username.ToLower()));
+            return users.Select(u => u.ToDTO()!).ToList();
+        }
+
+        //GET BY ID
+        public async Task<UserDTO?> GetByIdAsync(string id)
+        {
+            var user = await _users.GetByIdAsync(id);
+            if (user == null)
+                return null;
+            return user?.ToDTO();
+
+        }
+
+        //UPDATE USER ONLINE STATUS
+        public async Task<bool> UpdateOnlineStatusAsync(string userId, bool isOnline)
+        {
+            var user = await _users.GetByIdAsync(userId);
+            if (user == null)
+                return false;
+            user.IsOnline = isOnline;
+
+            await _users.UpdateAsync(user.Id, user);
+            return true;
+
+
+        }
     }
 }
