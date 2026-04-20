@@ -14,12 +14,14 @@
     <None Remove="Static\Images\DND.png" />
     <None Remove="Static\Images\home_button_image.png" />
     <None Remove="Static\Images\idle.png" />
+    <None Remove="Static\Images\invisible.png" />
     <None Remove="Static\Images\online.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Static\Images\DND.png" />
     <Resource Include="Static\Images\idle.png" />
+    <Resource Include="Static\Images\invisible.png" />
     <Resource Include="Static\Images\logoutlogo.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
