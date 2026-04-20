@@ -18,7 +18,7 @@ namespace Frontend.Global
 
                 return _session;
             }
-        } 
+        }
 
         private Session() { }
         public UserDTO? User { get; private set; }

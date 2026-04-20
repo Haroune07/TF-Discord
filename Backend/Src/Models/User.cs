@@ -5,7 +5,7 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace Backend.Src.Models
 {
     [BsonIgnoreExtraElements]
-    public class User : IEntity 
+    public class User : IEntity
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]

@@ -1,11 +1,11 @@
-using MongoDB.Driver;
-using Shared.DTOs.Auth;
+using Backend.Src.Mappers;
 using Backend.Src.Models;
+using Backend.Src.Repository;
+using MongoDB.Driver;
 using Shared.Constants;
 using Shared.DTOs;
+using Shared.DTOs.Auth;
 using Shared.DTOs.Requests;
-using Backend.Src.Repository;
-using Backend.Src.Mappers;
 namespace Backend.Src.Services
 {
     public class UserService

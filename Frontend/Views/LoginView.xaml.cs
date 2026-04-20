@@ -1,6 +1,6 @@
-﻿using System.Windows;
+﻿using Frontend.ViewModels;
+using System.Windows;
 using System.Windows.Controls;
-using Frontend.ViewModels;
 
 namespace Frontend.Views
 {

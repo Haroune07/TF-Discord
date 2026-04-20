@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using Frontend.ViewModels;
 
 namespace Frontend
 {
@@ -16,4 +15,3 @@ namespace Frontend
     }
 }
 
-    

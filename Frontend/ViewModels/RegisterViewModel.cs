@@ -60,7 +60,7 @@ namespace Frontend.ViewModels
         public async void Register()
         {
             ErrorMessage = "";
-            var res = await _apiService.RegisterUserAsync(new() { Password = _password, Username = _username});
+            var res = await _apiService.RegisterUserAsync(new() { Password = _password, Username = _username });
 
             if (res.Success && res.User != null)
             {
@@ -69,7 +69,8 @@ namespace Frontend.ViewModels
                 _main.CurrentViewModel = new HomeViewModel(_main);
             }
             // Yassine
-            else {
+            else
+            {
                 ErrorMessage = res.Message;
             }
             // End

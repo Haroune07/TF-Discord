@@ -3,7 +3,7 @@ using Shared.DTOs;
 
 namespace Backend.Src.Hubs
 {
-    
+
     public class ChatHub : Hub
     {
 

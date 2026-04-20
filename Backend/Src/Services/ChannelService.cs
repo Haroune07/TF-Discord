@@ -1,8 +1,8 @@
 using Backend.Src.Models;
 using Backend.Src.Repository;
+using Shared.DTOs;
 using Shared.DTOs.Requests;
 using Shared.Enums;
-using Shared.DTOs;
 
 namespace Backend.Src.Services
 {

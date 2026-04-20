@@ -2,8 +2,6 @@ using Backend.Src.Models;
 using Backend.Src.Services;
 using Microsoft.AspNetCore.Mvc;
 using Shared.DTOs.Requests;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Backend.Src.Controllers
 {
