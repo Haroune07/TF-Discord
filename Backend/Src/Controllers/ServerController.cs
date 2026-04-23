@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Shared.DTOs;
 using Shared.DTOs.Requests;
+using Shared.Enums;
 
 namespace Backend.Src.Controllers
 {
@@ -96,5 +97,52 @@ namespace Backend.Src.Controllers
 
             return Ok(servers);
         }
+
+        [HttpGet("{serverId}/members")]
+        public async Task<ActionResult<List<ServerMemberDTO>>> GetMembers(string serverId)
+        {
+            try {
+                var members = await _serverService.GetServerMembersAsync(serverId);
+                return Ok(members);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+
+        }
+
+        [HttpDelete("{serverId}/members/{userId}")]
+        public async Task<ActionResult> KickMember(string serverId, string userId, [FromQuery] string requesterId)
+        {
+            try
+            {
+                var success = await _serverService.KickMemberAsync(serverId, requesterId, userId);
+                return success ? Ok() : Forbid();
+            }
+            catch (Exception ex) {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPatch("{serverId}/members/{userId}/role")]
+        public async Task<ActionResult> UpdateRole(string serverId, string userId, [FromQuery] string requesterId, [FromBody] MemberRole newRole)
+        {
+            try
+            {
+                var success = await _serverService.UpdateMemberRoleAsync(serverId, requesterId, userId, newRole);
+                return success ? Ok() : Forbid();
+            }
+
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
+
+
+
     }
 }
