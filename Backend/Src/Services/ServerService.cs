@@ -10,13 +10,16 @@ namespace Backend.Src.Services
     {
         private readonly IRepository<Server> _servers;
         private readonly IRepository<ServerMember> _members;
+        private readonly IRepository<User> _users;
 
         public ServerService(
             IRepository<Server> servers,
-            IRepository<ServerMember> members)
+            IRepository<ServerMember> members,
+            IRepository<User> users)
         {
             _servers = servers;
             _members = members;
+            _users = users;
         }
 
         public async Task<ServerDTO> CreateServerAsync(CreateServerRequest req)
@@ -107,5 +110,80 @@ namespace Backend.Src.Services
         {
             return (await _servers.GetAllAsync()).Select(MapToDTO).ToList();
         }
+
+        public async Task<List<ServerMemberDTO>> GetServerMembersAsync(string serverId) 
+        {
+            var members = await _members.FindAsync(member => member.ServerId == serverId);
+
+            var serverMembers = new List<ServerMemberDTO>();
+            foreach (var member in members) {
+                
+                var user = await _users.GetByIdAsync(member.UserId);
+                if (user is null) continue;
+
+                serverMembers.Add(new ServerMemberDTO
+                {
+                    Id = member.Id,
+                    ServerId = member.ServerId,
+                    Role = member.Role,
+                    JoinedAt = member.JoinedAt,
+                    User = new UserDTO
+                    {
+                        Id = user.Id,
+                        Username = user.Username,
+                        IsOnline = user.IsOnline,
+                        CreatedAt = user.CreatedAt,
+                        ProfileImageUrl = user.ProfileImageUrl
+                    }
+                });
+
+            }
+
+            return serverMembers;
+
+        }
+
+        private async Task<ServerMember?> GetMemberAsync(string serverId, string userId)
+        {
+            var matches = await _members.FindAsync(m => m.ServerId == serverId && m.UserId == userId);
+            return matches.FirstOrDefault();
+        }
+
+
+        public async Task<bool> UpdateMemberRoleAsync(UpdateMemberRoleRequest req)
+        {
+            var requester = await GetMemberAsync(req.ServerId, req.RequesterId);
+
+            if (requester is null || requester.Role == MemberRole.Member) return false;
+
+            var targetUser = await GetMemberAsync(req.ServerId, req.TargetUserId);
+
+            if (targetUser is null) return false;
+
+            if (targetUser.Role == MemberRole.Owner) return false;
+
+            targetUser.Role = req.NewRole;
+            await _members.UpdateAsync(targetUser.Id, targetUser);
+            return true;
+
+        }
+
+
+        public async Task<bool> KickMemberAsync(KickMemberRequest req)
+        {
+
+            var requester = await GetMemberAsync(req.ServerId, req.RequesterId);
+            if (requester is null || requester.Role != MemberRole.Owner || requester.Role != MemberRole.Admin) return false;
+
+            var targetUser = await GetMemberAsync(req.ServerId, req.TargetUserId);
+            if (targetUser is null) return false;
+
+            if (requester.Role == MemberRole.Admin && targetUser.Role != MemberRole.Member) return false;
+
+            await _members.DeleteAsync(targetUser.Id);
+            return true;
+
+        }
+
     }
 }

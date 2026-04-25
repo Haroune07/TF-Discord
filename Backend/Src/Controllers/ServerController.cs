@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Shared.DTOs;
 using Shared.DTOs.Requests;
+using Shared.Enums;
 
 namespace Backend.Src.Controllers
 {
@@ -96,5 +97,52 @@ namespace Backend.Src.Controllers
 
             return Ok(servers);
         }
+
+        [HttpGet("{serverId}/members")]
+        public async Task<ActionResult<List<ServerMemberDTO>>> GetMembers(string serverId)
+        {
+            try {
+                var members = await _serverService.GetServerMembersAsync(serverId);
+                return Ok(members);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+
+        }
+
+        [HttpDelete("members/kick")]
+        public async Task<ActionResult> KickMember([FromBody] KickMemberRequest req)
+        {
+            try
+            {
+                var success = await _serverService.KickMemberAsync(req);
+                return success ? Ok() : Forbid();
+            }
+            catch (Exception ex) {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPatch("members/role")]
+        public async Task<ActionResult> UpdateRole([FromBody] UpdateMemberRoleRequest req)
+        {
+            try
+            {
+                var success = await _serverService.UpdateMemberRoleAsync(req);
+                return success ? Ok() : Forbid();
+            }
+
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
+
+
+
     }
 }
