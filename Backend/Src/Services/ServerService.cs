@@ -150,13 +150,13 @@ namespace Backend.Src.Services
         }
 
 
-        public async Task<bool> UpdateMemberRoleAsync(string serverId, string targetUserId, UpdateMemberRoleRequest req)
+        public async Task<bool> UpdateMemberRoleAsync(UpdateMemberRoleRequest req)
         {
-            var requester = await GetMemberAsync(serverId, req.RequesterId);
+            var requester = await GetMemberAsync(req.ServerId, req.RequesterId);
 
             if (requester is null || requester.Role == MemberRole.Member) return false;
 
-            var targetUser = await GetMemberAsync(serverId, targetUserId);
+            var targetUser = await GetMemberAsync(req.ServerId, req.TargetUserId);
 
             if (targetUser is null) return false;
 
@@ -169,13 +169,13 @@ namespace Backend.Src.Services
         }
 
 
-        public async Task<bool> KickMemberAsync(string serverId, string targetUserId, KickMemberRequest req)
+        public async Task<bool> KickMemberAsync(KickMemberRequest req)
         {
 
-            var requester = await GetMemberAsync(serverId, req.RequesterId);
+            var requester = await GetMemberAsync(req.ServerId, req.RequesterId);
             if (requester is null || requester.Role != MemberRole.Owner || requester.Role != MemberRole.Admin) return false;
 
-            var targetUser = await GetMemberAsync(serverId, targetUserId);
+            var targetUser = await GetMemberAsync(req.ServerId, req.TargetUserId);
             if (targetUser is null) return false;
 
             if (requester.Role == MemberRole.Admin && targetUser.Role != MemberRole.Member) return false;

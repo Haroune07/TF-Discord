@@ -113,12 +113,12 @@ namespace Backend.Src.Controllers
 
         }
 
-        [HttpDelete("{serverId}/members/{userId}")]
-        public async Task<ActionResult> KickMember(string serverId, string userId,[FromBody] KickMemberRequest req)
+        [HttpDelete("members/kick")]
+        public async Task<ActionResult> KickMember([FromBody] KickMemberRequest req)
         {
             try
             {
-                var success = await _serverService.KickMemberAsync(serverId, userId, req);
+                var success = await _serverService.KickMemberAsync(req);
                 return success ? Ok() : Forbid();
             }
             catch (Exception ex) {
@@ -126,12 +126,12 @@ namespace Backend.Src.Controllers
             }
         }
 
-        [HttpPatch("{serverId}/members/{userId}/role")]
-        public async Task<ActionResult> UpdateRole(string serverId, string userId, [FromBody] UpdateMemberRoleRequest req)
+        [HttpPatch("members/role")]
+        public async Task<ActionResult> UpdateRole([FromBody] UpdateMemberRoleRequest req)
         {
             try
             {
-                var success = await _serverService.UpdateMemberRoleAsync(serverId, userId, req);
+                var success = await _serverService.UpdateMemberRoleAsync(req);
                 return success ? Ok() : Forbid();
             }
 
