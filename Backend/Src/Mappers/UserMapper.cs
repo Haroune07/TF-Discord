@@ -13,6 +13,7 @@ namespace Backend.Src.Mappers
             {
                 Id = user.Id,
                 Username = user.Username,
+                PhoneNumber = user.PhoneNumber,
                 IsOnline = user.IsOnline,
                 CreatedAt = user.CreatedAt,
                 ProfileImageUrl = user.ProfileImageUrl
