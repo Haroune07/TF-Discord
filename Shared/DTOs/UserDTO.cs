@@ -5,6 +5,7 @@ namespace Shared.DTOs
     {
         public string Id { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
+        public string? PhoneNumber { get; set; }
         public bool IsOnline { get; set; }
         public DateTime CreatedAt { get; set; }
         public string? ProfileImageUrl { get; set; }

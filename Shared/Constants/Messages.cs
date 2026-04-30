@@ -9,6 +9,7 @@ namespace Shared.Constants
         public const string InvalidUsernameOrPassowrd = "Nom d'utilisateur ou mot de passe Invalide.";
         public const string LoginSuccess = "Login avec succès.";
         public const string InvalidPasswordLength = "Le mot de passe doit contenir au moins 6 caractères.";
+        public const string PasswordMismatch = "Les mots de passe ne correspondent pas.";
         public const string InvalidUsernameLength = "Le nom d'utilisateur ne doit pas dépasser 20 caractères.";
 
         public const string ServerCreatedSuccess = "Serveur créé avec succès.";
