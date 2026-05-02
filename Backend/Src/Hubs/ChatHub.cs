@@ -3,10 +3,8 @@ using Shared.DTOs;
 
 namespace Backend.Src.Hubs
 {
-
     public class ChatHub : Hub
     {
-
         public async Task JoinChannel(string channelId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, channelId);
@@ -22,6 +20,16 @@ namespace Backend.Src.Hubs
             await Clients.OthersInGroup(messageDTO.ChannelId).SendAsync("ReceiveMessage", messageDTO);
         }
 
+        public async Task EditMessage(MessageDTO messageDTO)
+        {
+            await Clients.OthersInGroup(messageDTO.ChannelId).SendAsync("MessageEdited", messageDTO);
+        }
+
+        public async Task DeleteMessage(string channelId, string messageId)
+        {
+            await Clients.OthersInGroup(channelId).SendAsync("MessageDeleted", messageId);
+        }
+
         public async Task TypingStarted(string channelId, string username)
         {
             await Clients.OthersInGroup(channelId).SendAsync("UserTyping", username);
@@ -31,6 +39,5 @@ namespace Backend.Src.Hubs
         {
             await Clients.OthersInGroup(channelId).SendAsync("UserStoppedTyping", username);
         }
-
     }
 }

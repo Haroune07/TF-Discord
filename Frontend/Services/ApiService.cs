@@ -55,6 +55,22 @@ namespace Frontend.Services
             return res.IsSuccessStatusCode ? await res.Content.ReadFromJsonAsync<MessageDTO>() : null;
         }
 
+        public async Task<MessageDTO?> EditMessageAsync(string messageId, EditMessageRequest req)
+        {
+            var res = await _client.PatchAsJsonAsync($"{Routes.EditMessageRoute}/{messageId}", req);
+            return res.IsSuccessStatusCode ? await res.Content.ReadFromJsonAsync<MessageDTO>() : null;
+        }
+
+        public async Task<bool> DeleteMessageAsync(string messageId, string requesterId)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"{Routes.DeleteMessageRoute}/{messageId}")
+            {
+                Content = JsonContent.Create(new DeleteMessageRequest { RequesterId = requesterId })
+            };
+            var res = await _client.SendAsync(request);
+            return res.IsSuccessStatusCode;
+        }
+
         public async Task<List<ServerDTO>> GetMyServersAsync(string userId)
         {
             return await _client.GetFromJsonAsync<List<ServerDTO>>($"{Routes.GetMyServersRoute}/{userId}") ?? new();
@@ -85,6 +101,7 @@ namespace Frontend.Services
 
             return res ?? new();
         }
+
         public async Task<List<UserDTO>> GetAllUsersExceptMeAsync(string userId)
         {
             return await _client.GetFromJsonAsync<List<UserDTO>>($"{Routes.GetAllUsersRoute}/{userId}") ?? new();
