@@ -1,4 +1,4 @@
-﻿using Frontend.Commands;
+using Frontend.Commands;
 using Frontend.Global;
 using Frontend.Services;
 using Frontend.ViewModels.Base;
@@ -32,9 +32,21 @@ namespace Frontend.ViewModels
             set { _typingText = value; OnPropertyChanged(); }
         }
 
+        // Edit state
+        private MessageDTO? _editingMessage;
+        public MessageDTO? EditingMessage
+        {
+            get => _editingMessage;
+            set { _editingMessage = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsEditing)); }
+        }
+        public bool IsEditing => _editingMessage != null;
+
         private CancellationTokenSource? _typingCTS;
 
         public ICommand SendMessageCommand { get; }
+        public ICommand EditMessageCommand { get; }
+        public ICommand DeleteMessageCommand { get; }
+        public ICommand CancelEditCommand { get; }
 
         public ChatViewModel(ApiService apiService, ChatService chatService)
         {
@@ -42,6 +54,9 @@ namespace Frontend.ViewModels
             _chatService = chatService;
 
             SendMessageCommand = new RelayCommand(SendMessage, CanSendMessage);
+            EditMessageCommand = new RelayCommand<MessageDTO>(StartEdit, msg => msg?.Sender?.Id == Session.Current.User?.Id);
+            DeleteMessageCommand = new RelayCommand<MessageDTO>(async msg => await DeleteMessageAsync(msg!), msg => msg?.Sender?.Id == Session.Current.User?.Id);
+            CancelEditCommand = new RelayCommand(CancelEdit, () => true);
 
             _chatService.MessageReceived += OnMessageReceived;
             _chatService.UserTyping += OnOtherUserTyping;
@@ -57,22 +72,39 @@ namespace Frontend.ViewModels
 
             _currentChannelId = channelId;
             Messages.Clear();
+            CancelEdit();
 
             var history = await _apiService.GetMessagesAsync(channelId);
             foreach (var msg in history)
-            {
                 Messages.Add(msg);
-            }
 
-            //rejoindre le groupe SignalR pour le temps réel
             await _chatService.JoinChannelAsync(channelId);
+        }
+
+        private void StartEdit(MessageDTO? msg)
+        {
+            if (msg == null) return;
+            EditingMessage = msg;
+            InputText = msg.Content;
+        }
+
+        private void CancelEdit()
+        {
+            EditingMessage = null;
+            InputText = string.Empty;
         }
 
         private async void SendMessage()
         {
             string content = InputText;
-            InputText = string.Empty;
 
+            if (IsEditing)
+            {
+                await ConfirmEditAsync(content);
+                return;
+            }
+
+            InputText = string.Empty;
             if (string.IsNullOrEmpty(_currentChannelId)) return;
 
             var req = new CreateMessageRequest
@@ -85,8 +117,41 @@ namespace Frontend.ViewModels
 
             if (savedMessage != null)
             {
-                // On broadcast le message sauvegardé (avec le vrai sender du backend)
+                Application.Current.Dispatcher.Invoke(() => Messages.Add(savedMessage));
                 await _chatService.BroadcastMessageAsync(savedMessage);
+            }
+        }
+
+        private async Task ConfirmEditAsync(string newContent)
+        {
+            if (EditingMessage == null) return;
+
+            var updated = await _apiService.EditMessageAsync(EditingMessage.Id, new EditMessageRequest
+            {
+                RequesterId = Session.Current.User!.Id,
+                NewContent = newContent
+            });
+
+            if (updated != null)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var index = Messages.IndexOf(EditingMessage);
+                    if (index >= 0)
+                        Messages[index] = updated;
+                });
+            }
+
+            CancelEdit();
+        }
+
+        private async Task DeleteMessageAsync(MessageDTO msg)
+        {
+            var success = await _apiService.DeleteMessageAsync(msg.Id, Session.Current.User!.Id);
+
+            if (success)
+            {
+                Application.Current.Dispatcher.Invoke(() => Messages.Remove(msg));
             }
         }
 
@@ -97,9 +162,7 @@ namespace Frontend.ViewModels
             Application.Current.Dispatcher.Invoke(() =>
             {
                 if (msg.ChannelId == _currentChannelId)
-                {
                     Messages.Add(msg);
-                }
             });
         }
 

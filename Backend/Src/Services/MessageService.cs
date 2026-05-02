@@ -37,7 +37,7 @@ namespace Backend.Src.Services
                 Content = message.Content,
                 ChannelId = message.ChannelId,
                 SentAt = message.SentAt,
-                Sender = sender == null ? new UserDTO { Id = message.SenderId } : sender.ToDTO()
+                Sender = sender == null ? new UserDTO { Id = message.SenderId } : sender.ToDTO()!
             };
         }
 
@@ -60,10 +60,38 @@ namespace Backend.Src.Services
                         Content = m.Content,
                         ChannelId = m.ChannelId,
                         SentAt = m.SentAt,
-                        Sender = sender == null ? new UserDTO { Id = m.SenderId } : sender.ToDTO()
+                        Sender = sender == null ? new UserDTO { Id = m.SenderId } : sender.ToDTO()!
                     };
                 })
                 .ToList();
+        }
+
+        public async Task<MessageDTO?> EditMessageAsync(string messageId, string requesterId, string newContent)
+        {
+            var message = await _messages.GetByIdAsync(messageId);
+            if (message == null || message.SenderId != requesterId) return null;
+
+            message.Content = newContent;
+            await _messages.UpdateAsync(messageId, message);
+
+            var sender = await _users.GetByIdAsync(message.SenderId);
+            return new MessageDTO
+            {
+                Id = message.Id,
+                Content = message.Content,
+                ChannelId = message.ChannelId,
+                SentAt = message.SentAt,
+                Sender = sender == null ? new UserDTO { Id = message.SenderId } : sender.ToDTO()!
+            };
+        }
+
+        public async Task<bool> DeleteMessageAsync(string messageId, string requesterId)
+        {
+            var message = await _messages.GetByIdAsync(messageId);
+            if (message == null || message.SenderId != requesterId) return false;
+
+            await _messages.DeleteAsync(messageId);
+            return true;
         }
     }
 }
