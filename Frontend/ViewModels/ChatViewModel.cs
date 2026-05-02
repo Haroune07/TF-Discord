@@ -10,13 +10,44 @@ using System.Windows.Input;
 
 namespace Frontend.ViewModels
 {
+    public class MessageItemViewModel : BaseViewModel
+    {
+        private MessageDTO _message;
+        public MessageDTO Message 
+        {
+            get => _message;
+            set { _message = value; OnPropertyChanged(); OnPropertyChanged(nameof(FormattedDate)); }
+        }
+
+        public bool IsOwnMessage => Message.Sender?.Id == Session.Current.User?.Id;
+
+        public string FormattedDate
+        {
+            get
+            {
+                var localTime = Message.SentAt.ToLocalTime();
+                var now = DateTime.Now;
+                if (localTime.Date == now.Date)
+                    return $"Aujourd'hui à {localTime:HH:mm}";
+                if (localTime.Date == now.AddDays(-1).Date)
+                    return $"Hier à {localTime:HH:mm}";
+                return $"Le {localTime:dd/MM/yyyy} à {localTime:HH:mm}";
+            }
+        }
+
+        public MessageItemViewModel(MessageDTO message)
+        {
+            _message = message;
+        }
+    }
+
     public class ChatViewModel : BaseViewModel
     {
         private readonly ApiService _apiService;
         private readonly ChatService _chatService;
         private string? _currentChannelId;
 
-        public ObservableCollection<MessageDTO> Messages { get; } = new();
+        public ObservableCollection<MessageItemViewModel> Messages { get; } = new();
 
         private string _inputText = string.Empty;
         public string InputText
@@ -33,8 +64,8 @@ namespace Frontend.ViewModels
         }
 
         // Edit state
-        private MessageDTO? _editingMessage;
-        public MessageDTO? EditingMessage
+        private MessageItemViewModel? _editingMessage;
+        public MessageItemViewModel? EditingMessage
         {
             get => _editingMessage;
             set { _editingMessage = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsEditing)); }
@@ -54,11 +85,13 @@ namespace Frontend.ViewModels
             _chatService = chatService;
 
             SendMessageCommand = new RelayCommand(SendMessage, CanSendMessage);
-            EditMessageCommand = new RelayCommand<MessageDTO>(StartEdit, msg => msg?.Sender?.Id == Session.Current.User?.Id);
-            DeleteMessageCommand = new RelayCommand<MessageDTO>(async msg => await DeleteMessageAsync(msg!), msg => msg?.Sender?.Id == Session.Current.User?.Id);
+            EditMessageCommand = new RelayCommand<MessageItemViewModel>(StartEdit, msg => msg?.IsOwnMessage == true);
+            DeleteMessageCommand = new RelayCommand<MessageItemViewModel>(async msg => await DeleteMessageAsync(msg!), msg => msg?.IsOwnMessage == true);
             CancelEditCommand = new RelayCommand(CancelEdit, () => true);
 
             _chatService.MessageReceived += OnMessageReceived;
+            _chatService.MessageEdited += OnMessageEdited;
+            _chatService.MessageDeleted += OnMessageDeleted;
             _chatService.UserTyping += OnOtherUserTyping;
             _chatService.UserStoppedTyping += OnOtherUserStoppedTyping;
         }
@@ -76,16 +109,16 @@ namespace Frontend.ViewModels
 
             var history = await _apiService.GetMessagesAsync(channelId);
             foreach (var msg in history)
-                Messages.Add(msg);
+                Messages.Add(new MessageItemViewModel(msg));
 
             await _chatService.JoinChannelAsync(channelId);
         }
 
-        private void StartEdit(MessageDTO? msg)
+        private void StartEdit(MessageItemViewModel? msg)
         {
             if (msg == null) return;
             EditingMessage = msg;
-            InputText = msg.Content;
+            InputText = msg.Message.Content;
         }
 
         private void CancelEdit()
@@ -96,29 +129,36 @@ namespace Frontend.ViewModels
 
         private async void SendMessage()
         {
-            string content = InputText;
-
-            if (IsEditing)
+            try
             {
-                await ConfirmEditAsync(content);
-                return;
+                string content = InputText;
+
+                if (IsEditing)
+                {
+                    await ConfirmEditAsync(content);
+                    return;
+                }
+
+                InputText = string.Empty;
+                if (string.IsNullOrEmpty(_currentChannelId)) return;
+
+                var req = new CreateMessageRequest
+                {
+                    ChannelId = _currentChannelId,
+                    Content = content,
+                    SenderId = Session.Current.User!.Id
+                };
+                var savedMessage = await _apiService.SendMessageAsync(req);
+
+                if (savedMessage != null)
+                {
+                    Application.Current.Dispatcher.Invoke(() => Messages.Add(new MessageItemViewModel(savedMessage)));
+                    await _chatService.BroadcastMessageAsync(savedMessage);
+                }
             }
-
-            InputText = string.Empty;
-            if (string.IsNullOrEmpty(_currentChannelId)) return;
-
-            var req = new CreateMessageRequest
+            catch (Exception ex)
             {
-                ChannelId = _currentChannelId,
-                Content = content,
-                SenderId = Session.Current.User!.Id
-            };
-            var savedMessage = await _apiService.SendMessageAsync(req);
-
-            if (savedMessage != null)
-            {
-                Application.Current.Dispatcher.Invoke(() => Messages.Add(savedMessage));
-                await _chatService.BroadcastMessageAsync(savedMessage);
+                MessageBox.Show($"Erreur lors de l'envoi : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -126,32 +166,56 @@ namespace Frontend.ViewModels
         {
             if (EditingMessage == null) return;
 
-            var updated = await _apiService.EditMessageAsync(EditingMessage.Id, new EditMessageRequest
+            try
             {
-                RequesterId = Session.Current.User!.Id,
-                NewContent = newContent
-            });
-
-            if (updated != null)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
+                var updated = await _apiService.EditMessageAsync(EditingMessage.Message.Id, new EditMessageRequest
                 {
-                    var index = Messages.IndexOf(EditingMessage);
-                    if (index >= 0)
-                        Messages[index] = updated;
+                    RequesterId = Session.Current.User!.Id,
+                    NewContent = newContent
                 });
-            }
 
-            CancelEdit();
+                if (updated != null)
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        EditingMessage.Message = updated;
+                    });
+                    await _chatService.BroadcastMessageEditedAsync(updated);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de la modification : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                CancelEdit();
+            }
         }
 
-        private async Task DeleteMessageAsync(MessageDTO msg)
+        private async Task DeleteMessageAsync(MessageItemViewModel msg)
         {
-            var success = await _apiService.DeleteMessageAsync(msg.Id, Session.Current.User!.Id);
-
-            if (success)
+            try
             {
-                Application.Current.Dispatcher.Invoke(() => Messages.Remove(msg));
+                var result = MessageBox.Show("Voulez-vous vraiment supprimer ce message ?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                if (result != MessageBoxResult.Yes) return;
+
+                var success = await _apiService.DeleteMessageAsync(msg.Message.Id, Session.Current.User!.Id);
+
+                if (success)
+                {
+                    Application.Current.Dispatcher.Invoke(() => Messages.Remove(msg));
+                    if (_currentChannelId != null)
+                        await _chatService.BroadcastMessageDeletedAsync(_currentChannelId, msg.Message.Id);
+                }
+                else
+                {
+                    MessageBox.Show("Impossible de supprimer le message côté serveur.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur inattendue lors de la suppression : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -162,13 +226,34 @@ namespace Frontend.ViewModels
             Application.Current.Dispatcher.Invoke(() =>
             {
                 if (msg.ChannelId == _currentChannelId)
-                    Messages.Add(msg);
+                    Messages.Add(new MessageItemViewModel(msg));
+            });
+        }
+
+        private void OnMessageEdited(MessageDTO msg)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (msg.ChannelId == _currentChannelId)
+                {
+                    var existing = Messages.FirstOrDefault(m => m.Message.Id == msg.Id);
+                    if (existing != null) existing.Message = msg;
+                }
+            });
+        }
+
+        private void OnMessageDeleted(string msgId)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var existing = Messages.FirstOrDefault(m => m.Message.Id == msgId);
+                if (existing != null) Messages.Remove(existing);
             });
         }
 
         private void OnOtherUserTyping(string username)
         {
-            Application.Current.Dispatcher.Invoke(() => TypingText = $"{username} is typing...");
+            Application.Current.Dispatcher.Invoke(() => TypingText = $"{username} est en train d'écrire...");
         }
 
         private void OnOtherUserStoppedTyping(string username)
