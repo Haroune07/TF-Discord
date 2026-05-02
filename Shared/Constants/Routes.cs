@@ -17,8 +17,9 @@
 
         public const string GetChannelMessagesRoute = "/api/message";
         public const string SendMessageRoute = "/api/message/send";
+        public const string EditMessageRoute = "/api/message";
+        public const string DeleteMessageRoute = "/api/message";
 
         public const string GetAllUsersRoute = "/api/user/all";
-
     }
 }
