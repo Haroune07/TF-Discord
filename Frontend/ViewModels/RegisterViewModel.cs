@@ -1,5 +1,6 @@
 using Frontend.Global;
 using Frontend.Services;
+using Shared.Constants;
 using System.Diagnostics;
 using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -14,7 +15,13 @@ namespace Frontend.ViewModels
         private string userName = string.Empty;
 
         [ObservableProperty]
+        private string phoneNumber = string.Empty;
+
+        [ObservableProperty]
         private string password = string.Empty;
+
+        [ObservableProperty]
+        private string confirmPassword = string.Empty;
 
         [ObservableProperty]
         private string errorMessage = string.Empty;
@@ -38,7 +45,12 @@ namespace Frontend.ViewModels
         public async Task Register()
         {
             ErrorMessage = string.Empty;
-            var res = await _apiService.RegisterUserAsync(new() { Password = Password, Username = UserName });
+            if (!string.Equals(Password, ConfirmPassword, StringComparison.Ordinal))
+            {
+                ErrorMessage = Messages.PasswordMismatch;
+                return;
+            }
+            var res = await _apiService.RegisterUserAsync(new() { Password = Password, Username = UserName, PhoneNumber = PhoneNumber });
 
             if (res.Success && res.User != null)
             {
