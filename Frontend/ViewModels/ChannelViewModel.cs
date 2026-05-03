@@ -1,5 +1,7 @@
 ﻿using Frontend.Commands;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
+
 
 public class ChannelViewModel
 {
@@ -9,11 +11,11 @@ public class ChannelViewModel
 
     public DateTime CreatedAt { get; set; }
 
-    public ICommand SelectCommand { get; }
+    public IRelayCommand SelectCommand { get; }
 
     public ChannelViewModel(Action<string> onSelected)
     {
-        SelectCommand = new RelayCommand(() => onSelected(Id), () => true);
+        SelectCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(() => onSelected(Id), () => true);
     }
 
 }

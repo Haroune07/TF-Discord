@@ -1,12 +1,12 @@
 ﻿
 using Frontend.Services;
-using Frontend.ViewModels.Base;
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 
 namespace Frontend.ViewModels
 {
-    public class ChannelListViewModel : BaseViewModel
+    public class ChannelListViewModel : ObservableObject
     {
         public ObservableCollection<ChannelViewModel> Channels { get; set; }
         private readonly ApiService _apiService = new();

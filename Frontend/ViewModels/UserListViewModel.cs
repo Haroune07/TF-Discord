@@ -6,10 +6,12 @@ using Shared.DTOs;
 using Shared.DTOs.Requests;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+
 
 namespace Frontend.ViewModels
 {
-    public class UserListViewModel : BaseViewModel
+    public class UserListViewModel : ObservableObject
     {
         private readonly ApiService _apiService = new();
         private readonly Action<string> _onDMChannelReady;

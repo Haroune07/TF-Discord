@@ -7,17 +7,18 @@ using Shared.DTOs.Requests;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Frontend.ViewModels
 {
-    public class MessageItemViewModel : BaseViewModel
+    public partial class MessageItemViewModel : ObservableObject
     {
-        private MessageDTO _message;
-        public MessageDTO Message 
-        {
-            get => _message;
-            set { _message = value; OnPropertyChanged(); OnPropertyChanged(nameof(FormattedDate)); }
-        }
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(FormattedDate))]
+        [NotifyPropertyChangedFor(nameof(IsOwnMessage))]
+        private MessageDTO message;
+
 
         public bool IsOwnMessage => Message.Sender?.Id == Session.Current.User?.Id;
 
@@ -37,11 +38,11 @@ namespace Frontend.ViewModels
 
         public MessageItemViewModel(MessageDTO message)
         {
-            _message = message;
+            this.message = message;
         }
     }
 
-    public class ChatViewModel : BaseViewModel
+    public partial class ChatViewModel : ObservableObject
     {
         private readonly ApiService _apiService;
         private readonly ChatService _chatService;
@@ -49,51 +50,49 @@ namespace Frontend.ViewModels
 
         public ObservableCollection<MessageItemViewModel> Messages { get; } = new();
 
-        private string _inputText = string.Empty;
-        public string InputText
-        {
-            get => _inputText;
-            set { _inputText = value; OnPropertyChanged(); _ = HandleTypingAsync(); }
-        }
+        [ObservableProperty]
+        private string inputText = string.Empty;
 
-        private string _typingText = string.Empty;
-        public string TypingText
-        {
-            get => _typingText;
-            set { _typingText = value; OnPropertyChanged(); }
-        }
+        [ObservableProperty]
+        private string typingText = string.Empty;
+
 
         // Edit state
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsEditing))]
         private MessageItemViewModel? _editingMessage;
-        public MessageItemViewModel? EditingMessage
-        {
-            get => _editingMessage;
-            set { _editingMessage = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsEditing)); }
-        }
-        public bool IsEditing => _editingMessage != null;
+
+        public bool IsEditing => EditingMessage != null;
 
         private CancellationTokenSource? _typingCTS;
 
-        public ICommand SendMessageCommand { get; }
-        public ICommand EditMessageCommand { get; }
-        public ICommand DeleteMessageCommand { get; }
-        public ICommand CancelEditCommand { get; }
+        public IRelayCommand SendMessageCommand { get; }
+        public IRelayCommand EditMessageCommand { get; }
+        public IRelayCommand DeleteMessageCommand { get; }
+        public IRelayCommand CancelEditCommand { get; }
 
         public ChatViewModel(ApiService apiService, ChatService chatService)
         {
             _apiService = apiService;
             _chatService = chatService;
 
-            SendMessageCommand = new RelayCommand(SendMessage, CanSendMessage);
-            EditMessageCommand = new RelayCommand<MessageItemViewModel>(StartEdit, msg => msg?.IsOwnMessage == true);
-            DeleteMessageCommand = new RelayCommand<MessageItemViewModel>(async msg => await DeleteMessageAsync(msg!), msg => msg?.IsOwnMessage == true);
-            CancelEditCommand = new RelayCommand(CancelEdit, () => true);
+            SendMessageCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(SendMessage, CanSendMessage);
+            EditMessageCommand = new CommunityToolkit.Mvvm.Input.RelayCommand<MessageItemViewModel>(StartEdit, msg => msg?.IsOwnMessage == true);
+            DeleteMessageCommand = new CommunityToolkit.Mvvm.Input.RelayCommand<MessageItemViewModel>(async msg => await DeleteMessageAsync(msg!), msg => msg?.IsOwnMessage == true);
+            CancelEditCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(CancelEdit, () => true);
 
             _chatService.MessageReceived += OnMessageReceived;
             _chatService.MessageEdited += OnMessageEdited;
             _chatService.MessageDeleted += OnMessageDeleted;
             _chatService.UserTyping += OnOtherUserTyping;
             _chatService.UserStoppedTyping += OnOtherUserStoppedTyping;
+        }
+
+
+        partial void OnInputTextChanged(string value)
+        {
+            ((CommunityToolkit.Mvvm.Input.RelayCommand)SendMessageCommand).NotifyCanExecuteChanged();
+            _ = HandleTypingAsync();
         }
 
         public async Task LoadChannelAsync(string channelId)

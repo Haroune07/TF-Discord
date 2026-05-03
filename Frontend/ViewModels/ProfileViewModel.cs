@@ -4,10 +4,12 @@ using Frontend.Services;
 using Frontend.ViewModels.Base;
 using Shared.DTOs;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+
 
 namespace Frontend.ViewModels
 {
-    public class ProfileViewModel : BaseViewModel
+    public class ProfileViewModel : ObservableObject
     {
         private readonly ApiService _apiService;
         public UserDTO? User { get; } = Session.Current.User;

@@ -1,10 +1,12 @@
 ﻿using Frontend.Commands;
 using Frontend.ViewModels.Base;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+
 
 namespace Frontend.ViewModels
 {
-    public class ServerViewModel : BaseViewModel
+    public class ServerViewModel : ObservableObject
     {
         public string Name { get; set; }
         public string Id { get; set; }
