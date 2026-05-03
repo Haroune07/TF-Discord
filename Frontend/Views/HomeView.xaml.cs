@@ -12,6 +12,8 @@ namespace Frontend.Views
             InitializeComponent();
         }
 
-
+        private void ChatView_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+        }
     }
 }

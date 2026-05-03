@@ -1,12 +1,13 @@
-﻿
 using Frontend.Services;
+using System;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-
 
 namespace Frontend.ViewModels
 {
-    public class ChannelListViewModel : ObservableObject
+    public partial class ChannelListViewModel : ObservableObject
     {
         public ObservableCollection<ChannelViewModel> Channels { get; set; }
         private readonly ApiService _apiService = new();
@@ -16,6 +17,12 @@ namespace Frontend.ViewModels
         public ChannelListViewModel()
         {
             Channels = new ObservableCollection<ChannelViewModel>();
+        }
+
+        public void Clear()
+        {
+            Channels.Clear();
+            OnChannelSelected = null;
         }
 
         public async Task LoadChannelsAsync(string serverId)
@@ -29,8 +36,7 @@ namespace Frontend.ViewModels
                     Name = c.Name,
                     Id = c.Id,
                     ServerID = c.ServerId,
-                    CreatedAt =
-                    c.CreatedAt
+                    CreatedAt = c.CreatedAt
                 });
             }
         }
