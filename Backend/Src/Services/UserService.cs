@@ -128,15 +128,15 @@ namespace Backend.Src.Services
             var user = await _users.GetByIdAsync(userId);
             if (user == null) return false;
 
-            // Convert \"True\"/\"False\" or \"Online\"/\"Offline\" to boolean
+            // Convert "True"/"False" or "Online"/"Offline" to boolean
             if (bool.TryParse(newStatus, out bool isOnline))
             {
                 user.IsOnline = isOnline;
             }
             else
             {
-                user.IsOnline = newStatus.Equals(\"online\", StringComparison.OrdinalIgnoreCase) || 
-                                newStatus.Equals(\"true\", StringComparison.OrdinalIgnoreCase);
+                user.IsOnline = newStatus.Equals("online", StringComparison.OrdinalIgnoreCase) || 
+                                newStatus.Equals("true", StringComparison.OrdinalIgnoreCase);
             }
 
             await _users.UpdateAsync(userId, user);

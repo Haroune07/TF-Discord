@@ -1,4 +1,4 @@
-﻿using Backend.Src.Services;
+using Backend.Src.Services;
 using Microsoft.AspNetCore.Mvc;
 using Shared.DTOs;
 
@@ -19,6 +19,7 @@ public class UserController : ControllerBase
         var users = await _userService.GetAllUsersExceptAsync(userId);
         return Ok(users);
     }
+
     // endpoint to search users by username
     [HttpGet("search")]
     public async Task<ActionResult<List<UserDTO>>> Search(string username)
@@ -26,6 +27,7 @@ public class UserController : ControllerBase
         var users = await _userService.SearchUsersAsync(username);
         return Ok(users);
     }
+
     // endpoint to get user by id
     [HttpGet("{id}")]
     public async Task<ActionResult<UserDTO>> GetById(string id)
@@ -37,18 +39,31 @@ public class UserController : ControllerBase
 
         return Ok(user);
     }
-    // endpoint to update user online status
+
+    // endpoint to update user online status (legacy)
     [HttpPatch("{id}/status")]
     public async Task<IActionResult> UpdateStatus(string id, [FromQuery] bool isOnline)
     {
-        var updated = await _userService.UpdateOnlineStatusAsync(id, isOnline);
+        var updated = await _userService.UpdateOnlineStatusAsync(id, isOnline.ToString());
         if (!updated)
             return NotFound();
 
         return Ok();
     }
 
+    [HttpPut("{userId}/update-pfp")]
+    public async Task<IActionResult> UpdateUserProfilePicture(string userId, [FromBody] string newPfpUrl)
+    {
+        var success = await _userService.UpdatePfpAsync(userId, newPfpUrl);
+        if (!success) return NotFound("User not found");
+        return NoContent();
+    }
 
-
-
+    [HttpPut("{userId}/update-status")]
+    public async Task<IActionResult> UpdateUserStatus(string userId, [FromBody] string newStatus)
+    {
+        var success = await _userService.UpdateOnlineStatusAsync(userId, newStatus);
+        if (!success) return NotFound("User not found");
+        return NoContent();
+    }
 }

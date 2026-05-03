@@ -1,4 +1,4 @@
-<Project Sdk=\"Microsoft.NET.Sdk\">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -10,31 +10,31 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove=\"Static\Images\bg_auth.jpg\" />
-    <None Remove=\"Static\Images\home_button_image.png\" />
-    <None Remove=\"Static\Images\idle.png\" />
-    <None Remove=\"Static\Images\invisible.png\" />
-    <None Remove=\"Static\Images\online.png\" />
+    <None Remove="Static\Images\bg_auth.jpg" />
+    <None Remove="Static\Images\home_button_image.png" />
+    <None Remove="Static\Images\idle.png" />
+    <None Remove="Static\Images\invisible.png" />
+    <None Remove="Static\Images\online.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include=\"Static\Images\DND.png\" />
-    <Resource Include=\"Static\Images\idle.png\" />
-    <Resource Include=\"Static\Images\invisible.png\" />
-    <Resource Include=\"Static\Images\online.png\" />
-    <Resource Include=\"Static\Images\logoutlogo.png\">
+    <Resource Include="Static\Images\DND.png" />
+    <Resource Include="Static\Images\idle.png" />
+    <Resource Include="Static\Images\invisible.png" />
+    <Resource Include="Static\Images\online.png" />
+    <Resource Include="Static\Images\logoutlogo.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include=\"Static\Images\bg_auth.jpg\" />
-    <Resource Include=\"Static\Images\home_button_image.png\" />
+    <Resource Include="Static\Images\bg_auth.jpg" />
+    <Resource Include="Static\Images\home_button_image.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include=\"..\Shared\Shared.csproj\" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include=\"Microsoft.AspNetCore.SignalR.Client\" Version=\"8.0.25\" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.25" />
   </ItemGroup>
 
 </Project>

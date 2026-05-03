@@ -60,15 +60,15 @@ namespace Frontend.ViewModels
         {
             if (_sourceUser != null)
             {
-                string name = _sourceUser.Username ?? \"??\";
+                string name = _sourceUser.Username ?? "??";
                 Initials = name.Length >= 2 ? name.Substring(0, 2).ToUpper() : name.ToUpper();
                 AvatarImage = _sourceUser.ProfileImageUrl;
                 IsOnline = _sourceUser.IsOnline;
                 AvatarOpacity = string.IsNullOrEmpty(AvatarImage) ? 0 : 1;
                 OnlineStatusImage = IsOnline
-                    ? \"/Static/Images/online.png\"
-                    : \"/Static/Images/invisible.png\";
-                OnlineStatusText = IsOnline ? \"En ligne\" : \"Invisible\";
+                    ? "/Static/Images/online.png"
+                    : "/Static/Images/invisible.png";
+                OnlineStatusText = IsOnline ? "En ligne" : "Invisible";
             }
         }
 

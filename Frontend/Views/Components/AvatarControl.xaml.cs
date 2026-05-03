@@ -78,7 +78,7 @@ namespace Frontend.Views.Components
         {
             if (user == null) return;
 
-            string name = user.Username ?? \"??\";
+            string name = user.Username ?? "??";
             Initials = name.Length >= 2 ? name.Substring(0, 2).ToUpper() : name.ToUpper();
             IsOnline = user.IsOnline;
 
@@ -96,7 +96,7 @@ namespace Frontend.Views.Components
                 AvatarOpacity = 0;
             }
 
-            OnlineStatusImage = user.IsOnline ? \"/Static/Images/online.png\" : \"/Static/Images/invisible.png\";
+            OnlineStatusImage = user.IsOnline ? "/Static/Images/online.png" : "/Static/Images/invisible.png";
         }
     }
 }
