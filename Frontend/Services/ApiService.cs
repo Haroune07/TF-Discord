@@ -107,5 +107,19 @@ namespace Frontend.Services
             return await _client.GetFromJsonAsync<List<UserDTO>>($"{Routes.GetAllUsersRoute}/{userId}") ?? new();
         }
 
+        public async Task<bool> UpdateStatusAsync(string userId, string status)
+        {
+            var url = string.Format(Routes.UpdateStatus, userId);
+            var response = await _client.PutAsJsonAsync(url, status);
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> UploadProfileImageAsync(string userId, string imageUrl)
+        {
+            var route = string.Format(Routes.UpdatePfp, userId);
+            var response = await _client.PutAsJsonAsync(route, imageUrl);
+            return response.IsSuccessStatusCode;
+        }
+
     }
 }

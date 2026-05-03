@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -12,9 +12,16 @@
   <ItemGroup>
     <None Remove="Static\Images\bg_auth.jpg" />
     <None Remove="Static\Images\home_button_image.png" />
+    <None Remove="Static\Images\idle.png" />
+    <None Remove="Static\Images\invisible.png" />
+    <None Remove="Static\Images\online.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Static\Images\DND.png" />
+    <Resource Include="Static\Images\idle.png" />
+    <Resource Include="Static\Images\invisible.png" />
+    <Resource Include="Static\Images\online.png" />
     <Resource Include="Static\Images\logoutlogo.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
