@@ -2,6 +2,7 @@ using Frontend.Global;
 using Shared.DTOs;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace Frontend.Views.Components
 {
@@ -65,6 +66,24 @@ namespace Frontend.Views.Components
         public AvatarControl()
         {
             InitializeComponent();
+            this.DataContextChanged += OnDataContextChanged;
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue is UserDTO user)
+            {
+                UpdateDisplay(user);
+            }
+            else if (e.NewValue is ViewModels.AvatarControlViewModel vm)
+            {
+                // Bind DP to VM properties
+                SetBinding(InitialsProperty, new Binding("Initials") { Source = vm });
+                SetBinding(IsOnlineProperty, new Binding("IsOnline") { Source = vm });
+                SetBinding(OnlineStatusImageProperty, new Binding("OnlineStatusImage") { Source = vm });
+                SetBinding(AvatarImageProperty, new Binding("AvatarImage") { Source = vm, Converter = new StringToUriConverter() });
+                SetBinding(AvatarOpacityProperty, new Binding("AvatarOpacity") { Source = vm });
+            }
         }
 
         private static void OnUserChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -96,7 +115,20 @@ namespace Frontend.Views.Components
                 AvatarOpacity = 0;
             }
 
-            OnlineStatusImage = user.IsOnline ? "/Static/Images/online.png" : "/Static/Images/invisible.png";
+            OnlineStatusImage = user.IsOnline 
+                ? "pack://application:,,,/Static/Images/online.png" 
+                : "pack://application:,,,/Static/Images/invisible.png";
         }
+    }
+
+    public class StringToUriConverter : IValueConverter
+    {
+        public object? Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value is string url && Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
+                return uri;
+            return null;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) => throw new NotImplementedException();
     }
 }
