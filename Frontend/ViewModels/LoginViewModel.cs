@@ -12,7 +12,7 @@ namespace Frontend.ViewModels
     {
 
         [ObservableProperty]
-        private string username = string.Empty;
+        private string userName = string.Empty;
 
         [ObservableProperty]
         private string password = string.Empty;
@@ -43,13 +43,13 @@ namespace Frontend.ViewModels
         {
             ErrorMessage = string.Empty;
 
-            var res = await _apiService.LoginUserAsync(new() { Password = Password, Username = Username });
+            var res = await _apiService.LoginUserAsync(new() { Password = Password, Username = UserName });
 
             if (res.Success && res.User != null)
             {
                 Session.Current.Login(res.User);
 
-                _main.CurrentViewModel = new HomeViewModel(_main);
+                _main?.CurrentViewModel = new HomeViewModel(_main);
             }
 
             else
