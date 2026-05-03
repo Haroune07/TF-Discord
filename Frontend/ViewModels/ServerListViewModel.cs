@@ -2,7 +2,6 @@
 using Frontend.Services;
 using System.Collections.ObjectModel;
 using System.Windows;
-using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -14,7 +13,7 @@ namespace Frontend.ViewModels
         private readonly Action<string> _onServerSelected;
         private readonly ApiService _apiService = new();
         public event Action<string>? OnServerSelected;
-        public ICommand CreateServerCommand { get; }
+        public IRelayCommand CreateServerCommand { get; }
 
         public ServerListViewModel(Action<string> onServerSelected)
         {

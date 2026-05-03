@@ -3,7 +3,6 @@ using Frontend.Services;
 using Shared.DTOs;
 using Shared.DTOs.Requests;
 using System.Collections.ObjectModel;
-using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -15,7 +14,7 @@ namespace Frontend.ViewModels
         private readonly ApiService _apiService = new();
         private readonly Action<string> _onDMChannelReady;
 
-        public ICommand OpenDMCommand { get; }
+        public IRelayCommand OpenDMCommand { get; }
 
         public ObservableCollection<UserDTO> Users { get; set; } = new();
 
