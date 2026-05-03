@@ -1,6 +1,7 @@
 using Backend.Src.Mappers;
 using Backend.Src.Models;
 using Backend.Src.Repository;
+using Infrastructure.Interfaces;
 using MongoDB.Driver;
 using Shared.Constants;
 using Shared.DTOs;
@@ -11,10 +12,12 @@ namespace Backend.Src.Services
     public class UserService
     {
         private readonly IRepository<User> _users;
+        private readonly INotificationService _notificationService;
 
-        public UserService(IRepository<User> userRepo)
+        public UserService(IRepository<User> userRepo, INotificationService notificationService)
         {
             _users = userRepo;
+            _notificationService = notificationService;
         }
 
         public async Task<List<UserDTO>> GetAllUsersExceptAsync(string userId)
@@ -66,7 +69,8 @@ namespace Backend.Src.Services
             if (!await UsernameExistsAsync(req.Username))
             {
                 string passwordHash = CryptoService.Hash(req.Password);
-                var user = new User() { Username = req.Username, PasswordHash = passwordHash, CreatedAt = DateTime.UtcNow, IsOnline = true };
+                string? phone = string.IsNullOrWhiteSpace(req.PhoneNumber) ? null : req.PhoneNumber.Trim();
+                var user = new User() { Username = req.Username, PasswordHash = passwordHash, CreatedAt = DateTime.UtcNow, IsOnline = true, PhoneNumber = phone };
                 await _users.InsertAsync(user);
                 var userDTO = user.ToDTO();
                 return new() { Success = true, User = userDTO, Message = Messages.UserCreatedSuccess };
@@ -85,10 +89,11 @@ namespace Backend.Src.Services
             {
                 var user = await GetByUsernameAsync(req.Username);
 
-                if (CryptoService.VerifyHash(req.Password, user.PasswordHash))
+                if (user != null && CryptoService.VerifyHash(req.Password, user.PasswordHash))
                 {
                     user.IsOnline = true;
                     await _users.UpdateAsync(user.Id, user);
+                    await _notificationService.SendLoginNotificationAsync(user.PhoneNumber ?? string.Empty, user.Username);
                     return new()
                     {
                         Success = true,

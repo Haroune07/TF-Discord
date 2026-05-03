@@ -49,7 +49,8 @@ namespace Frontend.ViewModels
             {
                 Session.Current.Login(res.User);
 
-                _main?.CurrentViewModel = new HomeViewModel(_main);
+                if (_main != null)
+                    _main.CurrentViewModel = new HomeViewModel(_main);
             }
 
             else

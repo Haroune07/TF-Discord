@@ -3,6 +3,9 @@ using Backend.Src.Hubs;
 using Backend.Src.Models;
 using Backend.Src.Repository;
 using Backend.Src.Services;
+using Infrastructure.Interfaces;
+using Infrastructure.Services;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Shared.Constants;
@@ -14,6 +17,14 @@ namespace Backend
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Configuration.AddJsonFile("appsettings.Twilio.Local.json", optional: true, reloadOnChange: true);
+            builder.Services.Configure<TwilioSettings>(builder.Configuration.GetSection("Twilio"));
+            builder.Services.AddScoped<INotificationService>(sp =>
+            {
+                ILogger<TwilioNotificationService> logger = sp.GetRequiredService<ILogger<TwilioNotificationService>>();
+                TwilioSettings twilio = sp.GetRequiredService<IOptions<TwilioSettings>>().Value;
+                return new TwilioNotificationService(logger, twilio.AccountSid, twilio.AuthToken, twilio.FromNumber);
+            });
             // Add services to the container.
             builder.Services.AddControllers();
             builder.Services.AddScoped<ServerService>();
