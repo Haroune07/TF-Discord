@@ -1,11 +1,10 @@
-﻿using Frontend.Commands;
-using Frontend.Global;
+﻿using Frontend.Global;
 using Frontend.Services;
-using Frontend.ViewModels.Base;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Frontend.ViewModels
 {

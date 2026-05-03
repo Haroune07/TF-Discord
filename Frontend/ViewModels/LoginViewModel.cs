@@ -1,10 +1,7 @@
-using Frontend.Commands;
 using Frontend.Global;
 using Frontend.Services;
-using Frontend.ViewModels.Base;
 using System.Diagnostics;
 using System.Text.Json;
-using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -34,7 +31,7 @@ namespace Frontend.ViewModels
         {
             _main = main;
             LoginCommand = new AsyncRelayCommand(Login, () => true);
-            GoToRegisterCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(() => main.CurrentViewModel = new RegisterViewModel(_main), () => true);
+            GoToRegisterCommand = new RelayCommand(() => { main.CurrentViewModel = new RegisterViewModel(_main); });
         }
 
         public LoginViewModel() { }
