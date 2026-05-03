@@ -1,4 +1,4 @@
-﻿using Frontend.Services;
+using Frontend.Services;
 using Frontend.ViewModels.Base;
 using Shared.DTOs.Requests;
 using System;
@@ -15,7 +15,7 @@ namespace Frontend.ViewModels
         public ObservableCollection<UserInviteViewModel> Users { get; set; }
         private readonly ApiService _apiService = new();
 
-        public event Action<string>? OnUserSelect;
+        public event Action<string>? OnDMRequest;
         public bool HasResults => Users.Count > 0;
 
         private string _inputText = string.Empty;
@@ -59,7 +59,7 @@ namespace Frontend.ViewModels
                     
                     Users.Add(new UserInviteViewModel(
                         onDM: async (id) => await HandleOpenDM(id),
-                        onInvite: async (id) => await HandleServerInvite(id)
+                        onInvite: async (id) => await HandleServerInvite(id, c.Username)
                     )
                     {
                         Id = c.Id,
@@ -81,13 +81,39 @@ namespace Frontend.ViewModels
 
         private async Task HandleOpenDM(string userId)
         {
-            var channel = await _apiService.CreateDMAsync(new CreateDMRequest { TargetUserId = userId });
+            if (Global.Session.Current.User == null) return;
+
+            var channel = await _apiService.CreateDMAsync(new CreateDMRequest 
+            { 
+                SenderId = Global.Session.Current.User.Id,
+                TargetUserId = userId 
+            });
+
+            if (channel != null)
+            {
+                // Clear search to provide feedback and close popup
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    InputText = string.Empty;
+                    OnDMRequest?.Invoke(channel.Id);
+                });
+            }
         }
 
-        private async Task HandleServerInvite(string userId)
+        private async Task HandleServerInvite(string userId, string username)
         {
-            Console.WriteLine($"Invitation envoyée à l'ID : {userId}");
-            
+            if (Global.Session.Current.User == null) return;
+
+            var success = await _apiService.SendFriendRequestAsync(Global.Session.Current.User.Id, username);
+            if (success)
+            {
+                InputText = string.Empty;
+                System.Windows.MessageBox.Show($"Friend request sent to {username}!", "Success", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            }
+            else
+            {
+                System.Windows.MessageBox.Show("Could not send friend request. You might already be friends or a request is pending.", "Info", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            }
         }
     }
 }

@@ -8,12 +8,14 @@
     xmlns:views="clr-namespace:Frontend.Views"
     xmlns:ViewModels="clr-namespace:Frontend.ViewModels"
     xmlns:components="clr-namespace:Frontend.Views.Components"
+    xmlns:converters="clr-namespace:Frontend.Converters"
     mc:Ignorable="d"
     d:DesignHeight="720"
     d:DesignWidth="1280">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
     </UserControl.Resources>
 
     <Grid Background="#1E1F22" x:Name="RootGrid">
@@ -67,25 +69,58 @@
                                                 Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
             <!-- Mode DM : liste d'users -->
-            <ListBox Grid.Row="1" ItemsSource="{Binding UserList.Users}"
-                     Background="Transparent" BorderThickness="0"
-                     Visibility="{Binding DataContext.IsDMMode,
-                                  ElementName=RootGrid,
-                                  Converter={StaticResource BooleanToVisibilityConverter}}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Button Content="{Binding Username}"
-                                Background="Transparent"
-                                Foreground="White"
-                                BorderThickness="0"
-                                HorizontalContentAlignment="Left"
-                                Padding="8,6"
-                                Command="{Binding DataContext.UserList.OpenDMCommand, 
-                                          ElementName=RootGrid}"
-                                CommandParameter="{Binding}"/>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                          Visibility="{Binding DataContext.IsDMMode,
+                                       ElementName=RootGrid,
+                                       Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <!-- Pending Requests Section -->
+                    <TextBlock Text="PENDING REQUESTS" Foreground="#949BA4" FontSize="11" FontWeight="Bold" Margin="16,16,16,8"
+                               Visibility="{Binding UserList.PendingRequests.Count, Converter={StaticResource IntToVisibilityConverter}}"/>
+                    <ItemsControl ItemsSource="{Binding UserList.PendingRequests}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="8,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Friend.Username}" Foreground="White" VerticalAlignment="Center" Margin="8,0"/>
+                                    <Button Grid.Column="1" Content="✓" Background="#248046" Foreground="White" Width="24" Height="24" Margin="2,0"
+                                            Command="{Binding DataContext.UserList.AcceptRequestCommand, ElementName=RootGrid}"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Grid.Column="2" Content="✕" Background="#DA373C" Foreground="White" Width="24" Height="24" Margin="2,0"
+                                            Command="{Binding DataContext.UserList.DeclineRequestCommand, ElementName=RootGrid}"
+                                            CommandParameter="{Binding}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock Text="DIRECT MESSAGES" Foreground="#949BA4" FontSize="11" FontWeight="Bold" Margin="16,16,16,8"
+                               Visibility="{Binding IsDMMode, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <ListBox ItemsSource="{Binding UserList.Users}"
+                             Background="Transparent" BorderThickness="0"
+                             Visibility="{Binding DataContext.IsDMMode,
+                                          ElementName=RootGrid,
+                                          Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Button Content="{Binding Username}"
+                                        Background="Transparent"
+                                        Foreground="White"
+                                        BorderThickness="0"
+                                        HorizontalContentAlignment="Left"
+                                        Padding="8,6"
+                                        Command="{Binding DataContext.UserList.OpenDMCommand, 
+                                                  ElementName=RootGrid}"
+                                        CommandParameter="{Binding}"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </ScrollViewer>
 
             <!-- Profile View (merged from PR #22) -->
             <views:ProfileView DataContext="{Binding Profile}" Margin="0,0,0,4" Grid.Row="2"></views:ProfileView>
@@ -99,26 +134,34 @@
             </Grid.RowDefinitions>
 
             <Border Grid.Row="0" BorderBrush="#1E1F22" BorderThickness="0,0,0,1">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0">
-                    <TextBlock Text="Friends" Foreground="White" FontWeight="Bold" VerticalAlignment="Center"/>
-                    <Separator Width="1" Height="24" Background="#3F4147" Margin="16,0"/>
-                    <TextBlock Text="Online" Foreground="#B5BAC1" Margin="16,0" VerticalAlignment="Center"/>
-                    <TextBlock Text="All" Foreground="#B5BAC1" Margin="16,0" VerticalAlignment="Center"/>
-                    <Border Background="#248046" CornerRadius="4" Padding="8,2" Margin="16,0">
-                        <TextBlock Text="Add Friend" Foreground="White" FontWeight="SemiBold"/>
-                    </Border>
-                    <views:SearchUserView DataContext="{Binding SearchVM}"></views:SearchUserView>
+                <Grid>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0">
+                        <TextBlock Text="Friends" Foreground="White" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <Separator Width="1" Height="24" Background="#3F4147" Margin="16,0"/>
+                        <TextBlock Text="Online" Foreground="#B5BAC1" Margin="16,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="All" Foreground="#B5BAC1" Margin="16,0" VerticalAlignment="Center"/>
+                        
+                        <views:SearchUserView x:Name="UserSearchBox" DataContext="{Binding SearchVM}"/>
+                    </StackPanel>
+
+                    <!-- Popup for search results -->
                     <Popup IsOpen="{Binding SearchVM.HasResults, Mode=OneWay}"
-       PlacementTarget="{Binding RelativeSource={RelativeSource AncestorType=Grid, AncestorLevel=1}}"
-       Placement="Bottom"
-       AllowsTransparency="True">
+                           PlacementTarget="{Binding ElementName=UserSearchBox}"
+                           Placement="Bottom"
+                           AllowsTransparency="True"
+                           HorizontalOffset="-45"
+                           PopupAnimation="Fade">
                         <Border Background="#2B2D31" 
-            Width="300" 
-            MinHeight="50" 
-            CornerRadius="8"
-            BorderBrush="Red" BorderThickness="2">
-                            <!-- Bordure rouge pour le test -->
-                            <ListBox ItemsSource="{Binding SearchVM.Users}">
+                                Width="300" 
+                                CornerRadius="8"
+                                BorderBrush="#1E1F22" BorderThickness="1"
+                                Padding="4"
+                                Margin="0,4,0,0">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.5"/>
+                            </Border.Effect>
+                            <ListBox ItemsSource="{Binding SearchVM.Users}" 
+                                     Background="Transparent" BorderThickness="0">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <views:UserInviteView />
@@ -127,7 +170,7 @@
                             </ListBox>
                         </Border>
                     </Popup>
-                </StackPanel>
+                </Grid>
             </Border>
 
             <views:ChatView Grid.Row="1" DataContext="{Binding ActiveChat}" Loaded="ChatView_Loaded" />
