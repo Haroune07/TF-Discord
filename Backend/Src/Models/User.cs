@@ -12,6 +12,7 @@ namespace Backend.Src.Models
         public string Id { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
+        public string? PhoneNumber { get; set; }
         public string? ProfileImageUrl { get; set; }
         public bool IsOnline { get; set; }
         public DateTime CreatedAt { get; set; }
