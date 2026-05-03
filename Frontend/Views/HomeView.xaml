@@ -107,10 +107,30 @@
                     <Border Background="#248046" CornerRadius="4" Padding="8,2" Margin="16,0">
                         <TextBlock Text="Add Friend" Foreground="White" FontWeight="SemiBold"/>
                     </Border>
+                    <views:SearchUserView DataContext="{Binding SearchVM}"></views:SearchUserView>
+                    <Popup IsOpen="{Binding SearchVM.HasResults, Mode=OneWay}"
+       PlacementTarget="{Binding RelativeSource={RelativeSource AncestorType=Grid, AncestorLevel=1}}"
+       Placement="Bottom"
+       AllowsTransparency="True">
+                        <Border Background="#2B2D31" 
+            Width="300" 
+            MinHeight="50" 
+            CornerRadius="8"
+            BorderBrush="Red" BorderThickness="2">
+                            <!-- Bordure rouge pour le test -->
+                            <ListBox ItemsSource="{Binding SearchVM.Users}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <views:UserInviteView />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+                    </Popup>
                 </StackPanel>
             </Border>
 
-            <views:ChatView Grid.Row="1" DataContext="{Binding ActiveChat}" />
+            <views:ChatView Grid.Row="1" DataContext="{Binding ActiveChat}" Loaded="ChatView_Loaded" />
         </Grid>
 
         <!-- Colonne 3 - active now -->

@@ -44,6 +44,7 @@ namespace Frontend.ViewModels
         public ICommand? GoToHomeCommand { get; }
 
         private readonly ChatService _chatService;
+        public SearchUserViewModel SearchVM { get; set; } = new SearchUserViewModel();
 
         public HomeViewModel(MainViewModel main)
         {

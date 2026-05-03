@@ -121,5 +121,10 @@ namespace Frontend.Services
             return response.IsSuccessStatusCode;
         }
 
+        public async Task<List<UserDTO>> SearchUsersAsync(string username)
+        {
+            return await _client.GetFromJsonAsync<List<UserDTO>>($"{Routes.SearchUser}/{username}") ?? new();
+        }
+
     }
 }
