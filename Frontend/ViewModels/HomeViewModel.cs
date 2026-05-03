@@ -35,10 +35,10 @@ namespace Frontend.ViewModels
         public bool IsServerMode => !IsDMMode;
 
         public bool IsUserOnline => User?.IsOnline == true;
-        public string OnlineStatus => IsUserOnline ? \"Online\" : \"Offline\";
+        public string OnlineStatus => IsUserOnline ? "Online" : "Offline";
         public string MemberSince => User != null
-            ? $\"Member since {User.CreatedAt:MMMM dd, yyyy}\"
-            : \"Member since unknown\";
+            ? $"Member since {User.CreatedAt:MMMM dd, yyyy}"
+            : "Member since unknown";
 
         public ICommand? GoToLoginCommand { get; }
         public ICommand? GoToHomeCommand { get; }
