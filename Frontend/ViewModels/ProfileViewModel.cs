@@ -1,29 +1,29 @@
-﻿using Frontend.Commands;
-using Frontend.Global;
+﻿using Frontend.Global;
 using Frontend.Services;
-using Frontend.ViewModels.Base;
 using Shared.DTOs;
-using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
 
 namespace Frontend.ViewModels
 {
-    public class ProfileViewModel : BaseViewModel
+    public class ProfileViewModel : ObservableObject
     {
         private readonly ApiService _apiService;
         public UserDTO? User { get; } = Session.Current.User;
         public AvatarControlViewModel Avatar { get; }
 
-        public ICommand UploadAvatarCommand { get; }
-        public ICommand SetOnlineStatusCommand { get; }
-        public ICommand LogoutCommand { get; } // Ajouté pour le bouton Logout
+        public IAsyncRelayCommand UploadAvatarCommand { get; }
+        public IAsyncRelayCommand SetOnlineStatusCommand { get; }
+        public IRelayCommand LogoutCommand { get; } // Ajouté pour le bouton Logout
 
         public ProfileViewModel(ApiService apiService, Action onLogout)
         {
             _apiService = apiService;
             Avatar = new AvatarControlViewModel(User);
 
-            UploadAvatarCommand = new RelayCommand(async () => await OpenUrlInputDialog(), ()=> true);
-            SetOnlineStatusCommand = new RelayCommand<string>(async (p) => await UpdateStatus(p), parameter => true);
+            UploadAvatarCommand = new AsyncRelayCommand(async () => await OpenUrlInputDialog(), ()=> true);
+            SetOnlineStatusCommand = new AsyncRelayCommand<string>(async (p) => await UpdateStatus(p), parameter => true);
             LogoutCommand = new RelayCommand(onLogout, ()=> true); // Relie l'action de déconnexion
 
             Avatar.Refresh();

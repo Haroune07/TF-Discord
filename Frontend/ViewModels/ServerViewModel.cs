@@ -1,16 +1,16 @@
-﻿using Frontend.Commands;
-using Frontend.ViewModels.Base;
-using System.Windows.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
 
 namespace Frontend.ViewModels
 {
-    public class ServerViewModel : BaseViewModel
+    public class ServerViewModel : ObservableObject
     {
         public string Name { get; set; }
         public string Id { get; set; }
         public string? ServerImageUrl { get; set; }
         public string Initials => Name.Length >= 2 ? Name.Substring(0, 2).ToUpper() : Name.ToUpper();
-        public ICommand SelectCommand { get; }
+        public IRelayCommand SelectCommand { get; }
 
         public ServerViewModel(string name, string id, Action<string> onSelected, string? serverImageUrl = null)
         {

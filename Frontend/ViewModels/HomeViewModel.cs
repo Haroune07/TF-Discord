@@ -1,14 +1,14 @@
-using Frontend.Commands;
 using Frontend.Global;
 using Frontend.Services;
-using Frontend.ViewModels.Base;
 using Shared.DTOs;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System.Windows;
-using System.Windows.Input;
+using System.Threading.Tasks;
 
 namespace Frontend.ViewModels
 {
-    public class HomeViewModel : BaseViewModel
+    public partial class HomeViewModel : ObservableObject
     {
         private MainViewModel? _main;
         public ProfileViewModel Profile { get; }
@@ -22,18 +22,15 @@ namespace Frontend.ViewModels
 
         public ChatViewModel ActiveChat { get; }
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsServerMode))]
         private bool _isDMMode = false;
-        public bool IsDMMode
+
+        partial void OnIsDMModeChanged(bool value)
         {
-            get => _isDMMode;
-            set
-            {
-                _isDMMode = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(IsServerMode));
-                if (_isDMMode) _ = UserList.LoadUsersAsync();
-            }
+            if (value) _ = UserList.LoadUsersAsync();
         }
+
         public bool IsServerMode => !IsDMMode;
 
         public bool IsUserOnline => User?.IsOnline == true;
@@ -42,8 +39,8 @@ namespace Frontend.ViewModels
             ? $"Member since {User.CreatedAt:MMMM dd, yyyy}"
             : "Member since unknown";
 
-        public ICommand? GoToLoginCommand { get; }
-        public ICommand? GoToHomeCommand { get; }
+        public IRelayCommand? GoToLoginCommand { get; }
+        public IRelayCommand? GoToHomeCommand { get; }
 
         private readonly ChatService _chatService;
         private readonly ApiService _apiService;
@@ -52,8 +49,8 @@ namespace Frontend.ViewModels
         public HomeViewModel(MainViewModel main)
         {
             _main = main;
-            GoToLoginCommand = new RelayCommand(Logout, () => true);
-            GoToHomeCommand = new RelayCommand(SwitchToDMMode, () => true);
+            GoToLoginCommand = new RelayCommand(Logout);
+            GoToHomeCommand = new RelayCommand(SwitchToDMMode);
 
             _apiService = new ApiService();
             _chatService = new ChatService();
@@ -98,7 +95,6 @@ namespace Frontend.ViewModels
         private void SwitchToDMMode()
         {
             IsDMMode = true;
-            _ = UserList.LoadUsersAsync();
         }
 
         private async void Logout()

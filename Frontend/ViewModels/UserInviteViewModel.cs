@@ -1,24 +1,20 @@
-using Frontend.Commands;
-using Frontend.ViewModels.Base;
 using System;
-using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Frontend.ViewModels
 {
-    public class UserInviteViewModel : BaseViewModel
+    public partial class UserInviteViewModel : ObservableObject
     {
-        private string _username = string.Empty;
+        [ObservableProperty]
+        private string username = string.Empty;
+
         public string Id { get; set; } = string.Empty;
-        public string Username 
-        { 
-            get => _username; 
-            set { if (_username != value) { _username = value; OnPropertyChanged(); } } 
-        }
         public bool IsOnline { get; set; }
         public DateTime CreatedAt { get; set; }
         public string? ProfileImageUrl { get; set; }
-        public ICommand DMCommand { get; }
-        public ICommand InviteServerCommand { get; }
+        public IRelayCommand DMCommand { get; }
+        public IRelayCommand InviteServerCommand { get; }
 
         public UserInviteViewModel(Action<string> onDM, Action<string> onInvite)
         {
