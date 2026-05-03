@@ -10,15 +10,21 @@ namespace Backend.Src.Services
     {
         private readonly IRepository<Channel> _channels;
         private readonly IRepository<User> _users;
+        private readonly IRepository<Server> _servers;
 
-        public ChannelService(IRepository<Channel> channelRepo, IRepository<User> userRepo)
+        public ChannelService(IRepository<Channel> channelRepo, IRepository<User> userRepo, IRepository<Server> serverRepo)
         {
             _channels = channelRepo;
             _users = userRepo;
+            _servers = serverRepo;
         }
 
         public async Task<ChannelDTO> CreateServerChannelAsync(CreateChannelRequest req)
         {
+            var server = await _servers.GetByIdAsync(req.ServerId);
+            if (server == null)
+                throw new Exception("Server not found");
+
             var channel = new Channel
             {
                 Name = req.Name,
