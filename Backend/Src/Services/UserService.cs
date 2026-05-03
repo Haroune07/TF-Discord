@@ -123,17 +123,36 @@ namespace Backend.Src.Services
         }
 
         //UPDATE USER ONLINE STATUS
-        public async Task<bool> UpdateOnlineStatusAsync(string userId, bool isOnline)
+        public async Task<bool> UpdateOnlineStatusAsync(string userId, string newStatus)
         {
             var user = await _users.GetByIdAsync(userId);
-            if (user == null)
-                return false;
-            user.IsOnline = isOnline;
+            if (user == null) return false;
 
-            await _users.UpdateAsync(user.Id, user);
+            // Convert \"True\"/\"False\" or \"Online\"/\"Offline\" to boolean
+            if (bool.TryParse(newStatus, out bool isOnline))
+            {
+                user.IsOnline = isOnline;
+            }
+            else
+            {
+                user.IsOnline = newStatus.Equals(\"online\", StringComparison.OrdinalIgnoreCase) || 
+                                newStatus.Equals(\"true\", StringComparison.OrdinalIgnoreCase);
+            }
+
+            await _users.UpdateAsync(userId, user);
             return true;
-
-
         }
+
+        //UPDATE USER PFP
+        public async Task<bool> UpdatePfpAsync(string userId, string newPfpUrl)
+        {
+            var user = await _users.GetByIdAsync(userId);
+            if (user == null) return false;
+
+            user.ProfileImageUrl = newPfpUrl;
+            await _users.UpdateAsync(userId, user);
+            return true;
+        }
+
     }
 }

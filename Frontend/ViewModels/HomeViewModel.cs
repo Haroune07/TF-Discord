@@ -10,6 +10,7 @@ namespace Frontend.ViewModels
     public class HomeViewModel : BaseViewModel
     {
         private MainViewModel? _main;
+        public ProfileViewModel Profile { get; }
 
         public UserDTO? User { get; private set; } = Session.Current.User;
         public AvatarControlViewModel CurrentUserAvatar { get; set; }
@@ -29,22 +30,20 @@ namespace Frontend.ViewModels
                 _isDMMode = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(IsServerMode));
-                System.Diagnostics.Debug.WriteLine($"IsDMMode={_isDMMode}, IsServerMode={!_isDMMode}");
             }
         }
         public bool IsServerMode => !IsDMMode;
 
         public bool IsUserOnline => User?.IsOnline == true;
-        public string OnlineStatus => IsUserOnline ? "Online" : "Offline";
+        public string OnlineStatus => IsUserOnline ? \"Online\" : \"Offline\";
         public string MemberSince => User != null
-            ? $"Member since {User.CreatedAt:MMMM dd, yyyy}"
-            : "Member since unknown";
+            ? $\"Member since {User.CreatedAt:MMMM dd, yyyy}\"
+            : \"Member since unknown\";
 
         public ICommand? GoToLoginCommand { get; }
         public ICommand? GoToHomeCommand { get; }
 
-        private readonly ChatService _chatService; // déjà présent, s'assurer qu'il est au niveau de la classe
-
+        private readonly ChatService _chatService;
 
         public HomeViewModel(MainViewModel main)
         {
@@ -57,6 +56,7 @@ namespace Frontend.ViewModels
             ActiveChat = new ChatViewModel(apiService, _chatService);
 
             CurrentUserAvatar = new(User);
+            Profile = new ProfileViewModel(apiService, Logout);
 
             UserList = new UserListViewModel(async (channelId) =>
             {
@@ -74,6 +74,7 @@ namespace Frontend.ViewModels
                 _main.ServerList.OnServerSelected += (id) => IsDMMode = false;
                 _ = _main.ServerList.LoadServersAsync();
             }
+            CurrentUserAvatar.Refresh();
         }
 
         private void SwitchToDMMode()
