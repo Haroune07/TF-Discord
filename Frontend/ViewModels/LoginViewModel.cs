@@ -31,7 +31,7 @@ namespace Frontend.ViewModels
         {
             _main = main;
             LoginCommand = new AsyncRelayCommand(Login, () => true);
-            GoToRegisterCommand = new RelayCommand(() => { main.CurrentViewModel = new RegisterViewModel(_main); });
+            GoToRegisterCommand = new RelayCommand(() => { if (_main != null) _main.CurrentViewModel = new RegisterViewModel(_main); });
         }
 
         public LoginViewModel() { }
