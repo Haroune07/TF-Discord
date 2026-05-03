@@ -1,4 +1,4 @@
-﻿using Frontend.ViewModels;
+using Frontend.ViewModels;
 using Frontend.ViewModels.Base;
 
 public class MainViewModel : BaseViewModel
@@ -23,5 +23,12 @@ public class MainViewModel : BaseViewModel
         ChannelList = new ChannelListViewModel();
         ServerList = new ServerListViewModel(async serverId => await ChannelList.LoadChannelsAsync(serverId));
         _currentViewModel = new LoginViewModel(this);
+    }
+
+    public void ResetState()
+    {
+        ServerList.Clear();
+        ChannelList.Clear();
+        Frontend.Global.Session.Current.Logout();
     }
 }

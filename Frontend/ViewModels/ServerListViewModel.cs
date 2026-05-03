@@ -1,4 +1,4 @@
-﻿using Frontend.Commands;
+using Frontend.Commands;
 using Frontend.Global;
 using Frontend.Services;
 using Frontend.ViewModels.Base;
@@ -47,6 +47,12 @@ namespace Frontend.ViewModels
                     s.ServerImageUrl
                 ));
             }
+        }
+
+        public void Clear()
+        {
+            Servers.Clear();
+            OnServerSelected = null;
         }
 
         private void OpenCreateServerWindow()
