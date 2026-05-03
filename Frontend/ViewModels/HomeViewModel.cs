@@ -4,10 +4,12 @@ using Frontend.Services;
 using Frontend.ViewModels.Base;
 using Shared.DTOs;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Frontend.ViewModels
 {
-    public class HomeViewModel : BaseViewModel
+    public partial class HomeViewModel : ObservableObject
     {
         private MainViewModel? _main;
         public ProfileViewModel Profile { get; }
@@ -21,17 +23,11 @@ namespace Frontend.ViewModels
 
         public ChatViewModel ActiveChat { get; }
 
-        private bool _isDMMode = false;
-        public bool IsDMMode
-        {
-            get => _isDMMode;
-            set
-            {
-                _isDMMode = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(IsServerMode));
-            }
-        }
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsServerMode))]
+        private bool isDMMode = false;
+
+
         public bool IsServerMode => !IsDMMode;
 
         public bool IsUserOnline => User?.IsOnline == true;
@@ -40,16 +36,16 @@ namespace Frontend.ViewModels
             ? $"Member since {User.CreatedAt:MMMM dd, yyyy}"
             : "Member since unknown";
 
-        public ICommand? GoToLoginCommand { get; }
-        public ICommand? GoToHomeCommand { get; }
+        public IRelayCommand? GoToLoginCommand { get; }
+        public IRelayCommand? GoToHomeCommand { get; }
 
         private readonly ChatService _chatService;
 
         public HomeViewModel(MainViewModel main)
         {
             _main = main;
-            GoToLoginCommand = new RelayCommand(Logout, () => true);
-            GoToHomeCommand = new RelayCommand(SwitchToDMMode, () => true);
+            GoToLoginCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(Logout, () => true);
+            GoToHomeCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(SwitchToDMMode, () => true);
 
             var apiService = new ApiService();
             _chatService = new ChatService();
@@ -64,7 +60,7 @@ namespace Frontend.ViewModels
                 await ActiveChat.LoadChannelAsync(channelId);
             });
 
-            _ = _chatService.ConnectAsync();
+            _ =_chatService.ConnectAsync();
 
             if (_main?.ChannelList != null)
                 _main.ChannelList.OnChannelSelected += async (id) => await SelectChannelAsync(id);

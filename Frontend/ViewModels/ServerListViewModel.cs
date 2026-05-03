@@ -5,10 +5,11 @@ using Frontend.ViewModels.Base;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Frontend.ViewModels
 {
-    public class ServerListViewModel : BaseViewModel
+    public class ServerListViewModel : ObservableObject
     {
         public ObservableCollection<ServerViewModel> Servers { get; set; }
         private readonly Action<string> _onServerSelected;

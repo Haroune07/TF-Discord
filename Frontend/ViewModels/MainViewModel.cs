@@ -1,27 +1,20 @@
 ﻿using Frontend.ViewModels;
 using Frontend.ViewModels.Base;
+using CommunityToolkit.Mvvm.ComponentModel;
 
-public class MainViewModel : BaseViewModel
+
+public partial class MainViewModel : ObservableObject
 {
-    private BaseViewModel _currentViewModel;
+    [ObservableProperty]
+    private ObservableObject currentViewModel;
 
     public ServerListViewModel ServerList { get; }
     public ChannelListViewModel ChannelList { get; }
-
-    public BaseViewModel CurrentViewModel
-    {
-        get => _currentViewModel;
-        set
-        {
-            _currentViewModel = value;
-            OnPropertyChanged(nameof(CurrentViewModel));
-        }
-    }
 
     public MainViewModel()
     {
         ChannelList = new ChannelListViewModel();
         ServerList = new ServerListViewModel(async serverId => await ChannelList.LoadChannelsAsync(serverId));
-        _currentViewModel = new LoginViewModel(this);
+        currentViewModel = new LoginViewModel(this);
     }
 }

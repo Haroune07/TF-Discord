@@ -4,44 +4,35 @@ using Frontend.Services;
 using Frontend.ViewModels.Base;
 using Shared.DTOs.Requests;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Frontend.ViewModels
 {
-    public class CreateServerViewModel : BaseViewModel
+    public partial class CreateServerViewModel : ObservableObject
     {
         private readonly ApiService _apiService = new();
 
-        private string _serverName = string.Empty;
-        public string ServerName
-        {
-            get => _serverName;
-            set { _serverName = value; OnPropertyChanged(); }
-        }
+        [ObservableProperty]
+        private string serverName = string.Empty;
 
-        private string _errorMessage = string.Empty;
-        public string ErrorMessage
-        {
-            get => _errorMessage;
-            set { _errorMessage = value; OnPropertyChanged(); }
-        }
+        [ObservableProperty]
+        private string errorMessage = string.Empty;
 
-        private string _serverImageUrl = string.Empty;
-        public string ServerImageUrl
-        {
-            get => _serverImageUrl;
-            set { _serverImageUrl = value; OnPropertyChanged(); }
-        }
-        public ICommand CreateCommand { get; }
+        [ObservableProperty]
+        private string serverImageUrl = string.Empty;
+
+        public IAsyncRelayCommand CreateCommand { get; }
 
         // Callback invoqué après création réussie
         public Action? OnCreated { get; set; }
 
         public CreateServerViewModel()
         {
-            CreateCommand = new RelayCommand(Create, () => true);
+            CreateCommand = new AsyncRelayCommand(Create, () => true);
         }
 
-        private async void Create()
+        private async Task Create()
         {
             ErrorMessage = string.Empty;
 

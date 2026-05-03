@@ -5,68 +5,49 @@ using Frontend.ViewModels.Base;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Frontend.ViewModels
 {
-    public class RegisterViewModel : BaseViewModel
+    public partial class RegisterViewModel : ObservableObject
     {
-        private string _username = "";
-        private string _password = "";
-        private string _errormessage = "";
+
+        [ObservableProperty]
+        private string username = string.Empty;
+
+        [ObservableProperty]
+        private string password = string.Empty;
+
+        [ObservableProperty]
+        private string errorMessage = string.Empty;
+
         private readonly ApiService _apiService = new();
 
         private MainViewModel? _main;
 
-        public ICommand? GoToLoginCommand { get; }
+        public IRelayCommand? GoToLoginCommand { get; }
 
-        public ICommand? RegisterCommand { get; }
+        public IAsyncRelayCommand? RegisterCommand { get; }
 
-        public string UserName
-        {
-            get => _username;
-            set
-            {
-                _username = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public string Password
-        {
-            get => _password;
-            set
-            {
-                _password = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public string ErrorMessage
-        {
-            get => _errormessage;
-            set
-            {
-                _errormessage = value;
-                OnPropertyChanged();
-            }
-        }
+        
         public RegisterViewModel(MainViewModel main)
         {
             _main = main;
-            GoToLoginCommand = new RelayCommand(() => _main.CurrentViewModel = new LoginViewModel(_main), () => true);
-            RegisterCommand = new RelayCommand(Register, () => true);
+            GoToLoginCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(() => _main.CurrentViewModel = new LoginViewModel(_main), () => true);
+            RegisterCommand = new CommunityToolkit.Mvvm.Input.AsyncRelayCommand(Register, () => true);
         }
 
-        public async void Register()
+        public async Task Register()
         {
-            ErrorMessage = "";
-            var res = await _apiService.RegisterUserAsync(new() { Password = _password, Username = _username });
+            ErrorMessage = string.Empty;
+            var res = await _apiService.RegisterUserAsync(new() { Password = Password, Username = Username });
 
             if (res.Success && res.User != null)
             {
                 Session.Current.Login(res.User);
 
-                _main.CurrentViewModel = new HomeViewModel(_main);
+                _main!.CurrentViewModel = new HomeViewModel(_main);
             }
             // Yassine
             else
