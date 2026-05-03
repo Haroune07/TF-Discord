@@ -80,12 +80,13 @@ namespace Frontend.ViewModels
 
             _ = _chatService.ConnectAsync();
 
+            // Use named handlers to allow proper unsubscription
             if (_main?.ChannelList != null)
-                _main.ChannelList.OnChannelSelected += async (id) => await SelectChannelAsync(id);
+                _main.ChannelList.OnChannelSelected += OnChannelSelected;
 
             if (_main?.ServerList != null)
             {
-                _main.ServerList.OnServerSelected += (id) => IsDMMode = false;
+                _main.ServerList.OnServerSelected += OnServerSelected;
                 _ = _main.ServerList.LoadServersAsync();
             }
             CurrentUserAvatar.Refresh();
@@ -102,9 +103,29 @@ namespace Frontend.ViewModels
 
         private async void Logout()
         {
+            // 1. Unsubscribe from global events to prevent ghost calls
+            if (_main?.ChannelList != null)
+                _main.ChannelList.OnChannelSelected -= OnChannelSelected;
+
+            if (_main?.ServerList != null)
+                _main.ServerList.OnServerSelected -= OnServerSelected;
+
+            // 2. Clear state and disconnect
             await _chatService.DisconnectAsync();
-            Session.Current.Logout();
+            _main?.ResetState();
+
+            // 3. Navigate back to login
             _main!.CurrentViewModel = new LoginViewModel(_main);
+        }
+
+        private async void OnChannelSelected(string id)
+        {
+            await SelectChannelAsync(id);
+        }
+
+        private void OnServerSelected(string id)
+        {
+            IsDMMode = false;
         }
 
         public async Task SelectChannelAsync(string channelId)
@@ -112,6 +133,5 @@ namespace Frontend.ViewModels
             IsDMMode = false;
             await ActiveChat.LoadChannelAsync(channelId);
         }
-
     }
 }
