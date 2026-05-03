@@ -1,6 +1,4 @@
-﻿using Frontend.Commands;
-using System.Windows.Input;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 
 
 public class ChannelViewModel

@@ -1,12 +1,11 @@
-﻿using Frontend.Commands;
-using Frontend.Global;
+﻿using Frontend.Global;
 using Frontend.Services;
-using Frontend.ViewModels.Base;
 using Shared.DTOs;
 using Shared.DTOs.Requests;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 
 namespace Frontend.ViewModels
@@ -23,7 +22,7 @@ namespace Frontend.ViewModels
         public UserListViewModel(Action<string> onDMChannelReady)
         {
             _onDMChannelReady = onDMChannelReady;
-            OpenDMCommand = new RelayCommand<UserDTO>(async (user) => await OpenDMAsync(user!), (user) => user != null);
+            OpenDMCommand = new AsyncRelayCommand<UserDTO>(async (user) => await OpenDMAsync(user!), (user) => user != null);
 
         }
 

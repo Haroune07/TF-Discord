@@ -1,5 +1,4 @@
 using Frontend.Global;
-using Frontend.ViewModels.Base;
 using Shared.DTOs;
 using CommunityToolkit.Mvvm.ComponentModel;
 
