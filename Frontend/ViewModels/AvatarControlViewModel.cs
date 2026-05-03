@@ -65,9 +65,12 @@ namespace Frontend.ViewModels
                 AvatarImage = _sourceUser.ProfileImageUrl;
                 IsOnline = _sourceUser.IsOnline;
                 AvatarOpacity = string.IsNullOrEmpty(AvatarImage) ? 0 : 1;
+                
+                // Using pack URI for absolute safety in WPF resources
                 OnlineStatusImage = IsOnline
-                    ? "/Static/Images/online.png"
-                    : "/Static/Images/invisible.png";
+                    ? "pack://application:,,,/Static/Images/online.png"
+                    : "pack://application:,,,/Static/Images/invisible.png";
+                
                 OnlineStatusText = IsOnline ? "En ligne" : "Invisible";
             }
         }
