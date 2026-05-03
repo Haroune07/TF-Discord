@@ -21,8 +21,14 @@ namespace Shared.Constants
         public const string DeleteMessageRoute = "/api/message";
 
         public const string GetAllUsersRoute = "/api/user/all";
+        public const string SearchUser = "/api/user/search";
 
         public const string UpdateStatus = "/api/user/{0}/update-status";
         public const string UpdatePfp = "/api/user/{0}/update-pfp";
+
+        public const string SendFriendRequestRoute = "/api/friendship/request";
+        public const string GetFriendsRoute = "/api/friendship/friends";
+        public const string GetPendingFriendsRoute = "/api/friendship/pending";
+        public const string UpdateFriendshipStatusRoute = "/api/friendship";
     }
 }

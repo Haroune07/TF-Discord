@@ -11,13 +11,18 @@
 
   <ItemGroup>
     <None Remove="Static\Images\bg_auth.jpg" />
+    <None Remove="Static\Images\DM.png" />
     <None Remove="Static\Images\home_button_image.png" />
     <None Remove="Static\Images\idle.png" />
     <None Remove="Static\Images\invisible.png" />
     <None Remove="Static\Images\online.png" />
+    <None Remove="Static\Images\plus.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Static\Images\DM.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Static\Images\DND.png" />
     <Resource Include="Static\Images\idle.png" />
     <Resource Include="Static\Images\invisible.png" />
@@ -27,6 +32,9 @@
     </Resource>
     <Resource Include="Static\Images\bg_auth.jpg" />
     <Resource Include="Static\Images\home_button_image.png" />
+    <Resource Include="Static\Images\plus.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
