@@ -19,6 +19,10 @@ namespace Backend.Src.Services
 
         public async Task<MessageDTO> SendMessageAsync(CreateMessageRequest req)
         {
+            var sender = await _users.GetByIdAsync(req.SenderId);
+            if (sender == null)
+                throw new Exception("Sender not found");
+
             var message = new Message
             {
                 Content = req.Content,
@@ -29,15 +33,13 @@ namespace Backend.Src.Services
 
             await _messages.InsertAsync(message);
 
-            var sender = await _users.GetByIdAsync(message.SenderId);
-
             return new MessageDTO
             {
                 Id = message.Id,
                 Content = message.Content,
                 ChannelId = message.ChannelId,
                 SentAt = message.SentAt,
-                Sender = sender == null ? new UserDTO { Id = message.SenderId } : sender.ToDTO()!
+                Sender = sender.ToDTO()!
             };
         }
 
