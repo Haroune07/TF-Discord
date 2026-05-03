@@ -1,4 +1,4 @@
-﻿
+
 using Frontend.Services;
 using Frontend.ViewModels.Base;
 using System.Collections.ObjectModel;
@@ -16,6 +16,12 @@ namespace Frontend.ViewModels
         public ChannelListViewModel()
         {
             Channels = new ObservableCollection<ChannelViewModel>();
+        }
+
+        public void Clear()
+        {
+            Channels.Clear();
+            OnChannelSelected = null; // Reset event handlers
         }
 
         public async Task LoadChannelsAsync(string serverId)
