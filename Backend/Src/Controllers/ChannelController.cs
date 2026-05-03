@@ -46,5 +46,12 @@ namespace Backend.Src.Controllers
             var channels = await _channelService.GetServerChannelsAsync(serverId);
             return Ok(channels);
         }
+
+        [HttpGet("dm/{userId}")]
+        public async Task<ActionResult<List<ChannelDTO>>> GetDMChannels(string userId)
+        {
+            var channels = await _channelService.GetUserDMChannelsAsync(userId);
+            return Ok(channels);
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Shared.Constants;
+using Shared.Constants;
 using Shared.DTOs;
 using Shared.DTOs.Auth;
 using Shared.DTOs.Requests;
@@ -119,6 +119,35 @@ namespace Frontend.Services
             var route = string.Format(Routes.UpdatePfp, userId);
             var response = await _client.PutAsJsonAsync(route, imageUrl);
             return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> SendFriendRequestAsync(string requesterId, string targetUsername)
+        {
+            var url = $"{Routes.SendFriendRequestRoute}?requesterId={requesterId}&targetUsername={targetUsername}";
+            var response = await _client.PostAsync(url, null);
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<List<FriendshipDTO>> GetFriendsAsync(string userId)
+        {
+            return await _client.GetFromJsonAsync<List<FriendshipDTO>>($"{Routes.GetFriendsRoute}/{userId}") ?? new();
+        }
+
+        public async Task<List<FriendshipDTO>> GetPendingRequestsAsync(string userId)
+        {
+            return await _client.GetFromJsonAsync<List<FriendshipDTO>>($"{Routes.GetPendingFriendsRoute}/{userId}") ?? new();
+        }
+
+        public async Task<bool> UpdateFriendshipStatusAsync(string friendshipId, string userId, Shared.Enums.FriendshipStatus status)
+        {
+            var url = $"{Routes.UpdateFriendshipStatusRoute}/{friendshipId}/status?userId={userId}&status={status}";
+            var response = await _client.PutAsync(url, null);
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<List<ChannelDTO>> GetMyDMChannelsAsync(string userId)
+        {
+            return await _client.GetFromJsonAsync<List<ChannelDTO>>($"/api/channel/dm/{userId}") ?? new();
         }
 
         public async Task<List<UserDTO>> SearchUsersAsync(string username)

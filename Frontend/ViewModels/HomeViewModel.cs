@@ -3,6 +3,7 @@ using Frontend.Global;
 using Frontend.Services;
 using Frontend.ViewModels.Base;
 using Shared.DTOs;
+using System.Windows;
 using System.Windows.Input;
 
 namespace Frontend.ViewModels
@@ -30,6 +31,7 @@ namespace Frontend.ViewModels
                 _isDMMode = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(IsServerMode));
+                if (_isDMMode) _ = UserList.LoadUsersAsync();
             }
         }
         public bool IsServerMode => !IsDMMode;
@@ -44,6 +46,7 @@ namespace Frontend.ViewModels
         public ICommand? GoToHomeCommand { get; }
 
         private readonly ChatService _chatService;
+        private readonly ApiService _apiService;
         public SearchUserViewModel SearchVM { get; set; } = new SearchUserViewModel();
 
         public HomeViewModel(MainViewModel main)
@@ -52,18 +55,28 @@ namespace Frontend.ViewModels
             GoToLoginCommand = new RelayCommand(Logout, () => true);
             GoToHomeCommand = new RelayCommand(SwitchToDMMode, () => true);
 
-            var apiService = new ApiService();
+            _apiService = new ApiService();
             _chatService = new ChatService();
-            ActiveChat = new ChatViewModel(apiService, _chatService);
+            ActiveChat = new ChatViewModel(_apiService, _chatService);
 
             CurrentUserAvatar = new(User);
-            Profile = new ProfileViewModel(apiService, Logout);
+            Profile = new ProfileViewModel(_apiService, Logout);
 
             UserList = new UserListViewModel(async (channelId) =>
             {
                 IsDMMode = true;
                 await ActiveChat.LoadChannelAsync(channelId);
             });
+
+            SearchVM.OnDMRequest += (channelId) =>
+            {
+                Application.Current.Dispatcher.Invoke(async () =>
+                {
+                    IsDMMode = true;
+                    await UserList.LoadUsersAsync();
+                    await ActiveChat.LoadChannelAsync(channelId);
+                });
+            };
 
             _ = _chatService.ConnectAsync();
 
@@ -76,6 +89,9 @@ namespace Frontend.ViewModels
                 _ = _main.ServerList.LoadServersAsync();
             }
             CurrentUserAvatar.Refresh();
+
+            // Load initial data
+            _ = UserList.LoadUsersAsync();
         }
 
         private void SwitchToDMMode()
@@ -96,5 +112,6 @@ namespace Frontend.ViewModels
             IsDMMode = false;
             await ActiveChat.LoadChannelAsync(channelId);
         }
+
     }
 }
