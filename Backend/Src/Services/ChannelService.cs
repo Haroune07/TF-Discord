@@ -9,10 +9,12 @@ namespace Backend.Src.Services
     public class ChannelService
     {
         private readonly IRepository<Channel> _channels;
+        private readonly IRepository<User> _users;
 
-        public ChannelService(IRepository<Channel> channelRepo)
+        public ChannelService(IRepository<Channel> channelRepo, IRepository<User> userRepo)
         {
             _channels = channelRepo;
+            _users = userRepo;
         }
 
         public async Task<ChannelDTO> CreateServerChannelAsync(CreateChannelRequest req)
@@ -85,6 +87,42 @@ namespace Backend.Src.Services
                 Type = c.Type,
                 CreatedAt = c.CreatedAt
             }).ToList();
+        }
+
+        public async Task<List<ChannelDTO>> GetUserDMChannelsAsync(string userId)
+        {
+            var channels = await _channels.FindAsync(c => c.Type == ChannelType.Direct && c.Participants != null && c.Participants.Contains(userId));
+
+            var results = new List<ChannelDTO>();
+            foreach (var c in channels)
+            {
+                var participants = new List<UserDTO>();
+                foreach (var pId in c.Participants ?? new List<string>())
+                {
+                    if (string.IsNullOrWhiteSpace(pId)) continue;
+
+                    var user = await _users.GetByIdAsync(pId);
+                    if (user != null)
+                    {
+                        participants.Add(new UserDTO 
+                        { 
+                            Id = user.Id, 
+                            Username = user.Username, 
+                            ProfileImageUrl = user.ProfileImageUrl,
+                            IsOnline = user.IsOnline
+                        });
+                    }
+                }
+
+                results.Add(new ChannelDTO
+                {
+                    Id = c.Id,
+                    Type = c.Type,
+                    CreatedAt = c.CreatedAt,
+                    Participants = participants
+                });
+            }
+            return results;
         }
     }
 }

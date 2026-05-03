@@ -1,13 +1,15 @@
-﻿using Frontend.Global;
+using Frontend.Global;
 using Frontend.Services;
+using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 namespace Frontend.ViewModels
 {
-    public class ServerListViewModel : ObservableObject
+    public partial class ServerListViewModel : ObservableObject
     {
         public ObservableCollection<ServerViewModel> Servers { get; set; }
         private readonly Action<string> _onServerSelected;
@@ -19,19 +21,22 @@ namespace Frontend.ViewModels
         {
             _onServerSelected = onServerSelected;
             Servers = new ObservableCollection<ServerViewModel>();
-            CreateServerCommand = new RelayCommand(OpenCreateServerWindow, () => true);
+            CreateServerCommand = new RelayCommand(OpenCreateServerWindow);
+        }
+
+        public void Clear()
+        {
+            Servers.Clear();
+            OnServerSelected = null;
         }
 
         public async Task LoadServersAsync()
         {
             if (Session.Current.User == null) return;
 
-            Servers.Clear(); // On vide la liste pour éviter les doublons
+            Servers.Clear();
 
             var data = await _apiService.GetAllServers();
-
-            // on devrait utiliser cette méthode, mais en ce moment on teste
-            //var data = await _apiService.GetMyServersAsync(Session.Current.User.Id);
 
             foreach (var s in data)
             {

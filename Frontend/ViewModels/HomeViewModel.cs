@@ -3,6 +3,8 @@ using Frontend.Services;
 using Shared.DTOs;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Windows;
+using System.Threading.Tasks;
 
 namespace Frontend.ViewModels
 {
@@ -22,8 +24,12 @@ namespace Frontend.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsServerMode))]
-        private bool isDMMode = false;
+        private bool _isDMMode = false;
 
+        partial void OnIsDMModeChanged(bool value)
+        {
+            if (value) _ = UserList.LoadUsersAsync();
+        }
 
         public bool IsServerMode => !IsDMMode;
 
@@ -37,19 +43,21 @@ namespace Frontend.ViewModels
         public IRelayCommand? GoToHomeCommand { get; }
 
         private readonly ChatService _chatService;
+        private readonly ApiService _apiService;
+        public SearchUserViewModel SearchVM { get; set; } = new SearchUserViewModel();
 
         public HomeViewModel(MainViewModel main)
         {
             _main = main;
-            GoToLoginCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(Logout, () => true);
-            GoToHomeCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(SwitchToDMMode, () => true);
+            GoToLoginCommand = new RelayCommand(Logout);
+            GoToHomeCommand = new RelayCommand(SwitchToDMMode);
 
-            var apiService = new ApiService();
+            _apiService = new ApiService();
             _chatService = new ChatService();
-            ActiveChat = new ChatViewModel(apiService, _chatService);
+            ActiveChat = new ChatViewModel(_apiService, _chatService);
 
             CurrentUserAvatar = new(User);
-            Profile = new ProfileViewModel(apiService, Logout);
+            Profile = new ProfileViewModel(_apiService, Logout);
 
             UserList = new UserListViewModel(async (channelId) =>
             {
@@ -57,30 +65,63 @@ namespace Frontend.ViewModels
                 await ActiveChat.LoadChannelAsync(channelId);
             });
 
-            _ =_chatService.ConnectAsync();
+            SearchVM.OnDMRequest += (channelId) =>
+            {
+                Application.Current.Dispatcher.Invoke(async () =>
+                {
+                    IsDMMode = true;
+                    await UserList.LoadUsersAsync();
+                    await ActiveChat.LoadChannelAsync(channelId);
+                });
+            };
 
+            _ = _chatService.ConnectAsync();
+
+            // Use named handlers to allow proper unsubscription
             if (_main?.ChannelList != null)
-                _main.ChannelList.OnChannelSelected += async (id) => await SelectChannelAsync(id);
+                _main.ChannelList.OnChannelSelected += OnChannelSelected;
 
             if (_main?.ServerList != null)
             {
-                _main.ServerList.OnServerSelected += (id) => IsDMMode = false;
+                _main.ServerList.OnServerSelected += OnServerSelected;
                 _ = _main.ServerList.LoadServersAsync();
             }
             CurrentUserAvatar.Refresh();
+
+            // Load initial data
+            _ = UserList.LoadUsersAsync();
         }
 
         private void SwitchToDMMode()
         {
             IsDMMode = true;
-            _ = UserList.LoadUsersAsync();
         }
 
         private async void Logout()
         {
+            // 1. Unsubscribe from global events to prevent ghost calls
+            if (_main?.ChannelList != null)
+                _main.ChannelList.OnChannelSelected -= OnChannelSelected;
+
+            if (_main?.ServerList != null)
+                _main.ServerList.OnServerSelected -= OnServerSelected;
+
+            // 2. Clear state and disconnect
             await _chatService.DisconnectAsync();
-            Session.Current.Logout();
+            _main?.ResetState();
+
+            // 3. Navigate back to login
             _main!.CurrentViewModel = new LoginViewModel(_main);
+        }
+
+        private async void OnChannelSelected(string id)
+        {
+            await SelectChannelAsync(id);
+        }
+
+        private void OnServerSelected(string id)
+        {
+            IsDMMode = false;
         }
 
         public async Task SelectChannelAsync(string channelId)
