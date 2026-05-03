@@ -1,7 +1,6 @@
 ﻿using Frontend.Global;
 using Frontend.Services;
 using Shared.DTOs;
-using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -14,9 +13,9 @@ namespace Frontend.ViewModels
         public UserDTO? User { get; } = Session.Current.User;
         public AvatarControlViewModel Avatar { get; }
 
-        public ICommand UploadAvatarCommand { get; }
-        public ICommand SetOnlineStatusCommand { get; }
-        public ICommand LogoutCommand { get; } // Ajouté pour le bouton Logout
+        public IAsyncRelayCommand UploadAvatarCommand { get; }
+        public IAsyncRelayCommand SetOnlineStatusCommand { get; }
+        public IRelayCommand LogoutCommand { get; } // Ajouté pour le bouton Logout
 
         public ProfileViewModel(ApiService apiService, Action onLogout)
         {
