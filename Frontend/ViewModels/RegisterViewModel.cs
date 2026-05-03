@@ -58,12 +58,10 @@ namespace Frontend.ViewModels
 
                 _main!.CurrentViewModel = new HomeViewModel(_main);
             }
-            // Yassine
             else
             {
                 ErrorMessage = res.Message;
             }
-            // End
 
             Debug.WriteLine(JsonSerializer.Serialize(res));
 

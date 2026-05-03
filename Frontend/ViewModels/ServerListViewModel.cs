@@ -36,7 +36,7 @@ namespace Frontend.ViewModels
 
             Servers.Clear();
 
-            var data = await _apiService.GetAllServers();
+            var data = await _apiService.GetAllServersAsync();
 
             foreach (var s in data)
             {

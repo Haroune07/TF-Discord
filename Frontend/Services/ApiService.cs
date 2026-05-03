@@ -94,8 +94,7 @@ namespace Frontend.Services
             return res.IsSuccessStatusCode;
         }
 
-        //test method
-        public async Task<List<ServerDTO>> GetAllServers()
+        public async Task<List<ServerDTO>> GetAllServersAsync()
         {
             var res = await _client.GetFromJsonAsync<List<ServerDTO>>(Routes.GetAllServersRoute);
 
