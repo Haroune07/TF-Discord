@@ -20,5 +20,8 @@
 
         public const string GetAllUsersRoute = "/api/user/all";
 
+        public const string UpdateStatus = "api/user/{0}/update-status";
+        public const string UpdatePfp = "api/user/{0}/update-pfp";
+
     }
 }

@@ -1,0 +1,46 @@
+﻿<UserControl x:Class="Frontend.Views.ProfileView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Frontend.Views"
+             mc:Ignorable="d"
+             xmlns:components="clr-namespace:Frontend.Views.Components"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Border Grid.Row="2" Background="#232428" Padding="8,0">
+        <Grid VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal">
+                <components:AvatarControl DataContext="{Binding Avatar}" Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+              Width="32" Height="32" 
+              Margin="0,0,8,0">
+                    <components:AvatarControl.ContextMenu>
+                        <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                            <MenuItem Header="Téléverser une image de profil (url)" 
+          Command="{Binding PlacementTarget.Tag.UploadAvatarCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+
+                            <MenuItem Header="Statut en ligne">
+                                <MenuItem Header="En ligne" 
+              Command="{Binding PlacementTarget.Tag.SetOnlineStatusCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
+              CommandParameter="True"/>
+                                <MenuItem Header="Invisible" 
+              Command="{Binding PlacementTarget.Tag.SetOnlineStatusCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
+              CommandParameter="False"/>
+                            </MenuItem>
+                        </ContextMenu>
+                    </components:AvatarControl.ContextMenu>
+                </components:AvatarControl>
+
+                <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding User.Username}" Foreground="White"
+                           FontSize="12" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding Avatar.OnlineStatusText}" Foreground="#B5BAC1" FontSize="10"/>
+                    <TextBlock Text="{Binding User.CreatedAt}" Foreground="#B5BAC1" FontSize="10"/>
+                </StackPanel>
+            </StackPanel>
+            <Button Command="{Binding LogoutCommand}" Width="33"
+                Margin="181,0,10,0" Background="#313338">
+                <Image Source="/Static/Images/logoutlogo.png" Stretch="Uniform"/>
+            </Button>
+        </Grid>
+    </Border>
+</UserControl>
