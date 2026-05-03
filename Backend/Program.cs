@@ -35,6 +35,8 @@ namespace Backend
             builder.Services.AddScoped<IRepository<Channel>, MongoRepository<Channel>>();
             builder.Services.AddScoped<MessageService>();
             builder.Services.AddScoped<IRepository<Message>, MongoRepository<Message>>();
+            builder.Services.AddScoped<FriendshipService>();
+            builder.Services.AddScoped<IRepository<Friendship>, MongoRepository<Friendship>>();
             builder.WebHost.UseUrls(Shared.Constants.Ports.SERVER_LISTEN_URL);
 
             builder.Services.AddCors(options =>

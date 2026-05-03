@@ -23,7 +23,7 @@
                            Foreground="White"
                            FontSize="12"
                            FontWeight="Bold"/>
-                <Ellipse Width="32" Height="32">
+                <Ellipse>
                     <Ellipse.Fill>
                         <ImageBrush ImageSource="{Binding AvatarImage, ElementName=Root}" 
                                     Stretch="UniformToFill" 

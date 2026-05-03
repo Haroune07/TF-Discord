@@ -1,3 +1,4 @@
+using Backend.Src.Models;
 using Backend.Src.Services;
 using Microsoft.AspNetCore.Mvc;
 using Shared.DTOs;
@@ -65,5 +66,22 @@ public class UserController : ControllerBase
         var success = await _userService.UpdateOnlineStatusAsync(userId, newStatus);
         if (!success) return NotFound("User not found");
         return NoContent();
+    }
+
+    [HttpGet("search/{username}")]
+    public async Task<ActionResult<List<UserDTO>>> SearchUsers(string username)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(username))
+                return Ok(new List<UserDTO>());
+            var results = await _userService.SearchUsersAsync(username);
+
+            return Ok(results);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Erreur interne : {ex.Message}");
+        }
     }
 }
