@@ -1,54 +1,32 @@
 using Frontend.Global;
-using Frontend.ViewModels.Base;
 using Shared.DTOs;
+using CommunityToolkit.Mvvm.ComponentModel;
+
 
 namespace Frontend.ViewModels
 {
-    public class AvatarControlViewModel : BaseViewModel
+    public partial class AvatarControlViewModel : ObservableObject
     {
         private UserDTO? _sourceUser;
 
-        private string _initials = string.Empty;
-        public string Initials
-        {
-            get => _initials;
-            set { _initials = value; OnPropertyChanged(); }
-        }
+        [ObservableProperty]
+        private string initials = string.Empty;
 
-        private double _avatarOpacity;
-        public double AvatarOpacity
-        {
-            get => _avatarOpacity;
-            set { _avatarOpacity = value; OnPropertyChanged(); }
-        }
+        [ObservableProperty]
+        private double avatarOpacity;
 
-        private string? _onlineStatusImage;
-        public string? OnlineStatusImage
-        {
-            get => _onlineStatusImage;
-            set { _onlineStatusImage = value; OnPropertyChanged(); }
-        }
+        [ObservableProperty]
+        private string? onlineStatusImage;
 
-        private bool _isOnline;
-        public bool IsOnline
-        {
-            get => _isOnline;
-            set { _isOnline = value; OnPropertyChanged(); }
-        }
+        [ObservableProperty]
+        private bool isOnline;
 
-        private string _onlineStatusText = string.Empty;
-        public string OnlineStatusText
-        {
-            get => _onlineStatusText;
-            set { _onlineStatusText = value; OnPropertyChanged(); }
-        }
+        [ObservableProperty]
+        private string onlineStatusText = string.Empty;
 
-        private string? _avatarImage;
-        public string? AvatarImage
-        {
-            get => _avatarImage;
-            set { _avatarImage = value; OnPropertyChanged(); }
-        }
+        [ObservableProperty]
+        private string? avatarImage;
+
 
         public AvatarControlViewModel(UserDTO? user = null)
         {

@@ -1,47 +1,39 @@
 using Frontend.Services;
-using Frontend.ViewModels.Base;
 using Shared.DTOs.Requests;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Frontend.ViewModels
 {
-    public class SearchUserViewModel : BaseViewModel
+    public partial class SearchUserViewModel : ObservableObject
     {
-        public ObservableCollection<UserInviteViewModel> Users { get; set; }
+        public ObservableCollection<UserInviteViewModel> Users { get; set; } = new();
         private readonly ApiService _apiService = new();
 
         public event Action<string>? OnDMRequest;
+
         public bool HasResults => Users.Count > 0;
 
-        private string _inputText = string.Empty;
-        public string InputText
+        [ObservableProperty]
+        private string inputText = string.Empty;
+
+        partial void OnInputTextChanged(string value)
         {
-            get => _inputText;
-            set
-            {
-                if (_inputText != value)
-                {
-                    _inputText = value;
-                    OnPropertyChanged();
-                    _ = LoadUserInvite(_inputText);
-                }
-            }
+            _ = LoadUserInvite(value);
         }
+
+        public string SelectedServerId { get; set; } = string.Empty;
 
         public SearchUserViewModel()
         {
-            Users = new ObservableCollection<UserInviteViewModel>();
         }
-        public string SelectedServerId { get; set; }
 
         public async Task LoadUserInvite(string query)
         {
-            
             if (string.IsNullOrWhiteSpace(query))
             {
                 Users.Clear();
@@ -56,7 +48,6 @@ namespace Frontend.ViewModels
 
                 foreach (var c in data)
                 {
-                    
                     Users.Add(new UserInviteViewModel(
                         onDM: async (id) => await HandleOpenDM(id),
                         onInvite: async (id) => await HandleServerInvite(id, c.Username)
@@ -77,7 +68,6 @@ namespace Frontend.ViewModels
                 OnPropertyChanged(nameof(HasResults));
             }
         }
-
 
         private async Task HandleOpenDM(string userId)
         {

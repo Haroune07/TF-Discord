@@ -1,76 +1,55 @@
-using Frontend.Commands;
 using Frontend.Global;
 using Frontend.Services;
-using Frontend.ViewModels.Base;
 using System.Diagnostics;
 using System.Text.Json;
-using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
 
 namespace Frontend.ViewModels
 {
-    public class LoginViewModel : BaseViewModel
+    public partial class LoginViewModel : ObservableObject
     {
-        private string _username = "";
-        private string _password = "";
-        private string _errormessage = "";
+
+        [ObservableProperty]
+        private string userName = string.Empty;
+
+        [ObservableProperty]
+        private string password = string.Empty;
+
+        [ObservableProperty]
+        private string errorMessage = string.Empty;
 
         private readonly ApiService _apiService = new();
 
         private MainViewModel? _main;
-        public ICommand? GoToRegisterCommand { get; }
+        public IRelayCommand? GoToRegisterCommand { get; }
 
-        public ICommand? LoginCommand { get; }
+        public IAsyncRelayCommand? LoginCommand { get; }
 
         public LoginViewModel(MainViewModel main)
         {
             _main = main;
-            LoginCommand = new RelayCommand(Login, () => true);
-            GoToRegisterCommand = new RelayCommand(() => main.CurrentViewModel = new RegisterViewModel(_main), () => true);
+            LoginCommand = new AsyncRelayCommand(Login, () => true);
+            GoToRegisterCommand = new RelayCommand(() => { if (_main != null) _main.CurrentViewModel = new RegisterViewModel(_main); });
         }
 
         public LoginViewModel() { }
 
-        public string UserName
-        {
-            get => _username;
-            set
-            {
-                _username = value;
-                OnPropertyChanged();
-            }
-        }
 
-        public string Password
-        {
-            private get => _password;
-            set
-            {
-                _password = value;
-                OnPropertyChanged();
-            }
-        }
 
-        public string ErrorMessage
-        {
-            get => _errormessage;
-            set
-            {
-                _errormessage = value;
-                OnPropertyChanged();
-            }
-        }
 
-        public async void Login()
+        public async Task Login()
         {
-            ErrorMessage = "";
+            ErrorMessage = string.Empty;
 
-            var res = await _apiService.LoginUserAsync(new() { Password = _password, Username = _username });
+            var res = await _apiService.LoginUserAsync(new() { Password = Password, Username = UserName });
 
             if (res.Success && res.User != null)
             {
                 Session.Current.Login(res.User);
 
-                _main.CurrentViewModel = new HomeViewModel(_main);
+                _main?.CurrentViewModel = new HomeViewModel(_main);
             }
 
             else

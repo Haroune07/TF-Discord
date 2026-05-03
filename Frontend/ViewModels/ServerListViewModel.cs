@@ -1,38 +1,42 @@
-using Frontend.Commands;
 using Frontend.Global;
 using Frontend.Services;
-using Frontend.ViewModels.Base;
+using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Frontend.ViewModels
 {
-    public class ServerListViewModel : BaseViewModel
+    public partial class ServerListViewModel : ObservableObject
     {
         public ObservableCollection<ServerViewModel> Servers { get; set; }
         private readonly Action<string> _onServerSelected;
         private readonly ApiService _apiService = new();
         public event Action<string>? OnServerSelected;
-        public ICommand CreateServerCommand { get; }
+        public IRelayCommand CreateServerCommand { get; }
 
         public ServerListViewModel(Action<string> onServerSelected)
         {
             _onServerSelected = onServerSelected;
             Servers = new ObservableCollection<ServerViewModel>();
-            CreateServerCommand = new RelayCommand(OpenCreateServerWindow, () => true);
+            CreateServerCommand = new RelayCommand(OpenCreateServerWindow);
+        }
+
+        public void Clear()
+        {
+            Servers.Clear();
+            OnServerSelected = null;
         }
 
         public async Task LoadServersAsync()
         {
             if (Session.Current.User == null) return;
 
-            Servers.Clear(); // On vide la liste pour éviter les doublons
+            Servers.Clear();
 
             var data = await _apiService.GetAllServers();
-
-            // on devrait utiliser cette méthode, mais en ce moment on teste
-            //var data = await _apiService.GetMyServersAsync(Session.Current.User.Id);
 
             foreach (var s in data)
             {
@@ -47,12 +51,6 @@ namespace Frontend.ViewModels
                     s.ServerImageUrl
                 ));
             }
-        }
-
-        public void Clear()
-        {
-            Servers.Clear();
-            OnServerSelected = null;
         }
 
         private void OpenCreateServerWindow()
