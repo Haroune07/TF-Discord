@@ -3,59 +3,85 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:Frontend.Views"
              mc:Ignorable="d" 
-             x:Name="Root"
              d:DesignHeight="48" d:DesignWidth="48">
 
-    <Border CornerRadius="14" Width="48" Height="48" Background="#5865F2" ClipToBounds="True">
-        <Button Command="{Binding SelectCommand}" Background="Transparent" BorderThickness="0">
-            <Button.Template>
-                <ControlTemplate TargetType="Button">
-                    <Grid Background="Transparent">
+    <Grid>
 
-                        <!-- Initiales (fallback si pas d'image) -->
-                        <TextBlock Text="{Binding Initials}"
-                                   Foreground="White"
-                                   FontWeight="Bold"
-                                   FontSize="16"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ServerImageUrl}" Value="{x:Null}">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding ServerImageUrl}" Value="">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
+        <!-- Barre blanche (serveur actif) -->
+        <Border Width="4"
+                HorizontalAlignment="Left"
+                Background="White"
+                CornerRadius="2"
+                Margin="0,8,0,8">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+        </Border>
 
-                        <!-- Image par-dessus si URL prsente -->
-                        <Image Source="{Binding ServerImageUrl}"
-                               Stretch="UniformToFill">
-                            <Image.Style>
-                                <Style TargetType="Image">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ServerImageUrl}" Value="{x:Null}">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding ServerImageUrl}" Value="">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Image.Style>
-                        </Image>
+        <!-- Contenu serveur -->
+        <Border CornerRadius="14"
+                Width="48"
+                Height="48"
+                Background="#5865F2"
+                Margin="6,0,0,0"
+                ClipToBounds="True">
 
-                    </Grid>
-                </ControlTemplate>
-            </Button.Template>
-        </Button>
-    </Border>
+            <Button Command="{Binding SelectCommand}"
+                    Background="Transparent"
+                    BorderThickness="0">
+
+                <Grid>
+
+                    <!-- Initiales -->
+                    <TextBlock Text="{Binding Initials}"
+                               Foreground="White"
+                               FontWeight="Bold"
+                               FontSize="16"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ServerImageUrl}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ServerImageUrl}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <!-- Image -->
+                    <Image Source="{Binding ServerImageUrl}" Stretch="UniformToFill">
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ServerImageUrl}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ServerImageUrl}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+
+                </Grid>
+
+            </Button>
+        </Border>
+
+    </Grid>
 </UserControl>
