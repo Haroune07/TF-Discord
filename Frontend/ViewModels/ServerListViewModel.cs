@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Linq;
 
 namespace Frontend.ViewModels
 {
@@ -14,6 +15,7 @@ namespace Frontend.ViewModels
         public ObservableCollection<ServerViewModel> Servers { get; set; }
         private readonly Action<string> _onServerSelected;
         private readonly ApiService _apiService = new();
+        private ServerViewModel? _selectedServer;
         public event Action<string>? OnServerSelected;
         public IRelayCommand CreateServerCommand { get; }
 
@@ -45,6 +47,18 @@ namespace Frontend.ViewModels
                     s.Id,
                     (id) =>
                     {
+                        var clicked = Servers.First(s => s.Id == id);
+                        if (clicked == _selectedServer)
+                            return;
+
+                        if (_selectedServer != null)
+                            _selectedServer.IsSelected = false;
+
+                        clicked.IsSelected = true;
+                        _selectedServer = clicked;
+
+
+
                         OnServerSelected?.Invoke(id);
                         _onServerSelected(id);
                     },
