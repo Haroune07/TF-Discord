@@ -14,7 +14,7 @@ namespace Frontend.ViewModels
 {
     public partial class UserListViewModel : ObservableObject
     {
-        private readonly ApiService _apiService = new();
+        private readonly ApiService _apiService;
         private readonly Action<string> _onDMChannelReady;
 
         public IRelayCommand OpenDMCommand { get; }
@@ -24,8 +24,9 @@ namespace Frontend.ViewModels
         public ObservableCollection<UserDTO> Users { get; set; } = new();
         public ObservableCollection<FriendshipDTO> PendingRequests { get; set; } = new();
 
-        public UserListViewModel(Action<string> onDMChannelReady)
+        public UserListViewModel(ApiService apiService, Action<string> onDMChannelReady)
         {
+            _apiService = apiService;
             _onDMChannelReady = onDMChannelReady;
             OpenDMCommand = new AsyncRelayCommand<UserDTO>(async (user) => await OpenDMAsync(user!), (user) => user != null);
             AcceptRequestCommand = new AsyncRelayCommand<FriendshipDTO>(async (req) => await UpdateRequestStatus(req!, Shared.Enums.FriendshipStatus.Accepted), (req) => req != null);

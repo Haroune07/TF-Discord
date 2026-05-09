@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Windows;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Frontend.ViewModels
 {
@@ -44,22 +45,31 @@ namespace Frontend.ViewModels
 
         private readonly ChatService _chatService;
         private readonly ApiService _apiService;
-        public SearchUserViewModel SearchVM { get; set; } = new SearchUserViewModel();
+        private readonly IServiceProvider _services;
+        public SearchUserViewModel SearchVM { get; set; }
 
-        public HomeViewModel(MainViewModel main)
+        public HomeViewModel(
+            MainViewModel main,
+            ApiService apiService,
+            ChatService chatService,
+            ChatViewModel activeChat,
+            SearchUserViewModel searchVM,
+            IServiceProvider services)
         {
             _main = main;
+            _apiService = apiService;
+            _chatService = chatService;
+            ActiveChat = activeChat;
+            SearchVM = searchVM;
+            _services = services;
+
             GoToLoginCommand = new RelayCommand(Logout);
             GoToHomeCommand = new RelayCommand(SwitchToDMMode);
-
-            _apiService = new ApiService();
-            _chatService = new ChatService();
-            ActiveChat = new ChatViewModel(_apiService, _chatService);
 
             CurrentUserAvatar = new(User);
             Profile = new ProfileViewModel(_apiService, Logout);
 
-            UserList = new UserListViewModel(async (channelId) =>
+            UserList = new UserListViewModel(_apiService, async (channelId) =>
             {
                 IsDMMode = true;
                 await ActiveChat.LoadChannelAsync(channelId);
@@ -77,7 +87,6 @@ namespace Frontend.ViewModels
 
             _ = _chatService.ConnectAsync();
 
-            // Use named handlers to allow proper unsubscription
             if (_main?.ChannelList != null)
                 _main.ChannelList.OnChannelSelected += OnChannelSelected;
 
@@ -88,7 +97,6 @@ namespace Frontend.ViewModels
             }
             CurrentUserAvatar.Refresh();
 
-            // Load initial data
             _ = UserList.LoadUsersAsync();
         }
 
@@ -99,19 +107,16 @@ namespace Frontend.ViewModels
 
         private async void Logout()
         {
-            // 1. Unsubscribe from global events to prevent ghost calls
             if (_main?.ChannelList != null)
                 _main.ChannelList.OnChannelSelected -= OnChannelSelected;
 
             if (_main?.ServerList != null)
                 _main.ServerList.OnServerSelected -= OnServerSelected;
 
-            // 2. Clear state and disconnect
             await _chatService.DisconnectAsync();
             _main?.ResetState();
 
-            // 3. Navigate back to login
-            _main!.CurrentViewModel = new LoginViewModel(_main);
+            _main!.CurrentViewModel = ActivatorUtilities.CreateInstance<LoginViewModel>(_services, _main);
         }
 
         private async void OnChannelSelected(string id)
