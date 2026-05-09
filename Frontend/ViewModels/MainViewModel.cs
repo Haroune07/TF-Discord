@@ -1,5 +1,6 @@
 using Frontend.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Extensions.DependencyInjection;
 
 public partial class MainViewModel : ObservableObject
 {
@@ -9,11 +10,11 @@ public partial class MainViewModel : ObservableObject
     public ServerListViewModel ServerList { get; }
     public ChannelListViewModel ChannelList { get; }
 
-    public MainViewModel()
+    public MainViewModel(ChannelListViewModel channelList, ServerListViewModel serverList, IServiceProvider services)
     {
-        ChannelList = new ChannelListViewModel();
-        ServerList = new ServerListViewModel(async serverId => await ChannelList.LoadChannelsAsync(serverId));
-        currentViewModel = new LoginViewModel(this);
+        ChannelList = channelList;
+        ServerList = serverList;
+        currentViewModel = ActivatorUtilities.CreateInstance<LoginViewModel>(services, this);
     }
 
     public void ResetState()
