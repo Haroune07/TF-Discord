@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Frontend.ViewModels
 {
@@ -26,7 +27,8 @@ namespace Frontend.ViewModels
         [ObservableProperty]
         private string errorMessage = string.Empty;
 
-        private readonly ApiService _apiService = new();
+        private readonly ApiService _apiService;
+        private readonly IServiceProvider _services;
 
         private MainViewModel? _main;
 
@@ -35,10 +37,12 @@ namespace Frontend.ViewModels
         public IAsyncRelayCommand? RegisterCommand { get; }
 
         
-        public RegisterViewModel(MainViewModel main)
+        public RegisterViewModel(MainViewModel main, ApiService apiService, IServiceProvider services)
         {
             _main = main;
-            GoToLoginCommand = new RelayCommand(() => { main.CurrentViewModel = new LoginViewModel(_main!); });
+            _apiService = apiService;
+            _services = services;
+            GoToLoginCommand = new RelayCommand(() => { main.CurrentViewModel = ActivatorUtilities.CreateInstance<LoginViewModel>(_services, _main!); });
             RegisterCommand = new AsyncRelayCommand(Register, () => true);
         }
 
@@ -56,7 +60,7 @@ namespace Frontend.ViewModels
             {
                 Session.Current.Login(res.User);
 
-                _main!.CurrentViewModel = new HomeViewModel(_main);
+                _main!.CurrentViewModel = ActivatorUtilities.CreateInstance<HomeViewModel>(_services, _main);
             }
             else
             {

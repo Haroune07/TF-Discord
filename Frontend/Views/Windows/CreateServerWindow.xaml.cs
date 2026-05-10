@@ -1,5 +1,6 @@
 ﻿using Frontend.ViewModels;
 using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Frontend.Views
 {
@@ -8,7 +9,7 @@ namespace Frontend.Views
         public CreateServerWindow()
         {
             InitializeComponent();
-            var vm = new CreateServerViewModel();
+            var vm = App.Services.GetRequiredService<CreateServerViewModel>();
             vm.OnCreated = () => { DialogResult = true; Close(); };
             DataContext = vm;
         }

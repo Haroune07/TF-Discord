@@ -1,17 +1,14 @@
 ﻿using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Frontend
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new MainViewModel();
+            DataContext = App.Services.GetRequiredService<MainViewModel>();
         }
     }
 }
-

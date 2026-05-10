@@ -12,7 +12,7 @@ namespace Frontend.ViewModels
     public partial class SearchUserViewModel : ObservableObject
     {
         public ObservableCollection<UserInviteViewModel> Users { get; set; } = new();
-        private readonly ApiService _apiService = new();
+        private readonly ApiService _apiService;
 
         public event Action<string>? OnDMRequest;
 
@@ -28,8 +28,9 @@ namespace Frontend.ViewModels
 
         public string SelectedServerId { get; set; } = string.Empty;
 
-        public SearchUserViewModel()
+        public SearchUserViewModel(ApiService apiService)
         {
+            _apiService = apiService;
         }
 
         public async Task LoadUserInvite(string query)

@@ -8,7 +8,7 @@ namespace Frontend.ViewModels
 {
     public partial class CreateServerViewModel : ObservableObject
     {
-        private readonly ApiService _apiService = new();
+        private readonly ApiService _apiService;
 
         [ObservableProperty]
         private string serverName = string.Empty;
@@ -24,8 +24,9 @@ namespace Frontend.ViewModels
         // Callback invoqué après création réussie
         public Action? OnCreated { get; set; }
 
-        public CreateServerViewModel()
+        public CreateServerViewModel(ApiService apiService)
         {
+            _apiService = apiService;
             CreateCommand = new AsyncRelayCommand(Create, () => true);
         }
 

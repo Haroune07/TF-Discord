@@ -10,12 +10,13 @@ namespace Frontend.ViewModels
     public partial class ChannelListViewModel : ObservableObject
     {
         public ObservableCollection<ChannelViewModel> Channels { get; set; }
-        private readonly ApiService _apiService = new();
+        private readonly ApiService _apiService;
 
         public event Action<string>? OnChannelSelected;
 
-        public ChannelListViewModel()
+        public ChannelListViewModel(ApiService apiService)
         {
+            _apiService = apiService;
             Channels = new ObservableCollection<ChannelViewModel>();
         }
 

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 
 
 namespace Frontend.ViewModels
@@ -20,22 +21,22 @@ namespace Frontend.ViewModels
         [ObservableProperty]
         private string errorMessage = string.Empty;
 
-        private readonly ApiService _apiService = new();
+        private readonly ApiService _apiService;
+        private readonly IServiceProvider _services;
 
         private MainViewModel? _main;
         public IRelayCommand? GoToRegisterCommand { get; }
 
         public IAsyncRelayCommand? LoginCommand { get; }
 
-        public LoginViewModel(MainViewModel main)
+        public LoginViewModel(MainViewModel main, ApiService apiService, IServiceProvider services)
         {
             _main = main;
+            _apiService = apiService;
+            _services = services;
             LoginCommand = new AsyncRelayCommand(Login, () => true);
-            GoToRegisterCommand = new RelayCommand(() => { if (_main != null) _main.CurrentViewModel = new RegisterViewModel(_main); });
+            GoToRegisterCommand = new RelayCommand(() => { if (_main != null) _main.CurrentViewModel = ActivatorUtilities.CreateInstance<RegisterViewModel>(_services, _main); });
         }
-
-        public LoginViewModel() { }
-
 
 
 
@@ -50,7 +51,7 @@ namespace Frontend.ViewModels
                 Session.Current.Login(res.User);
 
                 if (_main != null)
-                    _main.CurrentViewModel = new HomeViewModel(_main);
+                    _main.CurrentViewModel = ActivatorUtilities.CreateInstance<HomeViewModel>(_services, _main);
             }
 
             else
