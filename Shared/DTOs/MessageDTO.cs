@@ -7,5 +7,6 @@
         public string ChannelId { get; set; } = string.Empty;
         public UserDTO Sender { get; set; } = new();
         public DateTime SentAt { get; set; }
+        public bool IsEdited { get; set; }
     }
 }

@@ -83,7 +83,8 @@ namespace Backend.Src.Services
                 Content = message.Content,
                 ChannelId = message.ChannelId,
                 SentAt = message.SentAt,
-                Sender = sender == null ? new UserDTO { Id = message.SenderId } : sender.ToDTO()!
+                Sender = sender == null ? new UserDTO { Id = message.SenderId } : sender.ToDTO()!,
+                IsEdited = true
             };
         }
 
