@@ -4,8 +4,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.AspNetCore.SignalR;
-using System.Windows;
 
 
 namespace Frontend.ViewModels
@@ -13,30 +11,27 @@ namespace Frontend.ViewModels
     public partial class ChannelListViewModel : ObservableObject
     {
         public ObservableCollection<ChannelViewModel> Channels { get; set; }
-        private readonly ApiService _apiService;
-        private readonly ChatService _chatService;
-
+        private readonly IApiService _apiService;
+        private readonly IChatService _chatService;
+        private readonly IDispatcherService _dispatcher;
 
         public event Action<string>? OnChannelSelected;
 
-        // Dans ChannelListViewModel.cs
-
-        public ChannelListViewModel(ApiService apiService, ChatService chatService)
+        public ChannelListViewModel(IApiService apiService, IChatService chatService, IDispatcherService dispatcher)
         {
             _apiService = apiService;
             _chatService = chatService;
+            _dispatcher = dispatcher;
 
             Channels = new ObservableCollection<ChannelViewModel>();
 
             _chatService.MessageReceived += (message) =>
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                _dispatcher.Invoke(() =>
                 {
                     var channel = Channels.FirstOrDefault(c => c.Id == message.ChannelId);
-                    // On incrémente seulement si ce n'est pas le canal actif (logique optionnelle)
                     if (channel != null)
                     {
-                        // On utilise la propriété Visible pour stocker le compte
                         channel.Visible = 1;
                     }
                 });
