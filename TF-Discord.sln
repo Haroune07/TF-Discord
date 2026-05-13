@@ -11,13 +11,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend", "Backend\Backend.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{8843B97F-9207-4387-A868-B81A0FD3AD3D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TF-Discord.Tests", "TF-Discord.Tests\TF-Discord.Tests.csproj", "{71A2B34D-D31B-4EFE-8626-77F737EC4870}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{54493A6C-80FC-414F-8420-D6A168E2E9F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -36,5 +35,15 @@ Global
 		{8843B97F-9207-4387-A868-B81A0FD3AD3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8843B97F-9207-4387-A868-B81A0FD3AD3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8843B97F-9207-4387-A868-B81A0FD3AD3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71A2B34D-D31B-4EFE-8626-77F737EC4870}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71A2B34D-D31B-4EFE-8626-77F737EC4870}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71A2B34D-D31B-4EFE-8626-77F737EC4870}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71A2B34D-D31B-4EFE-8626-77F737EC4870}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7E124002-5A7B-472B-AE63-A3C4E6A700CF}
 	EndGlobalSection
 EndGlobal
