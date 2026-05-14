@@ -8,7 +8,7 @@ namespace Frontend.ViewModels
 {
     public partial class ServerMembersViewModel : ObservableObject
     {
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
 
         public ObservableCollection<ServerMemberDTO> Members { get; set; }
 
@@ -16,7 +16,7 @@ namespace Frontend.ViewModels
 
         public IRelayCommand<ServerMemberDTO> KickCommand { get; }
 
-        public ServerMembersViewModel(ApiService apiService)
+        public ServerMembersViewModel(IApiService apiService)
         {
             _apiService = apiService;
 
