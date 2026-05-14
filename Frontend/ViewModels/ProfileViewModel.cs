@@ -1,4 +1,4 @@
-﻿using Frontend.Global;
+using Frontend.Global;
 using Frontend.Services;
 using Shared.DTOs;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -9,7 +9,7 @@ namespace Frontend.ViewModels
 {
     public class ProfileViewModel : ObservableObject
     {
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
         public UserDTO? User { get; } = Session.Current.User;
         public AvatarControlViewModel Avatar { get; }
 
@@ -17,7 +17,7 @@ namespace Frontend.ViewModels
         public IAsyncRelayCommand SetOnlineStatusCommand { get; }
         public IRelayCommand LogoutCommand { get; } // Ajouté pour le bouton Logout
 
-        public ProfileViewModel(ApiService apiService, Action onLogout)
+        public ProfileViewModel(IApiService apiService, Action onLogout)
         {
             _apiService = apiService;
             Avatar = new AvatarControlViewModel(User);

@@ -14,12 +14,12 @@ namespace Frontend.ViewModels
     {
         public ObservableCollection<ServerViewModel> Servers { get; set; }
         private readonly Action<string> _onServerSelected;
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
         private ServerViewModel? _selectedServer;
         public event Action<string>? OnServerSelected;
         public IRelayCommand CreateServerCommand { get; }
 
-        public ServerListViewModel(ApiService apiService, Action<string> onServerSelected)
+        public ServerListViewModel(IApiService apiService, Action<string> onServerSelected)
         {
             _apiService = apiService;
             _onServerSelected = onServerSelected;

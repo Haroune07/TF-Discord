@@ -4,7 +4,7 @@ using Shared.DTOs;
 
 namespace Frontend.Services
 {
-    public class ChatService
+    public class ChatService : IChatService
     {
         public event Action<string>? UserTyping;
         public event Action<string>? UserStoppedTyping;

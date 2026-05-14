@@ -6,7 +6,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -14,7 +13,8 @@ namespace Frontend.ViewModels
 {
     public partial class UserListViewModel : ObservableObject
     {
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
+        private readonly IDispatcherService _dispatcher;
         private readonly Action<string> _onDMChannelReady;
 
         public IRelayCommand OpenDMCommand { get; }
@@ -24,9 +24,10 @@ namespace Frontend.ViewModels
         public ObservableCollection<UserDTO> Users { get; set; } = new();
         public ObservableCollection<FriendshipDTO> PendingRequests { get; set; } = new();
 
-        public UserListViewModel(ApiService apiService, Action<string> onDMChannelReady)
+        public UserListViewModel(IApiService apiService, IDispatcherService dispatcher, Action<string> onDMChannelReady)
         {
             _apiService = apiService;
+            _dispatcher = dispatcher;
             _onDMChannelReady = onDMChannelReady;
             OpenDMCommand = new AsyncRelayCommand<UserDTO>(async (user) => await OpenDMAsync(user!), (user) => user != null);
             AcceptRequestCommand = new AsyncRelayCommand<FriendshipDTO>(async (req) => await UpdateRequestStatus(req!, Shared.Enums.FriendshipStatus.Accepted), (req) => req != null);
@@ -45,7 +46,7 @@ namespace Frontend.ViewModels
             System.Diagnostics.Debug.WriteLine($"UserList: Found {dmChannels.Count} DM channels, {friendships.Count} friends, {pending.Count} pending.");
 
             // Update UI on the main thread to prevent crashes
-            Application.Current.Dispatcher.Invoke(() =>
+            _dispatcher.Invoke(() =>
             {
                 Users.Clear();
                 

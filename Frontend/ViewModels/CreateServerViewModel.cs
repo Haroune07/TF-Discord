@@ -1,4 +1,4 @@
-﻿using Frontend.Global;
+using Frontend.Global;
 using Frontend.Services;
 using Shared.DTOs.Requests;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -8,7 +8,7 @@ namespace Frontend.ViewModels
 {
     public partial class CreateServerViewModel : ObservableObject
     {
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
 
         [ObservableProperty]
         private string serverName = string.Empty;
@@ -24,7 +24,7 @@ namespace Frontend.ViewModels
         // Callback invoqué après création réussie
         public Action? OnCreated { get; set; }
 
-        public CreateServerViewModel(ApiService apiService)
+        public CreateServerViewModel(IApiService apiService)
         {
             _apiService = apiService;
             CreateCommand = new AsyncRelayCommand(Create, () => true);

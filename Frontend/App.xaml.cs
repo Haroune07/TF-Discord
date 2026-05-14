@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using Frontend.Services;
 using Frontend.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,14 +25,15 @@ namespace Frontend
 
         private static void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<ApiService>();
-            services.AddSingleton<ChatService>();
+            services.AddSingleton<IApiService, ApiService>();
+            services.AddSingleton<IChatService, ChatService>();
+            services.AddSingleton<IDispatcherService, WpfDispatcherService>();
             services.AddTransient<ChatViewModel>();
             services.AddTransient<SearchUserViewModel>();
             services.AddTransient<CreateServerViewModel>();
             services.AddSingleton<ChannelListViewModel>();
             services.AddSingleton<ServerListViewModel>(sp => new ServerListViewModel(
-                sp.GetRequiredService<ApiService>(),
+                sp.GetRequiredService<IApiService>(),
                 async serverId => await sp.GetRequiredService<ChannelListViewModel>().LoadChannelsAsync(serverId)));
             services.AddSingleton<MainViewModel>();
             services.AddTransient<LoginViewModel>();

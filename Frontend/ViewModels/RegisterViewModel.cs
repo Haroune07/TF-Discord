@@ -27,7 +27,7 @@ namespace Frontend.ViewModels
         [ObservableProperty]
         private string errorMessage = string.Empty;
 
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
         private readonly IServiceProvider _services;
 
         private MainViewModel? _main;
@@ -37,7 +37,7 @@ namespace Frontend.ViewModels
         public IAsyncRelayCommand? RegisterCommand { get; }
 
         
-        public RegisterViewModel(MainViewModel main, ApiService apiService, IServiceProvider services)
+        public RegisterViewModel(MainViewModel main, IApiService apiService, IServiceProvider services)
         {
             _main = main;
             _apiService = apiService;
