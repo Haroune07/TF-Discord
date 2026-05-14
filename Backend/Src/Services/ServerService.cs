@@ -173,7 +173,7 @@ namespace Backend.Src.Services
         {
 
             var requester = await GetMemberAsync(req.ServerId, req.RequesterId);
-            if (requester is null || requester.Role != MemberRole.Owner || requester.Role != MemberRole.Admin) return false;
+            if (requester is null || requester.Role != MemberRole.Owner && requester.Role != MemberRole.Admin) return false;
 
             var targetUser = await GetMemberAsync(req.ServerId, req.TargetUserId);
             if (targetUser is null) return false;
