@@ -21,6 +21,8 @@ namespace Frontend.ViewModels
         public ChannelListViewModel? ChannelList => _main?.ChannelList;
         public UserListViewModel UserList { get; }
 
+        public ServerMembersViewModel ServerMembers { get; }
+
         public ChatViewModel ActiveChat { get; }
 
         [ObservableProperty]
@@ -75,6 +77,8 @@ namespace Frontend.ViewModels
                 await ActiveChat.LoadChannelAsync(channelId);
             });
 
+            ServerMembers = new ServerMembersViewModel(_apiService);
+
             SearchVM.OnDMRequest += (channelId) =>
             {
                 Application.Current.Dispatcher.Invoke(async () =>
@@ -124,9 +128,10 @@ namespace Frontend.ViewModels
             await SelectChannelAsync(id);
         }
 
-        private void OnServerSelected(string id)
+        private async void OnServerSelected(string id)
         {
             IsDMMode = false;
+            await ServerMembers.LoadMembersAsync(id);
         }
 
         public async Task SelectChannelAsync(string channelId)

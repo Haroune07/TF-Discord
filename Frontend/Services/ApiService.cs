@@ -153,6 +153,19 @@ namespace Frontend.Services
         {
             return await _client.GetFromJsonAsync<List<UserDTO>>($"{Routes.SearchUser}/{username}") ?? new();
         }
+        public async Task<List<ServerMemberDTO>> GetServerMembersAsync(string serverId)
+        {
+            return await _client.GetFromJsonAsync<List<ServerMemberDTO>>
+                ($"/api/servermember/server/{serverId}") ?? new();
+        }
+
+        public async Task<bool> KickMemberAsync(string serverId, string userId)
+        {
+            var response = await _client.DeleteAsync(
+                $"/api/servermember/{serverId}/kick/{userId}");
+
+            return response.IsSuccessStatusCode;
+        }
 
     }
 }
