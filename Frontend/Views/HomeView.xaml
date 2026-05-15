@@ -28,12 +28,52 @@
 
         <!-- Colonne 0 - sidebar serveurs -->
         <StackPanel Grid.Column="0" Background="#1E1F22" Margin="0,12,0,0">
-            <Border Width="48" Height="48" CornerRadius="14" Background="#5865F2" Margin="0,0,0,8">
-                <Button Command="{Binding GoToHomeCommand}" Background="Transparent" BorderThickness="0">
+            <Border Width="48"
+        Height="48"
+        Margin="0,0,0,8"
+        ClipToBounds="True">
+
+                <Border.Style>
+
+                    <Style TargetType="Border">
+
+                        <Setter Property="Background" Value="#5865F2"/>
+                        <Setter Property="CornerRadius" Value="24"/>
+
+                        <Style.Triggers>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#6D78F7"/>
+                                <Setter Property="CornerRadius" Value="16"/>
+                            </Trigger>
+
+                        </Style.Triggers>
+
+                    </Style>
+
+                </Border.Style>
+
+                <Button Command="{Binding GoToHomeCommand}"
+            Background="Transparent"
+            BorderThickness="0"
+            Padding="0">
+
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <ContentPresenter HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"/>
+                        </ControlTemplate>
+                    </Button.Template>
+
                     <Image Source="/Static/Images/home_button_image.png"
-                           Stretch="Uniform" Width="25" Height="25"
-                           VerticalAlignment="Center" HorizontalAlignment="Center"/>
+               Stretch="Uniform"
+               Width="25"
+               Height="25"
+               VerticalAlignment="Center"
+               HorizontalAlignment="Center"/>
+
                 </Button>
+
             </Border>
             <Separator Background="#35363C" HorizontalAlignment="Center" Width="32" Margin="0,4,0,12"/>
             <views:ServerListView DataContext="{Binding ServerList}"/>

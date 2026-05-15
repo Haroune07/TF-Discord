@@ -3,23 +3,51 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:Frontend.Views"
              xmlns:views="clr-namespace:Frontend.Views"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="240">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    </UserControl.Resources>
+
     <StackPanel>
+
+        <DockPanel Margin="5">
+            <TextBlock Text="Canaux"
+                       Foreground="White"
+                       FontWeight="Bold"
+                       VerticalAlignment="Center" />
+
+            <Button Content="+"
+                    Width="25"
+                    Height="25"
+                    HorizontalAlignment="Right"
+                    DockPanel.Dock="Right"
+                    Command="{Binding CreateChannelCommand}"
+                    Visibility="{Binding CanManageChannels, Converter={StaticResource BoolToVisibilityConverter}}" />
+        </DockPanel>
 
         <ItemsControl ItemsSource="{Binding Channels}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-
                     <StackPanel />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
 
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <views:ChannelView Margin="1" />
+                    <views:ChannelView Margin="1"
+                                       Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ItemsControl}}">
+                        <views:ChannelView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Supprimer le canal"
+                                          Command="{Binding PlacementTarget.Tag.DeleteChannelCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                          Visibility="{Binding PlacementTarget.Tag.CanManageChannels, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            </ContextMenu>
+                        </views:ChannelView.ContextMenu>
+                    </views:ChannelView>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
