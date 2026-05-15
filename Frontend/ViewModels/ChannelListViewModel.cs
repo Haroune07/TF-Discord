@@ -20,7 +20,7 @@ namespace Frontend.ViewModels
     {
         public ObservableCollection<ChannelViewModel> Channels { get; set; }
 
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
         private readonly HttpClient _client = new();
 
         private string _currentServerId = string.Empty;
@@ -37,7 +37,7 @@ namespace Frontend.ViewModels
         public IRelayCommand CreateChannelCommand { get; }
         public IRelayCommand<ChannelViewModel> DeleteChannelCommand { get; }
 
-        public ChannelListViewModel(ApiService apiService)
+        public ChannelListViewModel(IApiService apiService)
         {
             _apiService = apiService;
 
@@ -64,6 +64,7 @@ namespace Frontend.ViewModels
             await LoadCurrentUserRoleAsync(serverId);
 
             Channels.Clear();
+
             var data = await _apiService.GetServerChannelsAsync(serverId);
 
             foreach (var c in data.Where(c => c.ServerId == serverId))
