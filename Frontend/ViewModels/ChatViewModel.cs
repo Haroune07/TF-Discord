@@ -3,7 +3,6 @@ using Frontend.Services;
 using Shared.DTOs;
 using Shared.DTOs.Requests;
 using System.Collections.ObjectModel;
-using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -15,7 +14,6 @@ namespace Frontend.ViewModels
         [NotifyPropertyChangedFor(nameof(FormattedDate))]
         [NotifyPropertyChangedFor(nameof(IsOwnMessage))]
         private MessageDTO message;
-
 
         public bool IsOwnMessage => Message.Sender?.Id == Session.Current.User?.Id;
 
@@ -41,8 +39,9 @@ namespace Frontend.ViewModels
 
     public partial class ChatViewModel : ObservableObject
     {
-        private readonly ApiService _apiService;
-        private readonly ChatService _chatService;
+        private readonly IApiService _apiService;
+        private readonly IChatService _chatService;
+        private readonly IDispatcherService _dispatcher;
         private string? _currentChannelId;
 
         public ObservableCollection<MessageItemViewModel> Messages { get; } = new();
@@ -52,7 +51,6 @@ namespace Frontend.ViewModels
 
         [ObservableProperty]
         private string typingText = string.Empty;
-
 
         // Edit state
         [ObservableProperty]
@@ -68,10 +66,11 @@ namespace Frontend.ViewModels
         public IRelayCommand DeleteMessageCommand { get; }
         public IRelayCommand CancelEditCommand { get; }
 
-        public ChatViewModel(ApiService apiService, ChatService chatService)
+        public ChatViewModel(IApiService apiService, IChatService chatService, IDispatcherService dispatcher)
         {
             _apiService = apiService;
             _chatService = chatService;
+            _dispatcher = dispatcher;
 
             SendMessageCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(SendMessage, CanSendMessage);
             EditMessageCommand = new CommunityToolkit.Mvvm.Input.RelayCommand<MessageItemViewModel>(StartEdit, msg => msg?.IsOwnMessage == true);
@@ -84,7 +83,6 @@ namespace Frontend.ViewModels
             _chatService.UserTyping += OnOtherUserTyping;
             _chatService.UserStoppedTyping += OnOtherUserStoppedTyping;
         }
-
 
         partial void OnInputTextChanged(string value)
         {
@@ -148,13 +146,13 @@ namespace Frontend.ViewModels
 
                 if (savedMessage != null)
                 {
-                    Application.Current.Dispatcher.Invoke(() => Messages.Add(new MessageItemViewModel(savedMessage)));
+                    _dispatcher.Invoke(() => Messages.Add(new MessageItemViewModel(savedMessage)));
                     await _chatService.BroadcastMessageAsync(savedMessage);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors de l'envoi : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Diagnostics.Debug.WriteLine($"Erreur lors de l'envoi : {ex.Message}");
             }
         }
 
@@ -172,7 +170,7 @@ namespace Frontend.ViewModels
 
                 if (updated != null)
                 {
-                    Application.Current.Dispatcher.Invoke(() =>
+                    _dispatcher.Invoke(() =>
                     {
                         EditingMessage.Message = updated;
                     });
@@ -181,7 +179,7 @@ namespace Frontend.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors de la modification : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Diagnostics.Debug.WriteLine($"Erreur lors de la modification : {ex.Message}");
             }
             finally
             {
@@ -193,25 +191,18 @@ namespace Frontend.ViewModels
         {
             try
             {
-                var result = MessageBox.Show("Voulez-vous vraiment supprimer ce message ?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                if (result != MessageBoxResult.Yes) return;
-
                 var success = await _apiService.DeleteMessageAsync(msg.Message.Id, Session.Current.User!.Id);
 
                 if (success)
                 {
-                    Application.Current.Dispatcher.Invoke(() => Messages.Remove(msg));
+                    _dispatcher.Invoke(() => Messages.Remove(msg));
                     if (_currentChannelId != null)
                         await _chatService.BroadcastMessageDeletedAsync(_currentChannelId, msg.Message.Id);
-                }
-                else
-                {
-                    MessageBox.Show("Impossible de supprimer le message côté serveur.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur inattendue lors de la suppression : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Diagnostics.Debug.WriteLine($"Erreur inattendue lors de la suppression : {ex.Message}");
             }
         }
 
@@ -219,7 +210,7 @@ namespace Frontend.ViewModels
 
         private void OnMessageReceived(MessageDTO msg)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            _dispatcher.Invoke(() =>
             {
                 if (msg.ChannelId == _currentChannelId)
                     Messages.Add(new MessageItemViewModel(msg));
@@ -228,7 +219,7 @@ namespace Frontend.ViewModels
 
         private void OnMessageEdited(MessageDTO msg)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            _dispatcher.Invoke(() =>
             {
                 if (msg.ChannelId == _currentChannelId)
                 {
@@ -240,7 +231,7 @@ namespace Frontend.ViewModels
 
         private void OnMessageDeleted(string msgId)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            _dispatcher.Invoke(() =>
             {
                 var existing = Messages.FirstOrDefault(m => m.Message.Id == msgId);
                 if (existing != null) Messages.Remove(existing);
@@ -249,12 +240,12 @@ namespace Frontend.ViewModels
 
         private void OnOtherUserTyping(string username)
         {
-            Application.Current.Dispatcher.Invoke(() => TypingText = $"{username} est en train d'écrire...");
+            _dispatcher.Invoke(() => TypingText = $"{username} est en train d'écrire...");
         }
 
         private void OnOtherUserStoppedTyping(string username)
         {
-            Application.Current.Dispatcher.Invoke(() => TypingText = string.Empty);
+            _dispatcher.Invoke(() => TypingText = string.Empty);
         }
 
         private async Task HandleTypingAsync()

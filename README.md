@@ -1,104 +1,54 @@
 # Discord-TF
 
-Discord-TF est une plateforme de communication "full-stack" inspirée de Discord, comprenant un backend en C# développé avec .NET 8 et un client frontend en WPF. Le système utilise MongoDB pour la persistance des données et implémente une architecture asynchrone moderne pour la gestion de l'authentification et des fonctionnalités en temps réel.
+Discord-TF est une plateforme de communication "full-stack" inspirée de Discord, comprenant un backend en C# développé avec .NET 8 et un client frontend en WPF. Le système utilise MongoDB pour la persistance des données et implémente une architecture asynchrone moderne pour la gestion de l'authentification et des fonctionnalités en temps réel via SignalR.
+
+---
+
+## Architecture et Design
+
+Le projet repose sur des standards modernes de développement .NET :
+- **Pattern MVVM** : Séparation stricte de la logique et de la vue dans le client WPF.
+- **Injection de Dépendances (IoC)** : Utilisation de `Microsoft.Extensions.DependencyInjection` dans `App.xaml.cs` pour gérer le cycle de vie des services et ViewModels.
+- **SignalR Hubs** : Communication bidirectionnelle en temps réel avec gestion automatique de la reconnexion.
+- **Services d'Infrastructure** : Couche dédiée pour les intégrations externes, comme **Twilio** pour les notifications.
 
 ---
 
 ## Structure du Projet
 
-La solution est composée de trois projets principaux :
-
-**Backend** : Une API Web ASP.NET Core qui gère la logique d'affaires, les interactions avec la base de données MongoDB et fournit les points de terminaison (endpoints) REST pour l'authentification, les serveurs, les canaux et les messages. La communication en temps réel est gérée via SignalR.
-
-**Frontend** : Une application de bureau Windows conçue avec WPF (Windows Presentation Foundation) suivant le patron de conception MVVM (Modèle-Vue-VueModèle).
-
-**Shared** : Une bibliothèque de classes contenant les objets de transfert de données (DTOs), les requêtes, les énumérations, les constantes et les modèles communs utilisés à la fois par le client et le serveur pour garantir la cohérence des données.
+- **Backend** : API ASP.NET Core 8 avec MongoDB Driver et SignalR Hubs.
+- **Frontend** : Application WPF utilisant le `CommunityToolkit.Mvvm`.
+- **Infrastructure** : Services transversaux (Notification, Stockage).
+- **Shared** : Modèles de données (DTOs), Requêtes, Enums et Constantes partagés.
+- **Discord-TF.Tests** : [À venir] Suite de tests unitaires avec xUnit et Moq.
 
 ---
 
-## Fonctionnalités Implémentées
+## Fonctionnalités Clés
 
-### Authentification
-- Création de compte
-- Connexion / Déconnexion
-- Hachage de mot de passe (SHA-256)
-- Gestion de session côté client
+### 🔐 Sécurité & Profil
+- Authentification complète (Inscription/Connexion).
+- Hachage sécurisé des mots de passe.
+- Persistance de la session utilisateur.
+
+### 💬 Messagerie & Social
+- **Serveurs & Salons** : Création dynamique de serveurs et de canaux textuels.
+- **Temps Réel** : Indicateurs de saisie ("User is typing"), notifications de message et mise à jour instantanée.
+- **Amis & DMs** : Système de gestion de liste d'amis (Friendships) et messagerie privée directe.
+- **Gestion des membres** : Rôles hiérarchiques (Owner, Admin, Member).
 
 ---
 
 ## Schéma de Base de Données (MongoDB)
 
-La base de données `DiscordTFDB` contient les collections suivantes :
-
 | Collection | Description |
 |---|---|
-| `Users` | Comptes utilisateurs |
-| `Servers` | Serveurs de communication |
-| `ServerMembers` | Relation utilisateur ↔ serveur avec rôle |
-| `Channels` | Canaux textuels (serveur ou DM) |
-| `Messages` | Messages envoyés dans un canal |
-
-### Relations
-- Un `Server` possède plusieurs `Channels`
-- Un `User` appartient à plusieurs `Servers` via `ServerMember`
-- Un `Channel` de type `Server` appartient à un `Server`
-- Un `Channel` de type `Direct` relie deux `Users` via `Participants`
-- Un `Channel` contient plusieurs `Messages`
-
----
-
-## Structure des DTOs (Shared)
-
-```
-Shared/
-├── DTOs/
-│   ├── UserDTO.cs
-│   ├── ServerDTO.cs
-│   ├── ServerMemberDTO.cs
-│   ├── ChannelDTO.cs
-│   ├── MessageDTO.cs
-│   └── Requests/
-│       ├── CreateServerRequest.cs
-│       ├── JoinServerRequest.cs
-│       ├── CreateChannelRequest.cs
-│       ├── CreateMessageRequest.cs
-│       └── CreateDMRequest.cs
-├── Constants/
-│   ├── Routes.cs
-│   ├── Messages.cs
-│   ├── Ports.cs
-│   └── Auth.cs
-└── Enums/
-    ├── ChannelType.cs
-    └── MemberRole.cs
-```
-
----
-
-## Configuration
-
-### Prérequis
-- .NET 8 SDK
-- MongoDB Atlas (ou instance locale)
-- Visual Studio 2022+
-
-### Base de données
-La chaîne de connexion MongoDB est configurée dans `Backend/appsettings.json` :
-
-```json
-"MongoDB": {
-  "ConnectionString": "<votre_connection_string>",
-  "DatabaseName": "DiscordTFDB"
-}
-```
-
-### Lancer le projet
-1. Cloner le dépôt
-2. Configurer la connexion MongoDB dans `appsettings.json`
-3. Lancer le projet `Backend` (écoute sur `http://localhost:8080`)
-4. Lancer le projet `Frontend`
-
-La documentation Swagger est disponible à `http://localhost:8080/swagger` en mode développement.
+| `Users` | Profils et identifiants utilisateurs. |
+| `Servers` | Groupes de discussion et métadonnées du serveur. |
+| `ServerMembers` | Association Utilisateur-Serveur avec gestion des rôles. |
+| `Channels` | Canaux (Textuels) rattachés à un serveur ou de type Direct. |
+| `Messages` | Contenu, horodatage et référence à l'auteur/canal. |
+| `Friendships` | État des relations sociales (Amis, En attente, Bloqués). |
 
 ---
 
@@ -106,8 +56,24 @@ La documentation Swagger est disponible à `http://localhost:8080/swagger` en mo
 
 | Couche | Technologie |
 |---|---|
-| Backend | ASP.NET Core 8, MongoDB.Driver, SignalR |
-| Frontend | WPF, MVVM, HttpClient |
-| Base de données | MongoDB Atlas |
-| Shared | .NET 8 Class Library |
-| Temps réel | ASP.NET Core SignalR |
+| **Backend** | .NET 8 (Web API), MongoDB.Driver |
+| **Temps Réel** | ASP.NET Core SignalR |
+| **Frontend** | WPF, MVVM, HttpClient |
+| **Infrastructure** | Twilio SDK |
+| **Tests** | xUnit, Moq |
+
+---
+
+## Configuration & Installation
+
+### Prérequis
+- SDK .NET 8.0
+- Instance MongoDB (Atlas ou Local)
+- Visual Studio 2022
+
+### Installation
+1. Cloner le repository.
+2. Modifier `Backend/appsettings.json` pour y inclure votre `ConnectionString` MongoDB.
+3. Exécuter le projet `Backend` (Swagger disponible sur le port 8080).
+4. Lancer le client `Frontend`.
+

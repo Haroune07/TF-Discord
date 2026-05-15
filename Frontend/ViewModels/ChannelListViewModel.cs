@@ -40,6 +40,7 @@ namespace Frontend.ViewModels
         public ChannelListViewModel(ApiService apiService)
         {
             _apiService = apiService;
+
             Channels = new ObservableCollection<ChannelViewModel>();
 
             _client.BaseAddress = new Uri(Shared.Constants.Ports.SERVER_LISTEN_URL);
@@ -67,7 +68,7 @@ namespace Frontend.ViewModels
 
             foreach (var c in data.Where(c => c.ServerId == serverId))
             {
-                Channels.Add(new ChannelViewModel((id) => OnChannelSelected?.Invoke(id))
+                Channels.Add(new ChannelViewModel((id) => HandleSelect(id))
                 {
                     Name = c.Name ?? string.Empty,
                     Id = c.Id,
@@ -75,6 +76,11 @@ namespace Frontend.ViewModels
                     CreatedAt = c.CreatedAt
                 });
             }
+        }
+
+        private void HandleSelect(string channelId)
+        {
+            OnChannelSelected?.Invoke(channelId);
         }
 
         private async Task LoadCurrentUserRoleAsync(string serverId)

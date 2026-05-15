@@ -3,7 +3,6 @@ using Frontend.Services;
 using Shared.DTOs;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Windows;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,6 +19,8 @@ namespace Frontend.ViewModels
         public ServerListViewModel? ServerList => _main?.ServerList;
         public ChannelListViewModel? ChannelList => _main?.ChannelList;
         public UserListViewModel UserList { get; }
+
+        public ServerMembersViewModel ServerMembers { get; }
 
         public ChatViewModel ActiveChat { get; }
 
@@ -43,15 +44,17 @@ namespace Frontend.ViewModels
         public IRelayCommand? GoToLoginCommand { get; }
         public IRelayCommand? GoToHomeCommand { get; }
 
-        private readonly ChatService _chatService;
-        private readonly ApiService _apiService;
+        private readonly IChatService _chatService;
+        private readonly IApiService _apiService;
+        private readonly IDispatcherService _dispatcher;
         private readonly IServiceProvider _services;
         public SearchUserViewModel SearchVM { get; set; }
 
         public HomeViewModel(
             MainViewModel main,
-            ApiService apiService,
-            ChatService chatService,
+            IApiService apiService,
+            IChatService chatService,
+            IDispatcherService dispatcher,
             ChatViewModel activeChat,
             SearchUserViewModel searchVM,
             IServiceProvider services)
@@ -59,6 +62,7 @@ namespace Frontend.ViewModels
             _main = main;
             _apiService = apiService;
             _chatService = chatService;
+            _dispatcher = dispatcher;
             ActiveChat = activeChat;
             SearchVM = searchVM;
             _services = services;
@@ -69,15 +73,17 @@ namespace Frontend.ViewModels
             CurrentUserAvatar = new(User);
             Profile = new ProfileViewModel(_apiService, Logout);
 
-            UserList = new UserListViewModel(_apiService, async (channelId) =>
+            UserList = new UserListViewModel(_apiService, _dispatcher, async (channelId) =>
             {
                 IsDMMode = true;
                 await ActiveChat.LoadChannelAsync(channelId);
             });
 
+            ServerMembers = new ServerMembersViewModel(_apiService);
+
             SearchVM.OnDMRequest += (channelId) =>
             {
-                Application.Current.Dispatcher.Invoke(async () =>
+                _dispatcher.Invoke(async () =>
                 {
                     IsDMMode = true;
                     await UserList.LoadUsersAsync();
@@ -124,9 +130,10 @@ namespace Frontend.ViewModels
             await SelectChannelAsync(id);
         }
 
-        private void OnServerSelected(string id)
+        private async void OnServerSelected(string id)
         {
             IsDMMode = false;
+            await ServerMembers.LoadMembersAsync(id);
         }
 
         public async Task SelectChannelAsync(string channelId)

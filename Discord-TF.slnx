@@ -1,5 +1,7 @@
 <Solution>
   <Project Path="Backend/Backend.csproj" />
   <Project Path="Frontend/Frontend.csproj" />
+  <Project Path="Infrastructure/Infrastructure.csproj" />
   <Project Path="Shared/Shared.csproj" />
+  <Project Path="TF-Discord.Tests/TF-Discord.Tests.csproj" />
 </Solution>
