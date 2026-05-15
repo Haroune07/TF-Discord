@@ -6,6 +6,9 @@
              xmlns:local="clr-namespace:Frontend.Views"
              mc:Ignorable="d"
              xmlns:components="clr-namespace:Frontend.Views.Components">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
     <Border Background="#2B2D31" CornerRadius="4" Padding="8" Margin="0,2">
         <Grid>
             <Grid.ColumnDefinitions>
@@ -30,7 +33,10 @@
                 <Button Command="{Binding DMCommand}" Background="Transparent" BorderThickness="0" Margin="4,0">
                     <Image Source="/Static/Images/DM.png" Width="20" Height="20" Opacity="0.7"/>
                 </Button>
-                <Button Command="{Binding InviteServerCommand}" Background="Transparent" BorderThickness="0" Margin="4,0">
+                <Button Command="{Binding InviteServerCommand}"
+                        Background="Transparent" BorderThickness="0" Margin="4,0"
+                        ToolTip="Inviter sur le serveur actif"
+                        Visibility="{Binding CanInviteToServer, Converter={StaticResource BoolToVis}}">
                     <Image Source="/Static/Images/plus.png" Width="20" Height="20" Opacity="0.7"/>
                 </Button>
             </StackPanel>

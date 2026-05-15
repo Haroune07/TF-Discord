@@ -29,6 +29,10 @@
 
                             <ContextMenu>
 
+                                <MenuItem Header="Inviter un membre"
+                                          Command="{Binding PlacementTarget.Tag.InviteToServerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+
                                 <MenuItem Header="Quitter le serveur"
                                           Command="{Binding PlacementTarget.Tag.LeaveServerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                           CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />

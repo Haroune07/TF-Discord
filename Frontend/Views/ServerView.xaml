@@ -5,148 +5,83 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
              d:DesignHeight="48"
-             d:DesignWidth="48">
+             d:DesignWidth="56"
+             ToolTip="{Binding Name}">
 
-    <Grid>
-
-        <!-- Barre blanche serveur actif -->
+    <Grid Width="56" Height="48">
         <Border Width="4"
                 HorizontalAlignment="Left"
                 Background="White"
                 CornerRadius="2"
-                Margin="0,8,0,8">
-
+                Margin="0,8,0,8"
+                IsHitTestVisible="False">
             <Border.Style>
                 <Style TargetType="Border">
-
                     <Setter Property="Visibility" Value="Collapsed"/>
-
                     <Style.Triggers>
-
                         <DataTrigger Binding="{Binding IsSelected}" Value="True">
                             <Setter Property="Visibility" Value="Visible"/>
                         </DataTrigger>
-
                     </Style.Triggers>
-
                 </Style>
             </Border.Style>
-
         </Border>
 
-        <!-- Serveur -->
-        <Border Width="48"
+        <Button Command="{Binding SelectCommand}"
+                Width="48"
                 Height="48"
-                Margin="6,0,0,0"
-                ClipToBounds="True">
-
-            <Border.Style>
-
-                <Style TargetType="Border">
-
-                    <!-- couleur normale -->
-                    <Setter Property="Background" Value="#313338"/>
-                    <Setter Property="CornerRadius" Value="24"/>
-
-                    <Style.Triggers>
-
-                        <!-- Hover -->
+                Margin="8,0,0,0"
+                HorizontalAlignment="Left"
+                Cursor="Hand"
+                Padding="0"
+                BorderThickness="0">
+            <Button.Template>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="RootBorder"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="24"
+                            ClipToBounds="True">
+                        <Grid>
+                            <TextBlock Text="{Binding Initials}"
+                                       Foreground="White"
+                                       FontWeight="Bold"
+                                       FontSize="16"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ServerImageUrl}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ServerImageUrl}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <Image Source="{Binding ServerImageUrl}" Stretch="UniformToFill"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#3A3C43"/>
-                            <Setter Property="CornerRadius" Value="16"/>
+                            <Setter TargetName="RootBorder" Property="Background" Value="#3A3C43"/>
+                            <Setter TargetName="RootBorder" Property="CornerRadius" Value="16"/>
                         </Trigger>
-
-                        <!-- Serveur sélectionné -->
                         <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                            <Setter Property="Background" Value="#404249"/>
-                            <Setter Property="CornerRadius" Value="16"/>
+                            <Setter TargetName="RootBorder" Property="Background" Value="#5865F2"/>
+                            <Setter TargetName="RootBorder" Property="CornerRadius" Value="16"/>
                         </DataTrigger>
-
-                    </Style.Triggers>
-
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Button.Template>
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Background" Value="#313338"/>
                 </Style>
-
-            </Border.Style>
-
-            <Button Command="{Binding SelectCommand}"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Padding="0">
-
-                <!-- retire le style bleu WPF -->
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <ContentPresenter HorizontalAlignment="Stretch"
-                                          VerticalAlignment="Stretch"/>
-                    </ControlTemplate>
-                </Button.Template>
-
-                <Grid>
-
-                    <!-- Initiales -->
-                    <TextBlock Text="{Binding Initials}"
-                               Foreground="White"
-                               FontWeight="Bold"
-                               FontSize="16"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center">
-
-                        <TextBlock.Style>
-
-                            <Style TargetType="TextBlock">
-
-                                <Setter Property="Visibility" Value="Collapsed"/>
-
-                                <Style.Triggers>
-
-                                    <DataTrigger Binding="{Binding ServerImageUrl}" Value="{x:Null}">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-
-                                    <DataTrigger Binding="{Binding ServerImageUrl}" Value="">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-
-                                </Style.Triggers>
-
-                            </Style>
-
-                        </TextBlock.Style>
-
-                    </TextBlock>
-
-                    <!-- Image -->
-                    <Image Source="{Binding ServerImageUrl}"
-                           Stretch="UniformToFill">
-
-                        <Image.Style>
-
-                            <Style TargetType="Image">
-
-                                <Style.Triggers>
-
-                                    <DataTrigger Binding="{Binding ServerImageUrl}" Value="{x:Null}">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-
-                                    <DataTrigger Binding="{Binding ServerImageUrl}" Value="">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-
-                                </Style.Triggers>
-
-                            </Style>
-
-                        </Image.Style>
-
-                    </Image>
-
-                </Grid>
-
-            </Button>
-
-        </Border>
-
+            </Button.Style>
+        </Button>
     </Grid>
-
 </UserControl>

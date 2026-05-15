@@ -1,4 +1,3 @@
-using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -10,16 +9,32 @@ namespace Frontend.ViewModels
         private string username = string.Empty;
 
         public string Id { get; set; } = string.Empty;
-        public bool IsOnline { get; set; }
-        public DateTime CreatedAt { get; set; }
         public string? ProfileImageUrl { get; set; }
+
+        [ObservableProperty]
+        private bool canInviteToServer;
+
         public IRelayCommand DMCommand { get; }
         public IRelayCommand InviteServerCommand { get; }
 
-        public UserInviteViewModel(Action<string> onDM, Action<string> onInvite)
+        public UserInviteViewModel(
+            Func<string, Task> onDM,
+            Func<string, Task> onInvite,
+            Func<bool> canInvite)
         {
-            DMCommand = new RelayCommand(() => onDM(Id), () => !string.IsNullOrEmpty(Id));
-            InviteServerCommand = new RelayCommand(() => onInvite(Id), () => !string.IsNullOrEmpty(Id));
+            DMCommand = new AsyncRelayCommand(async () => await onDM(Id), () => !string.IsNullOrEmpty(Id));
+            InviteServerCommand = new AsyncRelayCommand(
+                async () => await onInvite(Id),
+                () => !string.IsNullOrEmpty(Id) && canInvite());
         }
+
+        public void RefreshInviteState(bool canInvite)
+        {
+            CanInviteToServer = canInvite;
+            InviteServerCommand.NotifyCanExecuteChanged();
+        }
+
+        partial void OnCanInviteToServerChanged(bool value) =>
+            InviteServerCommand.NotifyCanExecuteChanged();
     }
 }

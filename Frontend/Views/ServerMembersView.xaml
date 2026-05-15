@@ -8,10 +8,12 @@
              d:DesignHeight="450"
              d:DesignWidth="235">
 
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-
         <StackPanel Margin="8">
-
             <TextBlock Text="MEMBERS"
                        Foreground="#949BA4"
                        FontSize="12"
@@ -19,42 +21,46 @@
                        Margin="8"/>
 
             <ItemsControl ItemsSource="{Binding Members}">
-
                 <ItemsControl.ItemTemplate>
-
                     <DataTemplate>
-
                         <Border Background="#2B2D31"
                                 CornerRadius="8"
                                 Margin="0,4"
                                 Padding="8">
-
                             <Grid>
-
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Orientation="Horizontal">
-
                                     <components:AvatarControl Width="32"
                                                               Height="32"
                                                               Margin="0,0,8,0"
-                                                              DataContext="{Binding User}"/>
+                                                              User="{Binding Member.User}"/>
 
-                                    <StackPanel>
-
-                                        <TextBlock Text="{Binding User.Username}"
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Username}"
                                                    Foreground="White"
                                                    FontWeight="SemiBold"/>
-
                                         <TextBlock Text="{Binding Role}"
                                                    Foreground="#949BA4"
                                                    FontSize="11"/>
-
+                                        <TextBlock Text="{Binding OnlineStatusText}"
+                                                   FontSize="11"
+                                                   Margin="0,2,0,0">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#949BA4"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsOnline}" Value="True">
+                                                            <Setter Property="Foreground" Value="#3BA55D"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
                                     </StackPanel>
-
                                 </StackPanel>
 
                                 <Button Grid.Column="1"
@@ -64,21 +70,14 @@
                                         BorderThickness="0"
                                         Padding="10,4"
                                         VerticalAlignment="Center"
+                                        Visibility="{Binding CanKick, Converter={StaticResource BoolToVis}}"
                                         Command="{Binding DataContext.KickCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                         CommandParameter="{Binding}"/>
-
                             </Grid>
-
                         </Border>
-
                     </DataTemplate>
-
                 </ItemsControl.ItemTemplate>
-
             </ItemsControl>
-
         </StackPanel>
-
     </ScrollViewer>
-
 </UserControl>

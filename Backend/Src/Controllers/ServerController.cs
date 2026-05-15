@@ -1,5 +1,7 @@
-﻿using Backend.Src.Services;
+﻿using Backend.Src.Hubs;
+using Backend.Src.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Shared.DTOs;
 using Shared.DTOs.Requests;
 using Shared.Enums;
@@ -11,10 +13,12 @@ namespace Backend.Src.Controllers
     public class ServerController : ControllerBase
     {
         private readonly ServerService _serverService;
+        private readonly IHubContext<ChatHub> _hubContext;
 
-        public ServerController(ServerService serverService)
+        public ServerController(ServerService serverService, IHubContext<ChatHub> hubContext)
         {
             _serverService = serverService;
+            _hubContext = hubContext;
         }
 
         [HttpPost("create")]
@@ -54,15 +58,8 @@ namespace Backend.Src.Controllers
                 return BadRequest("UserId is required.");
             }
 
-            try
-            {
-                await _serverService.JoinServerAsync(req);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _serverService.JoinServerAsync(req);
+            return Ok();
         }
 
         [HttpPost("leave")]
@@ -119,7 +116,11 @@ namespace Backend.Src.Controllers
             try
             {
                 var success = await _serverService.KickMemberAsync(req);
-                return success ? Ok() : Forbid();
+                if (!success)
+                    return Forbid();
+
+                await _hubContext.Clients.All.SendAsync("KickedFromServer", req.ServerId, req.TargetUserId);
+                return Ok();
             }
             catch (Exception ex) {
                 return BadRequest(ex.Message);

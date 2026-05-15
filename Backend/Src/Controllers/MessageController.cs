@@ -30,13 +30,22 @@ namespace Backend.Src.Controllers
                 return BadRequest("SenderId is required.");
 
             var message = await _messageService.SendMessageAsync(req);
+            if (message == null)
+                return Forbid();
+
             return Ok(message);
         }
 
         [HttpGet("channel/{channelId}")]
-        public async Task<ActionResult<List<MessageDTO>>> GetMessagesByChannel(string channelId)
+        public async Task<ActionResult<List<MessageDTO>>> GetMessagesByChannel(string channelId, [FromQuery] string userId)
         {
-            var messages = await _messageService.GetMessagesByChannelAsync(channelId);
+            if (string.IsNullOrWhiteSpace(userId))
+                return BadRequest("userId is required.");
+
+            var messages = await _messageService.GetMessagesByChannelAsync(channelId, userId);
+            if (messages == null)
+                return Forbid();
+
             return Ok(messages);
         }
 

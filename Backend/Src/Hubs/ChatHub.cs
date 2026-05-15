@@ -1,3 +1,4 @@
+using Backend.Src.Services;
 using Microsoft.AspNetCore.SignalR;
 using Shared.DTOs;
 
@@ -5,8 +6,18 @@ namespace Backend.Src.Hubs
 {
     public class ChatHub : Hub
     {
-        public async Task JoinChannel(string channelId)
+        private readonly ChannelService _channelService;
+
+        public ChatHub(ChannelService channelService)
         {
+            _channelService = channelService;
+        }
+
+        public async Task JoinChannel(string channelId, string userId)
+        {
+            if (!await _channelService.CanAccessChannelAsync(channelId, userId))
+                return;
+
             await Groups.AddToGroupAsync(Context.ConnectionId, channelId);
         }
 

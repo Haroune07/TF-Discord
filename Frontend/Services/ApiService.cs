@@ -9,33 +9,66 @@ namespace Frontend.Services
 {
     public class ApiService : IApiService
     {
-
         private readonly HttpClient _client;
+        private Action<string>? _errorCallback;
 
         public ApiService()
         {
-            _client = new();
-            _client.BaseAddress = new Uri(Ports.SERVER_LISTEN_URL);
+            _client = new HttpClient
+            {
+                BaseAddress = new Uri(Ports.SERVER_LISTEN_URL),
+                Timeout = TimeSpan.FromSeconds(30)
+            };
+        }
+
+        public void SetErrorCallback(Action<string>? callback) => _errorCallback = callback;
+
+        private async Task<T> ExecuteAsync<T>(Func<Task<T>> action)
+        {
+            try
+            {
+                return await action();
+            }
+            catch (Exception)
+            {
+                _errorCallback?.Invoke("Impossible de joindre le serveur. Vérifiez votre connexion.");
+                throw;
+            }
         }
 
         public async Task<AuthResponse> RegisterUserAsync(RegisterRequest req)
         {
-
             var res = await _client.PostAsJsonAsync(Routes.RegisterRoute, req);
-
             return (await res.Content.ReadFromJsonAsync<AuthResponse>())!;
         }
 
         public async Task<AuthResponse> LoginUserAsync(LoginRequest req)
         {
             var res = await _client.PostAsJsonAsync(Routes.LoginRoute, req);
-
             return (await res.Content.ReadFromJsonAsync<AuthResponse>())!;
         }
 
-        public async Task<List<ChannelDTO>> GetServerChannelsAsync(string serverId)
+        public async Task<List<ChannelDTO>> GetServerChannelsAsync(string serverId, string userId)
         {
-            return await _client.GetFromJsonAsync<List<ChannelDTO>>($"{Routes.GetServerChannelsRoute}/{serverId}") ?? new();
+            var response = await _client.GetAsync($"{Routes.GetServerChannelsRoute}/{serverId}?userId={userId}");
+            if (!response.IsSuccessStatusCode)
+                return new();
+
+            return await response.Content.ReadFromJsonAsync<List<ChannelDTO>>() ?? new();
+        }
+
+        public async Task<ChannelDTO?> CreateServerChannelAsync(string requesterId, CreateChannelRequest req)
+        {
+            var res = await _client.PostAsJsonAsync(
+                $"{Routes.CreateServerChannelRoute}?requesterId={requesterId}", req);
+            return res.IsSuccessStatusCode ? await res.Content.ReadFromJsonAsync<ChannelDTO>() : null;
+        }
+
+        public async Task<bool> DeleteChannelAsync(string channelId, string requesterId)
+        {
+            var res = await _client.DeleteAsync(
+                $"{Routes.DeleteChannelRoute}/{channelId}?requesterId={requesterId}");
+            return res.IsSuccessStatusCode;
         }
 
         public async Task<ChannelDTO?> CreateDMAsync(CreateDMRequest req)
@@ -44,32 +77,40 @@ namespace Frontend.Services
             return res.IsSuccessStatusCode ? await res.Content.ReadFromJsonAsync<ChannelDTO>() : null;
         }
 
-        public async Task<List<MessageDTO>> GetMessagesAsync(string channelId)
-        {
-            return await _client.GetFromJsonAsync<List<MessageDTO>>($"{Routes.GetChannelMessagesRoute}/channel/{channelId}") ?? new();
-        }
-
-        public async Task<MessageDTO?> SendMessageAsync(CreateMessageRequest req)
-        {
-            var res = await _client.PostAsJsonAsync(Routes.SendMessageRoute, req);
-            return res.IsSuccessStatusCode ? await res.Content.ReadFromJsonAsync<MessageDTO>() : null;
-        }
-
-        public async Task<MessageDTO?> EditMessageAsync(string messageId, EditMessageRequest req)
-        {
-            var res = await _client.PatchAsJsonAsync($"{Routes.EditMessageRoute}/{messageId}", req);
-            return res.IsSuccessStatusCode ? await res.Content.ReadFromJsonAsync<MessageDTO>() : null;
-        }
-
-        public async Task<bool> DeleteMessageAsync(string messageId, string requesterId)
-        {
-            var request = new HttpRequestMessage(HttpMethod.Delete, $"{Routes.DeleteMessageRoute}/{messageId}")
+        public async Task<List<MessageDTO>> GetMessagesAsync(string channelId, string userId) =>
+            await ExecuteAsync(async () =>
             {
-                Content = JsonContent.Create(new DeleteMessageRequest { RequesterId = requesterId })
-            };
-            var res = await _client.SendAsync(request);
-            return res.IsSuccessStatusCode;
-        }
+                var response = await _client.GetAsync($"{Routes.GetChannelMessagesRoute}/channel/{channelId}?userId={userId}");
+                if (!response.IsSuccessStatusCode)
+                    return new List<MessageDTO>();
+
+                return await response.Content.ReadFromJsonAsync<List<MessageDTO>>() ?? new();
+            });
+
+        public async Task<MessageDTO?> SendMessageAsync(CreateMessageRequest req) =>
+            await ExecuteAsync(async () =>
+            {
+                var res = await _client.PostAsJsonAsync(Routes.SendMessageRoute, req);
+                return res.IsSuccessStatusCode ? await res.Content.ReadFromJsonAsync<MessageDTO>() : null;
+            });
+
+        public async Task<MessageDTO?> EditMessageAsync(string messageId, EditMessageRequest req) =>
+            await ExecuteAsync(async () =>
+            {
+                var res = await _client.PatchAsJsonAsync($"{Routes.EditMessageRoute}/{messageId}", req);
+                return res.IsSuccessStatusCode ? await res.Content.ReadFromJsonAsync<MessageDTO>() : null;
+            });
+
+        public async Task<bool> DeleteMessageAsync(string messageId, string requesterId) =>
+            await ExecuteAsync(async () =>
+            {
+                var request = new HttpRequestMessage(HttpMethod.Delete, $"{Routes.DeleteMessageRoute}/{messageId}")
+                {
+                    Content = JsonContent.Create(new DeleteMessageRequest { RequesterId = requesterId })
+                };
+                var res = await _client.SendAsync(request);
+                return res.IsSuccessStatusCode;
+            });
 
         public async Task<List<ServerDTO>> GetMyServersAsync(string userId)
         {
@@ -97,7 +138,6 @@ namespace Frontend.Services
         public async Task<List<ServerDTO>> GetAllServersAsync()
         {
             var res = await _client.GetFromJsonAsync<List<ServerDTO>>(Routes.GetAllServersRoute);
-
             return res ?? new();
         }
 
@@ -108,10 +148,15 @@ namespace Frontend.Services
 
         public async Task<bool> UpdateStatusAsync(string userId, string status)
         {
-            var url = string.Format(Routes.UpdateStatus, userId);
-            var response = await _client.PutAsJsonAsync(url, status);
+            var isOnline = status.Equals("True", StringComparison.OrdinalIgnoreCase)
+                || status.Equals("online", StringComparison.OrdinalIgnoreCase);
+            var url = $"/api/user/{userId}/status?isOnline={isOnline}";
+            var response = await _client.PatchAsync(url, null);
             return response.IsSuccessStatusCode;
         }
+
+        public Task<bool> SetOnlineAsync(string userId, bool isOnline) =>
+            UpdateStatusAsync(userId, isOnline ? "True" : "False");
 
         public async Task<bool> UploadProfileImageAsync(string userId, string imageUrl)
         {
@@ -153,19 +198,23 @@ namespace Frontend.Services
         {
             return await _client.GetFromJsonAsync<List<UserDTO>>($"{Routes.SearchUser}/{username}") ?? new();
         }
-        public async Task<List<ServerMemberDTO>> GetServerMembersAsync(string serverId)
-        {
-            return await _client.GetFromJsonAsync<List<ServerMemberDTO>>
-                ($"/api/servermember/server/{serverId}") ?? new();
-        }
 
-        public async Task<bool> KickMemberAsync(string serverId, string userId)
-        {
-            var response = await _client.DeleteAsync(
-                $"/api/servermember/{serverId}/kick/{userId}");
+        public async Task<List<ServerMemberDTO>> GetServerMembersAsync(string serverId) =>
+            await _client.GetFromJsonAsync<List<ServerMemberDTO>>($"/api/server/{serverId}/members") ?? new();
 
+        public async Task<bool> KickMemberAsync(string serverId, string requesterId, string targetUserId)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Delete, "/api/server/members/kick")
+            {
+                Content = JsonContent.Create(new KickMemberRequest
+                {
+                    ServerId = serverId,
+                    RequesterId = requesterId,
+                    TargetUserId = targetUserId
+                })
+            };
+            var response = await _client.SendAsync(request);
             return response.IsSuccessStatusCode;
         }
-
     }
 }

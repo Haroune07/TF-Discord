@@ -11,6 +11,8 @@ namespace Frontend.Services
         event Action<MessageDTO>? MessageReceived;
         event Action<MessageDTO>? MessageEdited;
         event Action<string>? MessageDeleted;
+        event Action<bool>? ReconnectingChanged;
+        event Action<string, string>? KickedFromServer;
 
         Task ConnectAsync();
         Task JoinChannelAsync(string channelId);

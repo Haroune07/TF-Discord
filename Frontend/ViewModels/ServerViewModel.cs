@@ -15,12 +15,12 @@ namespace Frontend.ViewModels
         [ObservableProperty]
         private bool isSelected;
 
-        public ServerViewModel(string name, string id, Action<string> onSelected, string? serverImageUrl = null)
+        public ServerViewModel(string name, string id, Func<string, Task> onSelected, string? serverImageUrl = null)
         {
             Name = name;
             Id = id;
             ServerImageUrl = serverImageUrl;
-            SelectCommand = new RelayCommand(() => onSelected(Id), () => true);
+            SelectCommand = new AsyncRelayCommand(() => onSelected(Id));
         }
     }
 }

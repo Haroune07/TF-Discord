@@ -17,20 +17,40 @@ namespace Backend.Src.Controllers
         }
 
         [HttpPost("server")]
-        public async Task<ActionResult<ChannelDTO>> CreateServerChannel(CreateChannelRequest req)
+        public async Task<ActionResult<ChannelDTO>> CreateServerChannel(
+            [FromQuery] string requesterId,
+            [FromBody] CreateChannelRequest req)
         {
             if (string.IsNullOrWhiteSpace(req.Name))
-            {
                 return BadRequest("Name is required.");
-            }
 
             if (string.IsNullOrWhiteSpace(req.ServerId))
-            {
                 return BadRequest("ServerId is required.");
-            }
 
-            var channel = await _channelService.CreateServerChannelAsync(req);
+            if (string.IsNullOrWhiteSpace(requesterId))
+                return BadRequest("requesterId is required.");
+
+            var channel = await _channelService.CreateChannelAsync(req.ServerId, requesterId, req);
+            if (channel == null)
+                return Forbid();
+
             return Ok(channel);
+        }
+
+        [HttpDelete("{channelId}")]
+        public async Task<IActionResult> DeleteChannel(string channelId, [FromQuery] string requesterId)
+        {
+            if (string.IsNullOrWhiteSpace(channelId))
+                return BadRequest("channelId is required.");
+
+            if (string.IsNullOrWhiteSpace(requesterId))
+                return BadRequest("requesterId is required.");
+
+            var deleted = await _channelService.DeleteChannelAsync(channelId, requesterId);
+            if (!deleted)
+                return Forbid();
+
+            return NoContent();
         }
 
         [HttpPost("dm")]
@@ -41,9 +61,15 @@ namespace Backend.Src.Controllers
         }
 
         [HttpGet("server/{serverId}")]
-        public async Task<ActionResult<List<ChannelDTO>>> GetServerChannels(string serverId)
+        public async Task<ActionResult<List<ChannelDTO>>> GetServerChannels(string serverId, [FromQuery] string userId)
         {
-            var channels = await _channelService.GetServerChannelsAsync(serverId);
+            if (string.IsNullOrWhiteSpace(userId))
+                return BadRequest("userId is required.");
+
+            var channels = await _channelService.GetServerChannelsAsync(serverId, userId);
+            if (channels == null)
+                return Forbid();
+
             return Ok(channels);
         }
 

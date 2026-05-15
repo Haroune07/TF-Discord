@@ -53,22 +53,35 @@ namespace Backend.Src.Services
         public async Task<List<ServerDTO>> GetUserServersAsync(string userId)
         {
             var memberships = await _members.FindAsync(m => m.UserId == userId);
-            var serverIds = memberships.Select(m => m.ServerId).ToList();
+            var serverIds = memberships.Select(m => m.ServerId).Distinct().ToList();
+
+            if (serverIds.Count == 0)
+                return new List<ServerDTO>();
 
             var servers = await _servers.FindAsync(s => serverIds.Contains(s.Id));
+            var existingIds = servers.Select(s => s.Id).ToHashSet();
 
-            return servers.Select(serv => MapToDTO(serv)).ToList();
+            foreach (var membership in memberships.Where(m => !existingIds.Contains(m.ServerId)))
+                await _members.DeleteAsync(membership.Id);
+
+            return servers.Select(MapToDTO).ToList();
         }
 
         // JOIN SERVER
         public async Task JoinServerAsync(JoinOrLeaveServerRequest req)
         {
-            // vérifier si l'utilisateur est déjà membre
             var existing = await _members.FindAsync(m =>
                 m.ServerId == req.ServerId && m.UserId == req.UserId);
 
-            if (existing.Any())
-                throw new Exception("User already in server");
+            if (existing.Count > 0)
+            {
+                if (existing.Count > 1)
+                {
+                    foreach (var duplicate in existing.Skip(1))
+                        await _members.DeleteAsync(duplicate.Id);
+                }
+                return;
+            }
 
             var member = new ServerMember
             {
@@ -114,10 +127,17 @@ namespace Backend.Src.Services
         public async Task<List<ServerMemberDTO>> GetServerMembersAsync(string serverId) 
         {
             var members = await _members.FindAsync(member => member.ServerId == serverId);
-
             var serverMembers = new List<ServerMemberDTO>();
-            foreach (var member in members) {
-                
+            var seenUserIds = new HashSet<string>();
+
+            foreach (var member in members.OrderByDescending(m => m.Role).ThenBy(m => m.JoinedAt))
+            {
+                if (!seenUserIds.Add(member.UserId))
+                {
+                    await _members.DeleteAsync(member.Id);
+                    continue;
+                }
+
                 var user = await _users.GetByIdAsync(member.UserId);
                 if (user is null) continue;
 
@@ -136,11 +156,9 @@ namespace Backend.Src.Services
                         ProfileImageUrl = user.ProfileImageUrl
                     }
                 });
-
             }
 
             return serverMembers;
-
         }
 
         private async Task<ServerMember?> GetMemberAsync(string serverId, string userId)
@@ -175,12 +193,16 @@ namespace Backend.Src.Services
             var requester = await GetMemberAsync(req.ServerId, req.RequesterId);
             if (requester is null || requester.Role != MemberRole.Owner && requester.Role != MemberRole.Admin) return false;
 
-            var targetUser = await GetMemberAsync(req.ServerId, req.TargetUserId);
+            var targetMembers = await _members.FindAsync(m =>
+                m.ServerId == req.ServerId && m.UserId == req.TargetUserId);
+            var targetUser = targetMembers.OrderByDescending(m => m.Role).FirstOrDefault();
             if (targetUser is null) return false;
 
             if (requester.Role == MemberRole.Admin && targetUser.Role != MemberRole.Member) return false;
 
-            await _members.DeleteAsync(targetUser.Id);
+            foreach (var membership in targetMembers)
+                await _members.DeleteAsync(membership.Id);
+
             return true;
 
         }

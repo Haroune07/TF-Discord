@@ -34,7 +34,7 @@ namespace Frontend
             services.AddSingleton<ChannelListViewModel>();
             services.AddSingleton<ServerListViewModel>(sp => new ServerListViewModel(
                 sp.GetRequiredService<IApiService>(),
-                async serverId => await sp.GetRequiredService<ChannelListViewModel>().LoadChannelsAsync(serverId)));
+                serverId => sp.GetRequiredService<ChannelListViewModel>().LoadChannelsAsync(serverId)));
             services.AddSingleton<MainViewModel>();
             services.AddTransient<LoginViewModel>();
             services.AddTransient<RegisterViewModel>();

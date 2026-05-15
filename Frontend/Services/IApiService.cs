@@ -10,9 +10,11 @@ namespace Frontend.Services
     {
         Task<AuthResponse> RegisterUserAsync(RegisterRequest req);
         Task<AuthResponse> LoginUserAsync(LoginRequest req);
-        Task<List<ChannelDTO>> GetServerChannelsAsync(string serverId);
+        Task<List<ChannelDTO>> GetServerChannelsAsync(string serverId, string userId);
+        Task<ChannelDTO?> CreateServerChannelAsync(string requesterId, CreateChannelRequest req);
+        Task<bool> DeleteChannelAsync(string channelId, string requesterId);
         Task<ChannelDTO?> CreateDMAsync(CreateDMRequest req);
-        Task<List<MessageDTO>> GetMessagesAsync(string channelId);
+        Task<List<MessageDTO>> GetMessagesAsync(string channelId, string userId);
         Task<MessageDTO?> SendMessageAsync(CreateMessageRequest req);
         Task<MessageDTO?> EditMessageAsync(string messageId, EditMessageRequest req);
         Task<bool> DeleteMessageAsync(string messageId, string requesterId);
@@ -30,5 +32,7 @@ namespace Frontend.Services
         Task<bool> UpdateFriendshipStatusAsync(string friendshipId, string userId, Shared.Enums.FriendshipStatus status);
         Task<List<ChannelDTO>> GetMyDMChannelsAsync(string userId);
         Task<List<UserDTO>> SearchUsersAsync(string username);
+        Task<List<ServerMemberDTO>> GetServerMembersAsync(string serverId);
+        Task<bool> KickMemberAsync(string serverId, string requesterId, string targetUserId);
     }
 }

@@ -92,6 +92,7 @@ namespace Frontend.ViewModels
             };
 
             _ = _chatService.ConnectAsync();
+            _chatService.KickedFromServer += OnKickedFromServer;
 
             if (_main?.ChannelList != null)
                 _main.ChannelList.OnChannelSelected += OnChannelSelected;
@@ -99,11 +100,27 @@ namespace Frontend.ViewModels
             if (_main?.ServerList != null)
             {
                 _main.ServerList.OnServerSelected += OnServerSelected;
+                _main.ServerList.OnServerLeft += OnServerLeft;
+                SearchVM.OnInviteToServer = (serverId, username) =>
+                    _main.ServerList.InviteUserToServerAsync(serverId, username);
                 _ = _main.ServerList.LoadServersAsync();
             }
+
+            _ = SetCurrentUserOnlineAsync(true);
             CurrentUserAvatar.Refresh();
 
             _ = UserList.LoadUsersAsync();
+        }
+
+        private async Task SetCurrentUserOnlineAsync(bool isOnline)
+        {
+            if (User == null) return;
+
+            if (await _apiService.UpdateStatusAsync(User.Id, isOnline ? "True" : "False"))
+            {
+                User.IsOnline = isOnline;
+                CurrentUserAvatar.Refresh();
+            }
         }
 
         private void SwitchToDMMode()
@@ -111,14 +128,58 @@ namespace Frontend.ViewModels
             IsDMMode = true;
         }
 
+        private void OnKickedFromServer(string serverId, string userId)
+        {
+            if (Session.Current.User?.Id != userId || _main?.ServerList == null)
+                return;
+
+            _dispatcher.Invoke(async () =>
+            {
+                var wasViewingKickedServer = SearchVM.SelectedServerId == serverId;
+
+                if (wasViewingKickedServer)
+                {
+                    ServerMembers.Clear();
+                    await ActiveChat.ClearChannelAsync();
+                }
+
+                await _main.ServerList.HandleKickedFromServerAsync(serverId);
+
+                if (wasViewingKickedServer && _main.ServerList.Servers.Count == 0)
+                {
+                    IsDMMode = true;
+                    SearchVM.SelectedServerId = string.Empty;
+                    _main.ChannelList?.Clear();
+                }
+            });
+        }
+
+        private void OnServerLeft()
+        {
+            _dispatcher.Invoke(() =>
+            {
+                IsDMMode = true;
+                SearchVM.SelectedServerId = string.Empty;
+                _main?.ChannelList?.Clear();
+                ServerMembers.Clear();
+            });
+        }
+
         private async void Logout()
         {
+            ActiveChat.Detach();
+            await SetCurrentUserOnlineAsync(false);
+
             if (_main?.ChannelList != null)
                 _main.ChannelList.OnChannelSelected -= OnChannelSelected;
 
             if (_main?.ServerList != null)
+            {
                 _main.ServerList.OnServerSelected -= OnServerSelected;
+                _main.ServerList.OnServerLeft -= OnServerLeft;
+            }
 
+            _chatService.KickedFromServer -= OnKickedFromServer;
             await _chatService.DisconnectAsync();
             _main?.ResetState();
 
@@ -133,6 +194,7 @@ namespace Frontend.ViewModels
         private async void OnServerSelected(string id)
         {
             IsDMMode = false;
+            SearchVM.SelectedServerId = id;
             await ServerMembers.LoadMembersAsync(id);
         }
 

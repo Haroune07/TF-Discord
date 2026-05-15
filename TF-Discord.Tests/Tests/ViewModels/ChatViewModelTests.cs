@@ -58,6 +58,7 @@ public class ChatViewModelTests
         chatMock.SetupAdd(c => c.MessageDeleted += It.IsAny<Action<string>>());
         chatMock.SetupAdd(c => c.UserTyping += It.IsAny<Action<string>>());
         chatMock.SetupAdd(c => c.UserStoppedTyping += It.IsAny<Action<string>>());
+        chatMock.SetupAdd(c => c.ReconnectingChanged += It.IsAny<Action<bool>>());
 
         chatMock.Setup(c => c.JoinChannelAsync(It.IsAny<string>())).Returns(Task.CompletedTask);
         chatMock.Setup(c => c.LeaveChannelAsync(It.IsAny<string>())).Returns(Task.CompletedTask);
@@ -78,7 +79,7 @@ public class ChatViewModelTests
     {
         var (vm, api, _) = Build();
 
-        api.Setup(a => a.GetMessagesAsync(TestChannelId))
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id))
            .ReturnsAsync(new List<MessageDTO>
            {
                new() { Id = "m1", Content = "Hello", ChannelId = TestChannelId, Sender = TestUser },
@@ -98,13 +99,13 @@ public class ChatViewModelTests
         var (vm, api, _) = Build();
         var secondChannel = "channel-xyz";
 
-        api.Setup(a => a.GetMessagesAsync(TestChannelId))
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id))
            .ReturnsAsync(new List<MessageDTO>
            {
                new() { Id = "m1", Content = "Old", ChannelId = TestChannelId, Sender = TestUser }
            });
 
-        api.Setup(a => a.GetMessagesAsync(secondChannel))
+        api.Setup(a => a.GetMessagesAsync(secondChannel, TestUser.Id))
            .ReturnsAsync(new List<MessageDTO>
            {
                new() { Id = "m2", Content = "New", ChannelId = secondChannel, Sender = TestUser }
@@ -122,12 +123,12 @@ public class ChatViewModelTests
     {
         var (vm, api, _) = Build();
 
-        api.Setup(a => a.GetMessagesAsync(TestChannelId)).ReturnsAsync(new List<MessageDTO>());
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id)).ReturnsAsync(new List<MessageDTO>());
 
         await vm.LoadChannelAsync(TestChannelId);
         await vm.LoadChannelAsync(TestChannelId); // second call should be a no-op
 
-        api.Verify(a => a.GetMessagesAsync(TestChannelId), Times.Once);
+        api.Verify(a => a.GetMessagesAsync(TestChannelId, TestUser.Id), Times.Once);
     }
 
     [Fact]
@@ -135,7 +136,7 @@ public class ChatViewModelTests
     {
         var (vm, api, chat) = Build();
 
-        api.Setup(a => a.GetMessagesAsync(TestChannelId)).ReturnsAsync(new List<MessageDTO>());
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id)).ReturnsAsync(new List<MessageDTO>());
 
         await vm.LoadChannelAsync(TestChannelId);
 
@@ -148,8 +149,8 @@ public class ChatViewModelTests
         var (vm, api, chat) = Build();
         var secondChannel = "channel-xyz";
 
-        api.Setup(a => a.GetMessagesAsync(TestChannelId)).ReturnsAsync(new List<MessageDTO>());
-        api.Setup(a => a.GetMessagesAsync(secondChannel)).ReturnsAsync(new List<MessageDTO>());
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id)).ReturnsAsync(new List<MessageDTO>());
+        api.Setup(a => a.GetMessagesAsync(secondChannel, TestUser.Id)).ReturnsAsync(new List<MessageDTO>());
 
         await vm.LoadChannelAsync(TestChannelId);
         await vm.LoadChannelAsync(secondChannel);
@@ -164,7 +165,7 @@ public class ChatViewModelTests
     {
         var (vm, api, _) = Build();
 
-        api.Setup(a => a.GetMessagesAsync(TestChannelId)).ReturnsAsync(new List<MessageDTO>());
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id)).ReturnsAsync(new List<MessageDTO>());
         await vm.LoadChannelAsync(TestChannelId);
 
         var saved = new MessageDTO { Id = "new-1", Content = "Hi", ChannelId = TestChannelId, Sender = TestUser };
@@ -185,7 +186,7 @@ public class ChatViewModelTests
     {
         var (vm, api, chat) = Build();
 
-        api.Setup(a => a.GetMessagesAsync(TestChannelId)).ReturnsAsync(new List<MessageDTO>());
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id)).ReturnsAsync(new List<MessageDTO>());
         await vm.LoadChannelAsync(TestChannelId);
 
         var saved = new MessageDTO { Id = "new-1", Content = "Hi", ChannelId = TestChannelId, Sender = TestUser };
@@ -204,7 +205,7 @@ public class ChatViewModelTests
     {
         var (vm, api, _) = Build();
 
-        api.Setup(a => a.GetMessagesAsync(TestChannelId)).ReturnsAsync(new List<MessageDTO>());
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id)).ReturnsAsync(new List<MessageDTO>());
         await vm.LoadChannelAsync(TestChannelId);
 
         api.Setup(a => a.SendMessageAsync(It.IsAny<CreateMessageRequest>()))
@@ -248,7 +249,7 @@ public class ChatViewModelTests
     {
         var (vm, api, _) = Build();
 
-        api.Setup(a => a.GetMessagesAsync(TestChannelId))
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id))
            .ReturnsAsync(new List<MessageDTO>
            {
                new() { Id = "m1", Content = "Original", ChannelId = TestChannelId, Sender = TestUser }
@@ -269,7 +270,7 @@ public class ChatViewModelTests
     {
         var (vm, api, _) = Build();
 
-        api.Setup(a => a.GetMessagesAsync(TestChannelId))
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id))
            .ReturnsAsync(new List<MessageDTO>
            {
                new() { Id = "m1", Content = "Original", ChannelId = TestChannelId, Sender = TestUser }
@@ -293,7 +294,7 @@ public class ChatViewModelTests
         var original = new MessageDTO { Id = "m1", Content = "Original", ChannelId = TestChannelId, Sender = TestUser };
         var updated = new MessageDTO { Id = "m1", Content = "Edited", ChannelId = TestChannelId, Sender = TestUser, IsEdited = true };
 
-        api.Setup(a => a.GetMessagesAsync(TestChannelId)).ReturnsAsync(new List<MessageDTO> { original });
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id)).ReturnsAsync(new List<MessageDTO> { original });
         api.Setup(a => a.EditMessageAsync("m1", It.IsAny<EditMessageRequest>())).ReturnsAsync(updated);
 
         await vm.LoadChannelAsync(TestChannelId);
@@ -318,7 +319,7 @@ public class ChatViewModelTests
         var (vm, api, _) = Build();
 
         var msg = new MessageDTO { Id = "m1", Content = "Bye", ChannelId = TestChannelId, Sender = TestUser };
-        api.Setup(a => a.GetMessagesAsync(TestChannelId)).ReturnsAsync(new List<MessageDTO> { msg });
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id)).ReturnsAsync(new List<MessageDTO> { msg });
         api.Setup(a => a.DeleteMessageAsync("m1", TestUser.Id)).ReturnsAsync(true);
 
         await vm.LoadChannelAsync(TestChannelId);
@@ -336,7 +337,7 @@ public class ChatViewModelTests
         var (vm, api, chat) = Build();
 
         var msg = new MessageDTO { Id = "m1", Content = "Bye", ChannelId = TestChannelId, Sender = TestUser };
-        api.Setup(a => a.GetMessagesAsync(TestChannelId)).ReturnsAsync(new List<MessageDTO> { msg });
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id)).ReturnsAsync(new List<MessageDTO> { msg });
         api.Setup(a => a.DeleteMessageAsync("m1", TestUser.Id)).ReturnsAsync(true);
 
         await vm.LoadChannelAsync(TestChannelId);
@@ -353,7 +354,7 @@ public class ChatViewModelTests
         var (vm, api, _) = Build();
 
         var msg = new MessageDTO { Id = "m1", Content = "Keep", ChannelId = TestChannelId, Sender = TestUser };
-        api.Setup(a => a.GetMessagesAsync(TestChannelId)).ReturnsAsync(new List<MessageDTO> { msg });
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id)).ReturnsAsync(new List<MessageDTO> { msg });
         api.Setup(a => a.DeleteMessageAsync("m1", TestUser.Id)).ReturnsAsync(false);
 
         await vm.LoadChannelAsync(TestChannelId);
@@ -371,7 +372,7 @@ public class ChatViewModelTests
     {
         var (vm, api, chat) = Build();
 
-        api.Setup(a => a.GetMessagesAsync(TestChannelId)).ReturnsAsync(new List<MessageDTO>());
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id)).ReturnsAsync(new List<MessageDTO>());
         await vm.LoadChannelAsync(TestChannelId);
 
         // Simulate SignalR push
@@ -387,7 +388,7 @@ public class ChatViewModelTests
     {
         var (vm, api, chat) = Build();
 
-        api.Setup(a => a.GetMessagesAsync(TestChannelId)).ReturnsAsync(new List<MessageDTO>());
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id)).ReturnsAsync(new List<MessageDTO>());
         await vm.LoadChannelAsync(TestChannelId);
 
         var wrongChannel = new MessageDTO { Id = "sig-x", Content = "Wrong", ChannelId = "other-channel", Sender = TestUser };
@@ -402,7 +403,7 @@ public class ChatViewModelTests
         var (vm, api, chat) = Build();
 
         var original = new MessageDTO { Id = "m1", Content = "Old", ChannelId = TestChannelId, Sender = TestUser };
-        api.Setup(a => a.GetMessagesAsync(TestChannelId)).ReturnsAsync(new List<MessageDTO> { original });
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id)).ReturnsAsync(new List<MessageDTO> { original });
         await vm.LoadChannelAsync(TestChannelId);
 
         var edited = new MessageDTO { Id = "m1", Content = "Updated", ChannelId = TestChannelId, Sender = TestUser, IsEdited = true };
@@ -417,7 +418,7 @@ public class ChatViewModelTests
         var (vm, api, chat) = Build();
 
         var msg = new MessageDTO { Id = "m1", Content = "ToDelete", ChannelId = TestChannelId, Sender = TestUser };
-        api.Setup(a => a.GetMessagesAsync(TestChannelId)).ReturnsAsync(new List<MessageDTO> { msg });
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id)).ReturnsAsync(new List<MessageDTO> { msg });
         await vm.LoadChannelAsync(TestChannelId);
 
         chat.Raise(c => c.MessageDeleted += null, "m1");
@@ -432,7 +433,7 @@ public class ChatViewModelTests
     {
         var (vm, api, chat) = Build();
 
-        api.Setup(a => a.GetMessagesAsync(TestChannelId)).ReturnsAsync(new List<MessageDTO>());
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id)).ReturnsAsync(new List<MessageDTO>());
         await vm.LoadChannelAsync(TestChannelId);
 
         chat.Raise(c => c.UserTyping += null, "Bob");
@@ -445,7 +446,7 @@ public class ChatViewModelTests
     {
         var (vm, api, chat) = Build();
 
-        api.Setup(a => a.GetMessagesAsync(TestChannelId)).ReturnsAsync(new List<MessageDTO>());
+        api.Setup(a => a.GetMessagesAsync(TestChannelId, TestUser.Id)).ReturnsAsync(new List<MessageDTO>());
         await vm.LoadChannelAsync(TestChannelId);
 
         chat.Raise(c => c.UserTyping += null, "Bob");

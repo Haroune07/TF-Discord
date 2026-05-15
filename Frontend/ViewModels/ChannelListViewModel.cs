@@ -2,13 +2,12 @@ using Frontend.Global;
 using Frontend.Services;
 using Frontend.Views;
 using Shared.DTOs;
+using Shared.DTOs.Requests;
 using Shared.Enums;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -21,7 +20,6 @@ namespace Frontend.ViewModels
         public ObservableCollection<ChannelViewModel> Channels { get; set; }
 
         private readonly IApiService _apiService;
-        private readonly HttpClient _client = new();
 
         private string _currentServerId = string.Empty;
         private bool _canManageChannels;
@@ -43,8 +41,6 @@ namespace Frontend.ViewModels
 
             Channels = new ObservableCollection<ChannelViewModel>();
 
-            _client.BaseAddress = new Uri(Shared.Constants.Ports.SERVER_LISTEN_URL);
-
             CreateChannelCommand = new RelayCommand(CreateChannel);
             DeleteChannelCommand = new RelayCommand<ChannelViewModel>(DeleteChannel);
         }
@@ -65,7 +61,10 @@ namespace Frontend.ViewModels
 
             Channels.Clear();
 
-            var data = await _apiService.GetServerChannelsAsync(serverId);
+            if (Session.Current.User == null)
+                return;
+
+            var data = await _apiService.GetServerChannelsAsync(serverId, Session.Current.User.Id);
 
             foreach (var c in data.Where(c => c.ServerId == serverId))
             {
@@ -93,13 +92,8 @@ namespace Frontend.ViewModels
 
             try
             {
-                var members = await _client.GetFromJsonAsync<List<ServerMemberDTO>>(
-                    $"/api/server/{serverId}/members"
-                ) ?? new();
-
-                var currentMember = members.FirstOrDefault(
-                    m => m.User.Id == Session.Current.User.Id
-                );
+                var members = await _apiService.GetServerMembersAsync(serverId);
+                var currentMember = members.FirstOrDefault(m => m.User.Id == Session.Current.User.Id);
 
                 CanManageChannels =
                     currentMember?.Role == MemberRole.Owner ||
@@ -111,9 +105,9 @@ namespace Frontend.ViewModels
             }
         }
 
-        private void CreateChannel()
+        private async void CreateChannel()
         {
-            if (!CanManageChannels)
+            if (!CanManageChannels || Session.Current.User == null)
                 return;
 
             var window = new CreateChannelView
@@ -126,18 +120,36 @@ namespace Frontend.ViewModels
             if (result != true)
                 return;
 
+            var created = await _apiService.CreateServerChannelAsync(
+                Session.Current.User.Id,
+                new CreateChannelRequest
+                {
+                    Name = window.ChannelName,
+                    ServerId = _currentServerId
+                });
+
+            if (created == null)
+            {
+                MessageBox.Show(
+                    "Impossible de créer le canal. Vérifiez vos permissions.",
+                    "Erreur",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
             Channels.Add(new ChannelViewModel((id) => OnChannelSelected?.Invoke(id))
             {
-                Id = Guid.NewGuid().ToString(),
-                Name = window.ChannelName,
-                ServerID = _currentServerId,
-                CreatedAt = DateTime.Now
+                Id = created.Id,
+                Name = created.Name ?? window.ChannelName,
+                ServerID = created.ServerId ?? _currentServerId,
+                CreatedAt = created.CreatedAt
             });
         }
 
-        private void DeleteChannel(ChannelViewModel? channel)
+        private async void DeleteChannel(ChannelViewModel? channel)
         {
-            if (!CanManageChannels)
+            if (!CanManageChannels || Session.Current.User == null)
                 return;
 
             if (channel == null)
@@ -152,6 +164,17 @@ namespace Frontend.ViewModels
 
             if (confirm != MessageBoxResult.Yes)
                 return;
+
+            var deleted = await _apiService.DeleteChannelAsync(channel.Id, Session.Current.User.Id);
+            if (!deleted)
+            {
+                MessageBox.Show(
+                    "Impossible de supprimer le canal. Vérifiez vos permissions.",
+                    "Erreur",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
 
             Channels.Remove(channel);
         }

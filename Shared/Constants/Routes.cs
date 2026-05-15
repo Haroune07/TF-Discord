@@ -12,6 +12,7 @@ namespace Shared.Constants
         public const string GetAllServersRoute = "/api/server/all";
 
         public const string CreateServerChannelRoute = "/api/channel/server";
+        public const string DeleteChannelRoute = "/api/channel";
         public const string CreateDMChannelRoute = "/api/channel/dm";
         public const string GetServerChannelsRoute = "/api/channel/server";
 

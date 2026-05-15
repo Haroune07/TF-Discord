@@ -52,7 +52,12 @@ namespace Frontend.ViewModels
         [ObservableProperty]
         private string typingText = string.Empty;
 
-        // Edit state
+        [ObservableProperty]
+        private string errorMessage = string.Empty;
+
+        [ObservableProperty]
+        private bool isReconnecting;
+
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsEditing))]
         private MessageItemViewModel? editingMessage;
@@ -60,6 +65,7 @@ namespace Frontend.ViewModels
         public bool IsEditing => EditingMessage != null;
 
         private CancellationTokenSource? _typingCTS;
+        private bool _isSending;
 
         public IRelayCommand SendMessageCommand { get; }
         public IRelayCommand EditMessageCommand { get; }
@@ -72,27 +78,62 @@ namespace Frontend.ViewModels
             _chatService = chatService;
             _dispatcher = dispatcher;
 
-            SendMessageCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(SendMessage, CanSendMessage);
-            EditMessageCommand = new CommunityToolkit.Mvvm.Input.RelayCommand<MessageItemViewModel>(StartEdit, msg => msg?.IsOwnMessage == true);
-            DeleteMessageCommand = new CommunityToolkit.Mvvm.Input.RelayCommand<MessageItemViewModel>(async msg => await DeleteMessageAsync(msg!), msg => msg?.IsOwnMessage == true);
-            CancelEditCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(CancelEdit, () => true);
+            if (apiService is ApiService api)
+                api.SetErrorCallback(msg => _dispatcher.Invoke(() => ErrorMessage = msg));
+
+            SendMessageCommand = new RelayCommand(SendMessage, CanSendMessage);
+            EditMessageCommand = new RelayCommand<MessageItemViewModel>(StartEdit, msg => msg?.IsOwnMessage == true);
+            DeleteMessageCommand = new RelayCommand<MessageItemViewModel>(async msg => await DeleteMessageAsync(msg!), msg => msg?.IsOwnMessage == true);
+            CancelEditCommand = new RelayCommand(CancelEdit, () => true);
 
             _chatService.MessageReceived += OnMessageReceived;
             _chatService.MessageEdited += OnMessageEdited;
             _chatService.MessageDeleted += OnMessageDeleted;
             _chatService.UserTyping += OnOtherUserTyping;
             _chatService.UserStoppedTyping += OnOtherUserStoppedTyping;
+            _chatService.ReconnectingChanged += OnReconnectingChanged;
+        }
+
+        public async Task ClearChannelAsync()
+        {
+            if (!string.IsNullOrEmpty(_currentChannelId))
+                await _chatService.LeaveChannelAsync(_currentChannelId);
+
+            _currentChannelId = null;
+            Messages.Clear();
+            CancelEdit();
+            ErrorMessage = string.Empty;
+        }
+
+        public void Detach()
+        {
+            _chatService.MessageReceived -= OnMessageReceived;
+            _chatService.MessageEdited -= OnMessageEdited;
+            _chatService.MessageDeleted -= OnMessageDeleted;
+            _chatService.UserTyping -= OnOtherUserTyping;
+            _chatService.UserStoppedTyping -= OnOtherUserStoppedTyping;
+            _chatService.ReconnectingChanged -= OnReconnectingChanged;
+        }
+
+        private void OnReconnectingChanged(bool reconnecting)
+        {
+            _dispatcher.Invoke(() => IsReconnecting = reconnecting);
+
+            if (!reconnecting && !string.IsNullOrEmpty(_currentChannelId))
+                _ = _chatService.JoinChannelAsync(_currentChannelId);
         }
 
         partial void OnInputTextChanged(string value)
         {
-            ((CommunityToolkit.Mvvm.Input.RelayCommand)SendMessageCommand).NotifyCanExecuteChanged();
+            ((RelayCommand)SendMessageCommand).NotifyCanExecuteChanged();
             _ = HandleTypingAsync();
         }
 
         public async Task LoadChannelAsync(string channelId)
         {
             if (_currentChannelId == channelId) return;
+
+            ErrorMessage = string.Empty;
 
             if (!string.IsNullOrEmpty(_currentChannelId))
                 await _chatService.LeaveChannelAsync(_currentChannelId);
@@ -101,9 +142,19 @@ namespace Frontend.ViewModels
             Messages.Clear();
             CancelEdit();
 
-            var history = await _apiService.GetMessagesAsync(channelId);
-            foreach (var msg in history)
-                Messages.Add(new MessageItemViewModel(msg));
+            try
+            {
+                if (Session.Current.User == null)
+                    return;
+
+                var history = await _apiService.GetMessagesAsync(channelId, Session.Current.User.Id);
+                foreach (var msg in history)
+                    Messages.Add(new MessageItemViewModel(msg));
+            }
+            catch
+            {
+                return;
+            }
 
             await _chatService.JoinChannelAsync(channelId);
         }
@@ -123,19 +174,25 @@ namespace Frontend.ViewModels
 
         private async void SendMessage()
         {
+            if (_isSending) return;
+
+            ErrorMessage = string.Empty;
+            string content = InputText;
+
+            if (IsEditing)
+            {
+                await ConfirmEditAsync(content);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(content) || string.IsNullOrEmpty(_currentChannelId))
+                return;
+
+            _isSending = true;
+            InputText = string.Empty;
+
             try
             {
-                string content = InputText;
-
-                if (IsEditing)
-                {
-                    await ConfirmEditAsync(content);
-                    return;
-                }
-
-                InputText = string.Empty;
-                if (string.IsNullOrEmpty(_currentChannelId)) return;
-
                 var req = new CreateMessageRequest
                 {
                     ChannelId = _currentChannelId,
@@ -146,13 +203,23 @@ namespace Frontend.ViewModels
 
                 if (savedMessage != null)
                 {
-                    _dispatcher.Invoke(() => Messages.Add(new MessageItemViewModel(savedMessage)));
+                    _dispatcher.Invoke(() => AddMessageIfNew(savedMessage));
                     await _chatService.BroadcastMessageAsync(savedMessage);
                 }
+                else
+                {
+                    _dispatcher.Invoke(() =>
+                        ErrorMessage = "Vous n'avez plus accès à ce canal.");
+                    InputText = content;
+                }
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"Erreur lors de l'envoi : {ex.Message}");
+                InputText = content;
+            }
+            finally
+            {
+                _isSending = false;
             }
         }
 
@@ -162,6 +229,7 @@ namespace Frontend.ViewModels
 
             try
             {
+                ErrorMessage = string.Empty;
                 var updated = await _apiService.EditMessageAsync(EditingMessage.Message.Id, new EditMessageRequest
                 {
                     RequesterId = Session.Current.User!.Id,
@@ -170,10 +238,7 @@ namespace Frontend.ViewModels
 
                 if (updated != null)
                 {
-                    _dispatcher.Invoke(() =>
-                    {
-                        EditingMessage.Message = updated;
-                    });
+                    _dispatcher.Invoke(() => EditingMessage.Message = updated);
                     await _chatService.BroadcastMessageEditedAsync(updated);
                 }
             }
@@ -191,6 +256,7 @@ namespace Frontend.ViewModels
         {
             try
             {
+                ErrorMessage = string.Empty;
                 var success = await _apiService.DeleteMessageAsync(msg.Message.Id, Session.Current.User!.Id);
 
                 if (success)
@@ -213,8 +279,22 @@ namespace Frontend.ViewModels
             _dispatcher.Invoke(() =>
             {
                 if (msg.ChannelId == _currentChannelId)
-                    Messages.Add(new MessageItemViewModel(msg));
+                    AddMessageIfNew(msg);
             });
+        }
+
+        private void AddMessageIfNew(MessageDTO msg)
+        {
+            if (string.IsNullOrEmpty(msg.Id))
+            {
+                Messages.Add(new MessageItemViewModel(msg));
+                return;
+            }
+
+            if (Messages.Any(m => m.Message.Id == msg.Id))
+                return;
+
+            Messages.Add(new MessageItemViewModel(msg));
         }
 
         private void OnMessageEdited(MessageDTO msg)
